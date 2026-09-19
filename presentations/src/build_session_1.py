@@ -34,8 +34,8 @@ def make_charts():
     vals = [549, 342]
     colors = [pal["sky"], pal["blue"]]
     ax.barh(cats, vals, color=colors)
-    ax.set_xlabel("Passengers")
-    ax.set_title("Titanic target balance: 891 passengers")
+    ax.set_xlabel("Passengers (bar length = how many)")
+    ax.set_title("The Survived column, counted: 891 passengers")
     for i, v in enumerate(vals):
         ax.text(v + 8, i, f"{v} ({v / 891:.1%})", va="center",
                 color=pal["ink"])
@@ -193,7 +193,7 @@ def make_cost_downhill_fig():
              ("A decent rule:  J = 90", lambda t: 1.05 * t + 7.2),
              ("The best rule:  J = 12", lambda t: a * t + b)]
     fig, axes = plt.subplots(2, 2, figsize=(7.8, 5.8))
-    for ax, (title, f) in zip(axes.flat[:3], cands):
+    for i, (ax, (title, f)) in enumerate(zip(axes.flat[:3], cands)):
         xs = np.linspace(0, 10, 40)
         for xi, yi in zip(x, y):  # miss bars, point to line
             ax.plot([xi, xi], [yi, f(xi)], color=pal["sky"], lw=1.6)
@@ -204,6 +204,13 @@ def make_cost_downhill_fig():
         ax.set_yticks([])
         ax.set_xlim(0, 10)
         ax.set_ylim(-1, 22)
+        if i == 0:  # teach the reader what one element means, once
+            xi = x[10]
+            ax.annotate("each thin line = one miss\n(dot = a passenger,\nblue line = the rule)",
+                        xy=(xi, (y[10] + f(xi)) / 2), xytext=(0.6, 16.6),
+                        color=pal["ink"], fontsize=8.6,
+                        arrowprops=dict(arrowstyle="-|>", color=pal["gray"],
+                                        lw=1.1))
     axes.flat[0].set_ylabel("target y", fontsize=10)
     axes.flat[0].set_xlabel("feature x", fontsize=10)
     # panel 4: the downhill walk on J
@@ -220,6 +227,8 @@ def make_cost_downhill_fig():
                 color=pal["ink"], fontsize=10)
     ax.annotate("smallest J", (0, 0), xytext=(0.55, 0.7),
                 color=pal["ink"], fontsize=10)
+    ax.text(-0.85, 4.9, "each dot = one step", color=pal["gray"],
+            fontsize=8.6, ha="center")
     ax.set_title("The search: walk downhill on J", fontsize=12.5)
     ax.set_xticks([])
     ax.set_yticks([])
@@ -391,7 +400,7 @@ def make_hero_fig():
          [("What will happen\nto a NEW case?", ""),
           ("Past data + a new,\nunseen row", "891 labeled examples,\nthen one new passenger"),
           ("A prediction", "software can\nact on it"),
-          ("Will a passenger like\nOwen survive?", "an answer per person,\non demand")]),
+          ("Will this NEW\npassenger survive?", "an answer per person,\non demand")]),
     ]
     for y0, label, sub, lab_fc, boxes in lanes:
         ml = lab_fc == pal["blue"]
@@ -510,9 +519,10 @@ def slides():
         "about the future",
         f"{FIGS_CONCEPTS}/hero_da_vs_ml.png",
         kicker="The bridge from M1",
-        caption="Same past data - a different question, and an output a "
-                "program can use. M1 drew the line itself: describing is "
-                "not predicting. M2 starts exactly there.",
+        caption="How to read it: each row runs left to right - question, "
+                "input, output, Titanic example. Top row = M1 (describing). "
+                "Bottom row = M2 (predicting). M1's own closing line: "
+                "describing is not predicting.",
     )
     notes(s, "Start from what they already know: in M1 they answered 'what "
              "happened' with charts a person reads. Machine learning answers "
@@ -528,20 +538,18 @@ def slides():
         f"{FIGS_CONCEPTS}/ladder_analytics.png",
         kicker="The analytics ladder",
         bullets=[
-            "Descriptive and diagnostic: M1. You told what happened and dug "
-            "into why - groupbys, crosstabs, correlations",
-            "Predictive: M2, this module. What will happen to a new, "
-            "unseen case?",
-            "Prescriptive sits on top: what should we do - decisions built "
-            "on predictions you can trust",
-            "Your M1 skills still do most of the daily job: 80% of the work "
-            "is still cleaning and describing data",
-            "The climb, session by session: S1 what ML is and honest "
-            "splits; S2 features; S3 the model tournament; S4 tune and ship",
+            "Rungs 1-2 are M1: what happened, and why - your groupbys "
+            "and crosstabs",
+            "Rung 3 is this module: what will happen to a NEW, unseen case?",
+            "Rung 4, prescriptive: what should we do? It needs a trusted "
+            "model first",
+            "M1 skills stay in daily use: 80% of the work is still "
+            "cleaning and describing",
+            "The climb here: S1 ideas and honest splits; S2 features; "
+            "S3 the model tournament; S4 tune and ship",
         ],
-        caption="MIT draws the same line by goal, not tools: statistics "
-                "asks 'does the model explain?' - ML asks 'does the "
-                "prediction hold up?' (MIT 6.390, Intro chapter). Ng, "
+        caption="Statistics asks 'does the model explain?' - ML asks 'does "
+                "the prediction hold up?' (MIT 6.390, Intro chapter). Ng, "
                 "Harvard CS109A and MIT 6.390 all climb this same ladder.",
     )
     notes(s, "Reassure them: this module is one rung up, not a new ladder. "
@@ -556,23 +564,23 @@ def slides():
         "ML learns the rules from examples instead of being told them",
         [
             ("Classic programming: a human writes the rules by hand",
-             ["A hand-written spam rule list - block 'winner', block ALL "
-              "CAPS, block unknown senders - never ends, and spammers adapt "
-              "faster than you can type"]),
-            ("Machine learning: you show labeled examples, the algorithm "
+             ["A spam rule list - block 'winner', block ALL CAPS, block "
+              "unknown senders - never ends",
+              "Spammers adapt faster than you can type new rules"]),
+            ("Machine learning: you show labeled examples - the algorithm "
              "finds the rules",
-             ["Arthur Samuel called it the \"field of study that gives "
-              "computers the ability to learn without being explicitly "
-              "programmed\" - his 1950s checkers program beat its own "
-              "programmer after tens of thousands of self-played games"]),
+             ["Arthur Samuel: the \"field of study that gives computers the "
+              "ability to learn without being explicitly programmed\"",
+              "His 1950s checkers program beat its own programmer after "
+              "tens of thousands of self-played games"]),
             ("It is already in your day",
-             ["Recommendations predict what you will want next; map "
-              "arrival times predict a trip nobody has driven in exactly "
-              "these conditions"]),
-            "The same move on our data: 891 passengers with known outcomes "
-            "go in; a pattern that predicts new passengers comes out",
-            "A model is a function with adjustable knobs (parameters); "
-            "training turns the knobs until predictions match the examples",
+             ["Recommendations predict your next pick; map arrival times "
+              "predict a trip nobody has driven"]),
+            "Our data, same move: 891 passengers with known outcomes in - "
+            "a pattern that predicts new ones out",
+            "A model = a function with adjustable knobs (its parameters)",
+            "Training = turning the knobs until predictions match the "
+            "examples",
         ],
         kicker="What ML is",
         note="Samuel's phrase, quoted by Ng - Machine Learning "
@@ -592,8 +600,9 @@ def slides():
         [
             ("Supervised learning: the examples include the right answer "
              "(the label)",
-             ["A spam filter learns from mail already marked spam or not "
-              "spam - ours: 891 passengers, each labeled Survived, 1 or 0"]),
+             ["A spam filter learns from mail already marked spam or "
+              "not spam",
+              "Ours: 891 passengers, each labeled Survived - 1 or 0"]),
             ("Unsupervised learning: no labels - find the structure "
              "yourself",
              ["Grouping shoppers into segments nobody named in advance: "
@@ -625,7 +634,8 @@ def slides():
         "Every supervised problem is a table: features X in, target y out",
         ("Features X = the inputs", [
             "The columns that describe each passenger",
-            "Age, Sex, Pclass, Fare, SibSp, Parch, Embarked",
+            "Age, Sex, Pclass (ticket class), Fare, SibSp (siblings + "
+            "spouse aboard), Parch (parents + children aboard), Embarked",
             "In code: X = everything except the answer",
             "Books also say predictors or covariates - "
             "different words, same idea: the input columns",
@@ -657,27 +667,30 @@ def slides():
         f"{FIGS_THEORY}/s1_error_stack.png",
         kicker="The hidden rule and the noise",
         bullets=[
-            "Y = f(X) + ε - in plain words: every outcome is pattern "
-            "plus luck",
-            "f is the pattern - learnable. ε (epsilon) is the luck - "
-            "nothing predicts a coin flip",
-            "On the Titanic: class, sex and age shape survival (the "
-            "pattern); chaos that night is the luck",
-            "A model estimates the pattern; the error you can still "
-            "shrink is called reducible",
-            "The luck is an irreducible floor - why 100% accuracy is "
-            "never the goal; Session 3 pays this off",
+            "On the Titanic: class, sex and age shaped survival - that "
+            "is the pattern",
+            "Two identical passengers could still meet different fates "
+            "- that is the luck",
+            "In symbols, Y = f(X) + ε: outcome = pattern (f) plus "
+            "luck (ε, epsilon)",
+            "How to read the bar: its full height is all the error a "
+            "model makes",
+            "The blue part (reducible) shrinks: better features, models "
+            "or data",
+            "The grey floor (irreducible noise) never shrinks - why "
+            "100% accuracy is never the goal",
         ],
         caption="Schematic illustration - no course numbers on this chart. "
                 "Harvard CS109A / ISLR ch. 2.",
     )
-    notes(s, "Say it as: every outcome is pattern plus luck. The pattern is "
-             "learnable - class, sex and age really did shape survival. The "
-             "luck is not: two identical passengers could meet different "
-             "fates in the chaos. Better features and models shrink the "
-             "pattern error; nothing shrinks the luck. Ask the class: why "
-             "would a model claiming 100% accuracy on survival actually be "
-             "suspicious?")
+    notes(s, "Start concrete: class, sex and age really did shape survival - "
+             "that is the pattern, and it is learnable. Two identical "
+             "passengers could still meet different fates in the chaos - "
+             "that is the luck, and nothing predicts a coin flip. Only then "
+             "give the symbols: Y = f(X) + epsilon. Walk the bar: full "
+             "height is all the error; blue shrinks with better features or "
+             "models, the grey floor never moves. Ask the class: why would "
+             "a model claiming 100% accuracy on survival be suspicious?")
 
     # NEW - The induction problem (MIT)
     s = ds.image_slide(
@@ -687,10 +700,9 @@ def slides():
         f"{FIGS_THEORY}/s1_induction.png",
         kicker="The induction problem",
         bullets=[
-            "The induction problem - in plain words: after 10 dog photos "
-            "you recognize an 11th you never saw",
-            "Every learner makes that leap: a few examples in, answers "
-            "for cases nobody has seen yet",
+            "After 10 dog photos you recognize an 11th dog you never saw",
+            "That leap is called induction - every learner makes it: few "
+            "examples in, unseen cases answered",
             "Nothing guarantees the future resembles the past - the leap "
             "rests on one assumption",
             "The assumption (called i.i.d.): new data looks like old - "
@@ -718,18 +730,18 @@ def slides():
         f"{FIGS_THEORY}/s1_hypothesis.png",
         kicker="The hypothesis class",
         bullets=[
-            "Hypothesis class - in plain words: you pick the shape of the "
-            "answer (a line? a curve?)",
-            "One hypothesis = one concrete rule, numbers filled in; the "
-            "class = all rules of that shape",
+            "You pick the shape of the answer first: a line? a curve? - "
+            "before touching any data",
+            "That menu of shapes is the hypothesis class; one hypothesis "
+            "= one rule, numbers filled in",
             "Learning is a search: the algorithm scans the family and "
             "returns the member that fits best",
-            "You pick the family before touching any data - that design "
-            "call is yours, not the algorithm's",
-            "A roomier family follows the pattern more closely - and "
-            "follows the noise too; it cuts both ways",
-            "MIT splits it: choose the class (Session 3's dial) vs fit "
-            "the member (training's job)",
+            "The design call is yours; only the search inside it is the "
+            "algorithm's",
+            "A roomier family (curves) hugs the pattern better - and "
+            "hugs the noise too",
+            "MIT's split: choosing the class is your job; fitting the "
+            "member is training's job",
         ],
         caption="Illustration - synthetic data. MIT 6.390, Intro chapter.",
     )
@@ -748,8 +760,8 @@ def slides():
         f"{FIGS_THEORY}/s1_recipe_slots.png",
         kicker="The three-slot recipe",
         bullets=[
-            "The three-slot recipe - in plain words: a menu of rules + a "
-            "scorecard + a search",
+            "How to read it: top row = the three slots; bottom lane = "
+            "one worked filling",
             "Slot 1, the model: the hypothesis class you just met - your "
             "call, made before any data",
             "Slot 2, the loss: how bad is each wrong answer? Simplest "
@@ -777,12 +789,13 @@ def slides():
         f"{FIGS_THEORY}/s1_cost_downhill.png",
         kicker="How training works",
         bullets=[
-            "The cost J - in plain words: the average miss over all 891 "
-            "examples - one number per rule",
-            "Training = the search for the rule with the smallest J - "
-            "nothing more mystical than that",
-            "The search walks downhill in fog: nudge the knobs in "
-            "whichever direction lowers J fastest",
+            "How to read it: dots = passengers, blue line = a candidate "
+            "rule, thin verticals = its misses",
+            "The cost J = the average miss over all 891 examples - one "
+            "number per rule",
+            "Training = the search for the rule with the smallest J",
+            "The search walks downhill in fog: nudge each knob the way "
+            "that lowers J fastest",
             "Step size matters: too small crawls, too large overshoots "
             "the valley",
             "The same downhill walk trains Session 3's scorecard - no "
@@ -792,12 +805,14 @@ def slides():
                 "course results. Method: Ng, Machine Learning "
                 "Specialization C1 / Stanford CS229 notes.",
     )
-    notes(s, "Demystify training: score every candidate rule by its average "
-             "miss - one number, J - and hunt for the rule with the smallest "
-             "J. The hunt is a walk downhill in fog: feel the slope, step "
-             "where it drops fastest, repeat. Point at the four panels: bad "
-             "rule big J, decent rule smaller, best rule smallest. Ask the "
-             "class: what goes wrong if your downhill steps are huge?")
+    notes(s, "Teach the picture before the idea: each dot is a passenger, "
+             "the blue line is one candidate rule, and every thin vertical "
+             "line is one miss. J is just the average miss - one number per "
+             "rule: bad rule big J, decent rule smaller, best rule smallest. "
+             "Then panel four: training hunts the smallest J by walking "
+             "downhill in fog - feel the slope, step where it drops fastest, "
+             "repeat; each dot is one step. Ask the class: what goes wrong "
+             "if your downhill steps are huge?")
 
     # Part 2 divider
     ds.section_slide(
@@ -809,7 +824,7 @@ def slides():
     )
 
     # The dataset (chart)
-    ds.image_slide(
+    s = ds.image_slide(
         prs,
         "One dataset carries every concept: 891 passengers, 38.4% survived",
         f"{FIGS}/fig1_target_balance.png",
@@ -823,9 +838,15 @@ def slides():
             "One worked example carrying every new concept is Andrew Ng's "
             "teaching pattern - we reuse the Titanic the same way",
         ],
-        caption="Class balance in the full dataset. Source: Module 2, "
-                "notebook 01, section 2.",
+        caption="The Survived column of the full dataset, before any "
+                "split. Source: Module 2, notebook 01, section 2.",
     )
+    notes(s, "Make the dataset feel small and human: 891 rows, one per "
+             "passenger, 12 columns. The chart just counts the answer "
+             "column - each bar is one outcome, longer bar = more people: "
+             "549 died, 342 survived. Flag the gaps now (Age 177, Cabin "
+             "687) - Session 2 fixes them. Ask the class: is 62/38 "
+             "unbalanced enough to worry about?")
 
     # 7. Meet three passengers - the module's recurring characters
     ds.table_slide(
@@ -873,27 +894,33 @@ def slides():
     )
 
     # 9. The workflow as a loop (diagram)
-    ds.image_slide(
+    s = ds.image_slide(
         prs,
         "The ML workflow is a loop, not a line - you will walk it all module",
         f"{FIGS_STORY}/s1_workflow_loop.png",
         kicker="The workflow",
         bullets=[
-            "Prepare: split, clean, encode, scale (Sessions 1-2) - today "
-            "you started it on the 891-row manifest",
+            "Prepare: split, clean, encode, scale (Sessions 1-2) - you "
+            "start it today",
             "Train: fit models on the training set only (Session 3)",
             "Evaluate: score on data the model has never seen (Session 3)",
             "Improve, then ship: tune, engineer, deploy (Session 4)",
-            "Evaluation sends you back to preparation more often than "
-            "forward",
-            "Harvard teaches it as a five-stage loop - ask, get, explore, "
-            "model, communicate: modeling is one box of five, and answers "
-            "routinely send you back a stage",
+            "The long arrow back is the point: evaluation sends you to "
+            "preparation more often than forward",
+            "Harvard's version has five stages - ask, get, explore, "
+            "model, communicate; modeling is one box of five",
         ],
         caption="Harvard CS109A teaches the same shape: one workflow "
                 "revisited all semester on messy real data. Source: Harvard "
                 "CS109A, Lecture 1 (the data science process).",
     )
+    notes(s, "Walk the boxes left to right - prepare, train, evaluate, "
+             "improve - then stop on the long arrow underneath: evaluation "
+             "usually sends you BACK to preparation, not forward. The only "
+             "exit is up, to ship, when the honest score is good enough. "
+             "Map each box to a session so the module feels like one walk "
+             "around this loop. Ask the class: why does the arrow back go "
+             "to preparation and not to training?")
 
     # 10. The golden rule: split first (chart)
     s = ds.image_slide(
@@ -903,10 +930,9 @@ def slides():
         kicker="The golden rule",
         bullets=[
             "80/20 split first: 712 training rows, 179 test rows (seed 42)",
-            "The test set is the final exam - you sit it once; seeing the "
-            "questions while studying proves nothing",
-            "Data leakage - in plain words: exam answers sneaking into "
-            "your study notes",
+            "The test set is the final exam - you sit it exactly once",
+            "Data leakage = exam answers sneaking into your study notes; "
+            "the score then proves nothing",
             "Even 'fill missing ages with the average' leaks, if that "
             "average was computed over all rows",
             "stratify=y - in plain words: keep the survivor share equal "
@@ -936,11 +962,11 @@ def slides():
         "0.617",
         "Accuracy of a model that always predicts 'died' - the baseline "
         "floor every real model must beat",
-        foot="Dummy classifier, 5-fold cross-validation on the training set. "
-             "Source: Module 2, notebook 02. Beating the floor is the entry "
-             "ticket, not the goal. Accuracy is 0-1 loss in disguise - the "
-             "simplest filling of the recipe's loss slot (MIT 6.390, Intro "
-             "chapter).",
+        foot="Dummy classifier, scored honestly by 5-fold cross-validation "
+             "on the training set (Session 3 explains this referee). Source: "
+             "Module 2, notebook 02. Beating the floor is the entry ticket, "
+             "not the goal. Accuracy is 0-1 loss in disguise - the recipe's "
+             "simplest loss slot (MIT 6.390, Intro chapter).",
         kicker="Honest evaluation preview",
     )
     notes(s, "A model that ignores everything and always answers 'died' is "
@@ -954,20 +980,20 @@ def slides():
         prs,
         "You now predict, not describe - and every claim gets a number",
         [
-            "Part 1, the ideas: ML learns rules from labeled examples - a "
-            "leap from seen cases to unseen ones, allowed by one "
-            "assumption (new data looks like old)",
-            "You choose the hypothesis class; every learner = model + loss "
-            "+ optimizer, and training = making one number (the cost J) "
-            "small",
-            "Y = f(X) + ε: we estimate the hidden rule, we never beat "
-            "the noise",
-            "Part 2, the manifest: 891 passengers, split first - 712 train "
-            "/ 179 test, stratified; the test set is the exam you take once",
-            "Every claim gets a number, and the floor is 0.617",
-            "Practice now, zero setup: open notebook 01 in Colab (badge "
-            "click), Runtime > Run all, work sections 1-3 - exercises at "
-            "the end, solutions included, attempt them first",
+            "Part 1, the ideas: ML learns rules from labeled examples, "
+            "then leaps to unseen cases",
+            "One assumption allows the leap: new data looks like old",
+            "You choose the hypothesis class; every learner = model + "
+            "loss + optimizer",
+            "Training = making one number, the cost J, small; and Y = "
+            "f(X) + ε - we never beat the noise",
+            "Part 2, the manifest: 891 passengers, split first - 712 "
+            "train / 179 test, stratified",
+            "The test set is the exam you take once; every claim gets a "
+            "number, and the floor is 0.617",
+            "Practice now, zero setup: notebook 01 in Colab (badge "
+            "click), Runtime > Run all, sections 1-3 - try the exercises "
+            "before the solutions",
         ],
     )
 

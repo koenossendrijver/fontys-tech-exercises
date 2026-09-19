@@ -104,7 +104,7 @@ from matplotlib.patches import Rectangle
 from shared_figs import make_frame_c
 
 make_frame_c(f"{FIGS_T2}/frame_c_bar_s2.png",
-             tag="hatched CHOOSE band: built in Session 3")
+             tag="the hatched band = the CHOOSE step; we build it in Session 3")
 
 # -------- Theory figure: MCAR / MAR / MNAR three-card diagram --------
 CARDS = [
@@ -172,17 +172,24 @@ for ax, (cx, cy, lr, steps, title) in zip(axes, [
                colors=pal["sky"], linewidths=1.1)
     xs, ys = gd_path(cx, cy, lr, steps)
     ax.plot(xs, ys, ":o", color=pal["navy"], lw=1.2, ms=2.8)
+    ax.plot(xs[0], ys[0], "o", color=pal["navy"], ms=5.5, zorder=4)
+    ax.annotate("start", (xs[0], ys[0]), textcoords="offset points",
+                xytext=(5, 4), fontsize=8.5, fontweight="bold",
+                color=pal["navy"])
     ax.plot(0, 0, "*", color=pal["blue"], ms=13)
+    ax.annotate("best", (0, 0), textcoords="offset points",
+                xytext=(7, -3), fontsize=8.5, fontweight="bold",
+                color=pal["blue"])
     ax.set_title(title, fontsize=11)
-    ax.set_xlabel("weight for Fare", fontsize=9.5)
-    ax.set_ylabel("weight for Age", fontsize=9.5)
+    ax.set_xlabel("the model's dial for Fare (its weight)", fontsize=8.5)
+    ax.set_ylabel("the model's dial for Age (its weight)", fontsize=8.5)
     ax.set_xticks([])
     ax.set_yticks([])
     ax.set_aspect("equal")
 axes[0].text(-2.8, -2.8, "the walk zigzags\nand crawls", fontsize=8.5,
              color=pal["ink"], ha="left", va="bottom",
              bbox=dict(facecolor="white", edgecolor="none", pad=1.5))
-axes[1].text(-2.8, -2.8, "straight to the\nminimum (star)", fontsize=8.5,
+axes[1].text(-2.8, -2.8, "straight to the\nbest (star)", fontsize=8.5,
              color=pal["ink"], ha="left", va="bottom",
              bbox=dict(facecolor="white", edgecolor="none", pad=1.5))
 fig.tight_layout()
@@ -216,6 +223,8 @@ ax.scatter([-1, -1], [0.18, -0.18], s=110, color=pal["navy"], marker="s", zorder
 ax.axvline(0, color=pal["blue"], lw=1.6, ls="--")
 ax.text(0.06, 0.85, "one threshold\nseparates them", fontsize=8.5,
         color=pal["blue"], ha="left")
+ax.text(-1.72, 1.02, "height is only for\nvisibility - all that counts\nis left vs right",
+        fontsize=7, color=pal["gray"], ha="left", va="top")
 ax.text(-1, -0.55, "(-1,+1) and (+1,-1)\nland at -1", fontsize=8,
         color=pal["gray"], ha="center")
 ax.text(1, -0.55, "(+1,+1) and (-1,-1)\nland at +1", fontsize=8,
@@ -339,7 +348,8 @@ plt.close(fig)
 from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
 
 fig, ax = plt.subplots(figsize=(7.6, 4.8))
-ax.text(0.15, 7.65, "TOP LANE: ONE PASSENGER'S ROW", fontsize=7.5,
+ax.text(0.15, 7.65, "TOP LANE - READ THIS FIRST: ONE PASSENGER'S ROW, "
+        "LEFT TO RIGHT", fontsize=7.5,
         fontweight="bold", color=pal["gray"])
 top = [("Raw row (PassengerId 166)",
         'Goldsmith, Master. Frank\nJohn William "Frankie"\n'
@@ -368,8 +378,8 @@ for x0, lab in ((3.28, "engineer\nnew columns"), (6.58, "impute, one-hot,\nscale
                                  color=pal["blue"], lw=1.5))
     ax.text(x0 + 0.25, 4.78, lab, ha="center", va="top",
             color=pal["gray"], fontsize=6.8)
-ax.text(0.15, 3.85, "BOTTOM LANE: THE PIPELINE THAT DOES IT", fontsize=7.5,
-        fontweight="bold", color=pal["gray"])
+ax.text(0.15, 3.85, "BOTTOM LANE - THEN THIS: THE PIPELINE THAT DOES IT",
+        fontsize=7.5, fontweight="bold", color=pal["gray"])
 bot = [("Impute", 'median Age 28.5,\nEmbarked "S" (from train)', 0.55, 2.75),
        ("Encode", "one-hot:\n13 x 0/1 columns", 3.95, 2.55),
        ("Scale", "StandardScaler,\n5 numeric columns", 7.15, 2.55)]
@@ -388,6 +398,8 @@ for x0 in (3.42, 6.62):
 # aligned link: the top lane's second arrow is implemented by the bottom lane
 ax.plot([6.83, 6.83], [4.35, 5.9], ls=":", color=pal["navy"], lw=1.3)
 ax.plot([6.83, 5.0], [4.35, 3.62], ls=":", color=pal["navy"], lw=1.3)
+ax.text(7.05, 4.18, "dotted link: this arrow\nIS the bottom lane",
+        fontsize=6.5, color=pal["navy"], ha="left", va="top")
 ax.plot([0.55, 0.55, 9.70, 9.70], [1.15, 0.92, 0.92, 1.15],
         color=pal["navy"], lw=1.2)
 ax.text(5.125, 0.62, "one Pipeline + ColumnTransformer: fit on train only, "
@@ -409,9 +421,9 @@ prs = ds.new_deck()
 ds.title_slide(
     prs, "Session 2 of 4",
     "Data Preparation and Feature Engineering",
-    "The manifest is messy: 177 missing ages, titles buried inside names, "
-    "scales that disagree. Today we turn passengers into signals - "
-    "without cheating.")
+    "The manifest - the ship's passenger list - is messy: 177 missing "
+    "ages, titles buried inside names, scales that disagree. Today we "
+    "turn passengers into signals - without cheating.")
 
 # Slide 2 - REPLACED: Frame C introduction (FIT | CHOOSE | REPORT bar)
 s = ds.image_slide(
@@ -421,32 +433,36 @@ s = ds.image_slide(
     f"{FIGS_T2}/frame_c_bar_s2.png",
     kicker="Recap and roadmap",
     bullets=[
-        "Where we left off: 891 manifest rows, split 80/20 into 712 train / "
-        "179 test - stratified, seed 42",
-        "In exam terms: study on the train rows, pick your strategy with "
-        "practice tests, sit the final once",
-        "Golden rule restated: anything learned FROM data (a fill-in "
-        "value, a scaler) is part of the model - so it must never see "
-        "test rows",
-        "The bar: FIT on the training band; CHOOSE models and settings in a "
-        "validation band; REPORT on the test band, opened once",
-        "Everything today happens inside the FIT band only",
+        "Last time: 891 passenger rows, split 80/20 - 712 train, 179 "
+        "test (stratified, seed 42)",
+        "How to read the bar: pale band = the 712 training rows; dark "
+        "block = the 179 test rows, sealed",
+        "The hatched stripe sits INSIDE training: validation - practice "
+        "tests, built in Session 3",
+        "Exam terms: study on train, pick your strategy with practice "
+        "tests, sit the final once",
+        "Anything learned FROM data - a fill-in value, a scaler - is "
+        "part of the model",
+        "So it must never see the test rows. Today lives entirely in "
+        "the FIT band",
     ],
     caption="The bar every session returns to. Harvard CS109A / ISLR ch. 5 "
             "(model selection vs model assessment).")
-notes(s, "Re-anchor the exam metaphor before anything new: train rows are "
-         "the study material, validation is the practice tests, the test "
-         "set is the final you sit exactly once. Today never leaves the "
-         "study material - every value we compute comes from the 712 "
-         "training rows. Ask the class: why does even an average count as "
-         "'part of the model'?")
+notes(s, "Teach the bar itself before the rules: the pale band is the 712 "
+         "training rows, the dark block is the 179 test rows kept sealed, "
+         "and the hatched stripe inside training is validation - the "
+         "practice tests we build in Session 3. Then the exam metaphor: "
+         "study on train, pick your strategy with practice tests, sit the "
+         "final once. Today never leaves the study material - every value "
+         "we compute comes from the 712 training rows. Ask the class: why "
+         "does even an average count as 'part of the model'?")
 
 # Slide 3 - Part 1 divider: the theory chapter
 ds.section_slide(
-    prs, "01", "Part 1 - The theory: turning the world into vectors",
-    "A vector is just a row of numbers. Before any code: the model only "
-    "sees the numbers you construct - missing values, encodings, scales, "
-    "and expanded features are design decisions, not chores")
+    prs, "01", "Part 1 - The theory: turning passengers into rows of numbers",
+    "A row of numbers is called a vector. Before any code: the model only "
+    "sees the numbers you construct - gaps, encodings, scales, and new "
+    "columns are design decisions, not chores")
 
 # Slide 4 - NEW: feature representation is a first-class decision (MIT)
 s = ds.image_slide(
@@ -456,21 +472,19 @@ s = ds.image_slide(
     f"{FIGS_T2}/fig_representation.png",
     kicker="Feature representation",
     bullets=[
-        "Representation - in plain words: the row of numbers you choose "
-        "to describe each passenger with",
-        "The model never meets a passenger - it meets that row; the "
-        "representation IS its whole world",
-        "Good features beat fancy algorithms: a simple model on good "
-        "columns routinely wins on tables",
-        "The core trick: transform the inputs, keep the model - same "
-        "line-fitter, new coordinates",
-        "Look right: the same points defeat a line on one axis and line "
-        "up perfectly on another",
-        "This chapter: the principled moves - gaps, encodings, scaling, "
-        "expansion - and why each is honest",
+        "The model never meets a passenger - it meets a row of numbers "
+        "built to stand for one",
+        "That row is the representation: the numbers you choose to "
+        "describe each passenger",
+        "How to read the charts: each dot is one example; the line is "
+        "the best straight line",
+        "Left: plotted against x, no straight line fits the dots",
+        "Right: the SAME dots against x squared - now they line up",
+        "The dots never move; only the axis changes - good columns beat "
+        "fancy algorithms",
     ],
-    caption="Illustration - same synthetic points, two coordinate systems. "
-            'MIT 6.390, ch. 5 "Feature representation".')
+    caption="Same 26 synthetic dots in both panels; only the horizontal "
+            'axis changes. MIT 6.390, ch. 5 "Feature representation".')
 notes(s, "The model never meets Frankie - it meets the row of numbers you "
          "built to stand for him, and that row is its entire world. Point "
          "at the two panels: the dots never move, only the axis changes, "
@@ -491,7 +505,8 @@ s = ds.table_slide(
          "Age missing in 177 of 891 rows (19.9%); Embarked missing in 2",
          "Imputation: fill gaps with a value learned from train"],
         ["Sensible scales",
-         "Age runs 0 to 80 while Fare runs 0 to 512",
+         "Age runs 0 to 80 while Fare runs 0 to 512 - Fare shouts, "
+         "Age whispers",
          "Scaling: put features on a comparable ruler"],
     ],
     kicker="Why preparation exists",
@@ -513,20 +528,20 @@ s = ds.image_slide(
     f"{FIGS_T2}/fig_missingness_cards.png",
     kicker="Missing values: the theory",
     bullets=[
-        "MCAR - in plain words: holes poked blindfolded; nothing decides "
-        "where they land",
-        "MAR: the chance of a hole depends on OTHER columns you can see "
-        "(third class recorded less often?)",
-        "MNAR: the hole is caused by the hidden value itself - the "
-        "nastiest species",
-        "The punchline: the data alone can never tell you which - you "
-        "must reason about the world",
-        "Discuss: which species could the Titanic's 177 missing ages be? "
-        "Argue it - the table cannot",
+        "Our table is missing 177 of 891 ages. WHY a hole exists matters",
+        "How to read: one card per species - meaning, a Titanic story, "
+        "the risk, the fix",
+        "MCAR: holes poked blindfolded - nothing decides where they land",
+        "MAR: holes cluster by ANOTHER column you can see (class, say)",
+        "MNAR: the hidden value itself caused the hole - the nastiest kind",
+        "The data alone cannot tell you which. Discuss: which are our 177?",
     ],
     caption="Each Titanic story is plausible, not asserted. Harvard CS109A, "
             "Missing Data lecture (2020, L19).")
-notes(s, "Harvard's device: MCAR is poking holes in the table blindfolded - "
+notes(s, "Ground it first: 177 of our 891 ages are simply blank - the "
+         "question is WHY. Walk the cards left to right; each card gives "
+         "the meaning, a plausible Titanic story, the risk, the fix. "
+         "Harvard's device: MCAR is poking holes in the table blindfolded - "
          "annoying but fair. MAR holes cluster where another visible column "
          "points, so ignoring them biases you. MNAR holes are caused by the "
          "very value that is missing - no fill can see that. The deciding "
@@ -542,24 +557,27 @@ s = ds.image_slide(
     f"{FIGS_T2}/fig_encodings_menu.png",
     kicker="Encoding: the theory",
     bullets=[
-        "Encoding - in plain words: translating the world into the only "
-        "language the model speaks: numbers - without accidentally lying",
-        "No real order (Embarked C/Q/S): one-hot - one 0/1 column per "
-        "category, exactly one switched on",
-        "Real order, unknown spacing (S < M < L): a thermometer code "
-        "keeps the ranking, invents no distances",
-        "True quantities (Age, Fare): keep the number, then standardize "
-        "= re-express as 'how far from average'",
-        "Never arbitrary integers: C=1, Q=2, S=3 claims S is three times "
-        "C - the model learns the lie",
-        "The honesty test: an encoding may claim only the structure the "
-        "category really has",
+        "The manifest says Embarked = S. The model needs numbers, not "
+        "letters",
+        "Encoding = translating categories into numbers, without "
+        "inventing facts",
+        "How to read: one card per code - when it applies, the "
+        "translation, why it is honest",
+        "One-hot (no real order): each category gets its own 0/1 column",
+        "Thermometer (order, no spacing): keeps the ranking S < M < L, "
+        "nothing more",
+        "Keep-numeric (true quantities): Age and Fare stay numbers",
+        "The navy strip is the trap: C=1, Q=2, S=3 claims S is three "
+        "times C",
     ],
     caption="Illustration - the encoding menu. MIT 6.390, ch. 5, sec. 5.3 "
             '"Hand-constructing features".')
-notes(s, "Frame encoding as translation into the only language the model "
-         "speaks - numbers - and honesty as translating without adding "
-         "claims. Coding red=1, blue=2 quietly tells the model blue is "
+notes(s, "Start concrete: the manifest literally says 'S' in the Embarked "
+         "column, and the model cannot eat letters. Walk the three cards "
+         "left to right, then the navy strip at the bottom - the forbidden "
+         "move. Frame encoding as translation into the only language the "
+         "model speaks - numbers - and honesty as translating without "
+         "adding claims. Coding red=1, blue=2 quietly tells the model blue is "
          "twice red; it will believe you. One-hot claims nothing, the "
          "thermometer claims only order, keeping a real number claims real "
          "distances. Ask the class: is T-shirt size S/M/L more like "
@@ -572,49 +590,54 @@ s = ds.image_slide(
     f"{FIGS_T2}/fig_contours_scaling.png",
     kicker="Feature scaling: the why",
     bullets=[
-        "Recall Session 1: training walks downhill on the cost - the "
-        "landscape of the average miss",
-        "With Fare 0-512 next to Age 0-80, the bowl stretches into a "
-        "long skinny valley",
-        "The walk zigzags across the narrow valley and crawls - look "
-        "left: the dotted path",
-        "Rescale to comparable ranges and the bowl turns round - the "
-        "walk heads straight for the star",
-        "Scaling never changes what the best model predicts - only how "
-        "fast and reliably you find it",
+        "Fare runs 0 to 512, Age 0 to 80 - to the model, Fare shouts "
+        "and Age whispers",
+        "Each picture is a map of the search for the best settings: "
+        "every ring = settings scoring the same; the star = the best; "
+        "the dots = training's steps",
+        "Unscaled: the map is a long skinny valley - the search zigzags "
+        "and crawls",
+        "Scaled: the map turns round - the search walks straight to "
+        "the star",
+        "Scaling never changes the answer - only how fast and surely "
+        "you find it",
     ],
-    caption="Illustration - schematic cost surface, not course data. "
-            "Ng, Machine Learning Specialization C1W2.")
-notes(s, "Ng's contour story: the downhill walk from Session 1 happens on a "
-         "landscape, and unequal scales stretch that landscape into a "
-         "skinny valley - the walker zigzags and crawls. Rescale and the "
-         "valley becomes a round bowl: straight to the bottom. The "
-         "destination never moves, only the trip changes. Ask the class: "
-         "which of our columns stretches the valley worst, Fare or Age?")
+    caption="Illustration - a schematic map of the search, not course "
+            "data. Ng, Machine Learning Specialization C1W2.")
+notes(s, "Ground it first: Fare runs 0-512 and Age 0-80, so to the model "
+         "Fare shouts and Age whispers. Then teach the picture before the "
+         "moral: each panel is a map of the search for the best settings - "
+         "one ring joins settings that score the same, the star is the "
+         "best setting, the dotted trail is training's steps from the "
+         "'start' marker. Unscaled, the map is a skinny valley: the walk "
+         "zigzags and crawls. Scaled, it is a round bowl: straight to the "
+         "star. The destination never moves - only the trip changes. Ask "
+         "the class: which of our columns stretches the valley worst?")
 
 # Slide 9 - MIT's XOR - new features bend the space
 s = ds.image_slide(
     prs,
-    "New features bend the space: four points no line can split become "
-    "splittable",
+    "One engineered column, x1 times x2, splits four points no line "
+    "ever could",
     f"{FIGS_T2}/fig_xor_features.png",
     kicker="Feature engineering: the geometry",
     bullets=[
-        "Four points at (+1 or -1, +1 or -1); diagonal corners share a class "
-        "- no straight line can separate them, ever",
-        "Add one engineered column, x1 * x2: it is +1 for one class and -1 "
-        "for the other - a single threshold now separates them perfectly",
-        "We did not change the model; we changed the space it looks at",
-        "Preview of Part 2: Title and FamilySize will be the manifest's "
-        "engineered axes - patterns the raw columns only hint at become "
-        "linearly visible",
-        "A linear model on transformed features is a non-linear model in the "
-        "original space - feature engineering IS model power",
+        "Four points, two facts each (x1, x2) - every value +1 or -1",
+        "How to read: blue circles = one class, dark squares = the other",
+        "Left: the gray dashed lines are failed tries - no straight line "
+        "can split circles from squares",
+        "Right: re-plot each point by ONE new number, x1 times x2, on a "
+        "number line",
+        "Circles land at +1, squares at -1 - one cut separates them",
+        "We never changed the model - we changed the space it looks at",
+        "Part 2 repeats the move on the manifest: Title and FamilySize",
     ],
     caption="Illustration - the classic XOR construction. MIT 6.390, ch. 5.")
-notes(s, "Walk the picture slowly: four corner points, diagonal corners "
-         "share a class, and no straight line will ever split them - let "
-         "students try. Then multiply the two coordinates into one new "
+notes(s, "Walk the picture slowly: four corner points - blue circles are "
+         "one class, dark squares the other - and diagonal corners share "
+         "a class, so no straight line will ever split them; let "
+         "students try (the gray dashed lines are failed tries). Then "
+         "multiply the two coordinates into one new "
          "column and the four points sort themselves onto two spots a "
          "single threshold separates. We never touched the model - we "
          "changed what it looks at. Ask the class: did the model get "
@@ -623,28 +646,29 @@ notes(s, "Walk the picture slowly: four corner points, diagonal corners "
 # Slide 10 - NEW: basis expansion (Harvard/ISLR)
 s = ds.image_slide(
     prs,
-    "Give a line x-squared as a column and it learns curves - flexibility "
-    "bought with features",
+    "Add an x-squared column and the straight line learns to curve",
     f"{FIGS_T2}/fig_basis_expansion.png",
     kicker="Basis expansion",
     bullets=[
-        "Basis expansion - in plain words: give the line new ingredients "
-        "(x squared) and it can cook curves",
-        "Append transformed copies of columns you already have - x "
-        "squared, x cubed, x1 * x2 - as new features",
-        "Nothing about the fitter changes: still a linear model, just "
-        "reading a wider table",
-        "A line in the new coordinates is a curve in the old ones - "
-        "flexibility bought with features, not a new algorithm",
-        "XOR's product column (previous slide) is the same family: "
-        "powers and products of what you measured",
-        "The price: every added column is flexibility the model can "
-        "spend on noise - Session 3 counts that cost",
+        "These dots rise, then fall - one straight line cannot follow "
+        "that",
+        "How to read: the same dots in both panels; left, the model "
+        "sees only the column x",
+        "Right: append ONE new column, x squared - the same fitter "
+        "now bends",
+        "Kitchen terms: same cook, one extra ingredient - now it can "
+        "cook curves",
+        "This is basis expansion: add powers and products of columns "
+        "you already have (XOR's x1 times x2 is the same family)",
+        "The price: every extra column can chase noise - Session 3 "
+        "counts that cost",
     ],
     caption="Illustration - one fitter, two feature tables, synthetic "
             'points. Harvard CS109A, Lecture 4 "Polynomial Regression" '
             "/ ISLR.")
-notes(s, "Stay in the kitchen: the line is the cook, the columns are the "
+notes(s, "Point at the dots first: they rise and then fall, and a ruler "
+         "cannot follow that - the dashed line on the left proves it. "
+         "Then the kitchen: the line is the cook, the columns are the "
          "ingredients. Hand the cook x squared as one more ingredient and "
          "the same recipe starts producing curves - no new cook, no new "
          "technique. But every extra ingredient is also freedom to cook "
@@ -660,20 +684,34 @@ ds.section_slide(
     "leak-proof pipeline")
 
 # Slide 12 - imputation the ML way
-ds.image_slide(
+s = ds.image_slide(
     prs,
-    "Fit the imputer on train only - the test median is information we refuse to use",
+    "Fill gaps with a value learned from train only - the test median "
+    "stays untouched",
     f"{FIGS}/fig_impute.png",
     kicker="Missing values the ML way",
     bullets=[
-        'SimpleImputer(strategy="median"): fit(train) learns median (the '
-        "middle value) Age 28.5",
-        "transform(train) and transform(test) both fill gaps with that same 28.5",
-        'The test-only median (27.0) is "exactly the information we refuse to use"',
-        "Never call fit on the test set - treat it like the future",
-        'Embarked (2 gaps): strategy="most_frequent" learns "S" from train',
+        "Age is blank in 137 train rows and 40 test rows (left chart)",
+        "Median = the middle value. The 712 train rows say: median "
+        "Age 28.5",
+        "That one number, 28.5, fills every gap - in train AND in test",
+        'The test-only median, 27.0, is "exactly the information we '
+        'refuse to use"',
+        'In code: SimpleImputer(strategy="median") - fit on train, '
+        "transform both",
+        'Embarked, 2 gaps: strategy="most_frequent" learns "S" from train',
     ],
-    caption="Missing Age rows and learned medians. Module 2, notebook 1.")
+    caption="Left: rows with Age blank. Right: each half's median - only "
+            "train's is ever used. Module 2, notebook 1.")
+notes(s, "Ground it in the chart: 137 blank ages in train, 40 in test. The "
+         "median is just the middle value, and only the 712 training rows "
+         "may vote: they say 28.5, and that one number fills every gap in "
+         "both halves. The test rows' own median, 27.0, is exactly the "
+         "information we refuse to use - the test set is the future, and "
+         "you cannot compute statistics on data you have not seen yet. "
+         "Same rule for Embarked's 2 gaps: most_frequent learns 'S' from "
+         "train. Ask the class: what would be wrong with filling test "
+         "gaps with 27.0?")
 
 # Slide 13 - MERGED: one-hot by hand + the get_dummies trap
 s13 = ds.table_slide(
@@ -691,9 +729,11 @@ s13 = ds.table_slide(
     note="Part 1's menu chose for us: Embarked has no real order, so "
          "one-hot - never C=1, Q=2, S=3. Module 2, notebook 1.",
     col_widths=[0.18, 0.22, 0.20, 0.20, 0.20])
-s13b = ds._box(s13, ds.MARGIN, Inches(4.68), ds.CONTENT_W, Inches(1.2))
+s13b = ds._box(s13, ds.MARGIN, Inches(4.68), ds.CONTENT_W, Inches(1.6))
 for i, line in enumerate([
-        "fit(train) memorizes the exact column layout; transform(test) always "
+        "Read one row: Passenger 2 boarded at C, so Embarked_C is 1 and "
+        "the other two are 0 - exactly one column is 'hot' per row",
+        "fit(train) fixes the column layout once; transform(test) always "
         "reproduces those same columns",
         'handle_unknown="ignore": an unseen category becomes all zeros - '
         "no crash",
@@ -701,76 +741,120 @@ for i, line in enumerate([
         "see - train and test drift apart (the notebook demo misaligns them)"]):
     ds._para(s13b.text_frame, line, 13.5, ds.INK, first=(i == 0), bullet=True,
              space_after=6)
+notes(s13, "Read one row of the table aloud: Passenger 2 boarded at C, so "
+           "the C column gets the 1 and the others get 0 - that lone 1 is "
+           "why it is called one-hot. No order, no distance is invented; "
+           "Part 1's menu chose this because Embarked has no real order. "
+           "Then the trap: pd.get_dummies rebuilds columns from whatever "
+           "data it sees, so train and test can drift apart; the sklearn "
+           "encoder fixes the layout at fit(train) and reproduces it "
+           "forever. Ask the class: what should happen to a port the "
+           "training set never saw?")
 
 # Slide 14 - scaling on the real manifest
-ds.image_slide(
+s = ds.image_slide(
     prs,
     "Scaling re-labels the ruler: distance models care, trees never notice",
     f"{FIGS}/fig_scales.png",
     kicker="Feature scaling",
     bullets=[
-        "Geometry first: each passenger is a point in space, one axis per "
-        "feature - scaling makes the axes comparable",
-        "Distance and equation models (KNN, Logistic Regression) let the "
-        "big-number axis dominate: raw Fare gaps drown out Age gaps",
-        'Trees only ask questions like "is Fare > 30?" - scale never matters',
-        "StandardScaler: Fare becomes mean -0.00, std 1.00. MinMaxScaler: "
-        "Fare squeezed into 0.0 to 1.0",
-        "The histogram shape does not change - only the numbers on the axis "
-        "do; Part 1's skinny valley is why equation models still care",
+        "Look right: Fare runs 0 to 512, Age 0 to 80 - Fare shouts, "
+        "Age whispers",
+        "Distance and equation models (KNN, Logistic Regression) hear "
+        "only the shouting axis: raw Fare gaps drown out Age gaps",
+        'Trees only ask yes/no questions - "is Fare > 30?" - so scale '
+        "never matters to them",
+        "StandardScaler re-expresses values as 'how far from average': "
+        "Fare becomes mean -0.00, std 1.00",
+        "MinMaxScaler instead squeezes Fare into 0.0 to 1.0",
+        "The histogram's shape never changes - scaling only re-labels "
+        "the ruler",
     ],
-    caption="Raw training ranges: Age 0 to 80, Fare 0 to 512.3. "
+    caption="Each bar = one column's raw range in the training set. "
             "Module 2, notebook 1.")
+notes(s, "Same grounding as Part 1: Fare shouts (0-512), Age whispers "
+         "(0-80) - the chart makes the mismatch physical. Models that "
+         "measure distances or weigh sums (KNN, Logistic Regression) hear "
+         "only the loud axis; trees just ask yes/no questions like 'is "
+         "Fare > 30?', so they never notice. StandardScaler re-expresses "
+         "each value as 'how far from average'; MinMaxScaler squeezes "
+         "into 0-1. Either way the histogram's shape is untouched - only "
+         "the ruler's labels change. Ask the class: which of our six "
+         "models from the next session will care?")
 
 # Slide 15 - Title from Name
-ds.image_slide(
+s = ds.image_slide(
     prs,
     "Title packs sex, age, and status into one column - and finds the boys",
     f"{FIGS}/fig_titles.png",
     kicker="Feature engineering: Title",
     bullets=[
-        'A regex (text-search pattern) " ([A-Za-z]+)\\." grabs the word '
-        "before the period - the title",
-        '"Cumings, Mrs. John Bradley" yields Mrs for Florence; 14 raw titles '
-        "group into 5 buckets: Mr, Miss, Mrs, Master, Rare",
-        'Frankie, age 9, is a "Master" - the old title for young boys, '
-        'secretly encoding "male child"',
-        "To the Sex column, Owen (22) and Frankie (9) are both just male - "
-        "Title tells the man from the boy",
-        "Signal check: Mrs and Miss survived far more often than Mr; Master "
-        "sits well above adult men",
+        'Every Name hides a title: "Cumings, Mrs. John Bradley" '
+        "contains Mrs",
+        'A regex (a text-search pattern), " ([A-Za-z]+)\\.", grabs the '
+        "word before the period",
+        "14 raw titles group into 5 buckets: Mr, Miss, Mrs, Master, Rare "
+        "- the chart counts them",
+        'Frankie, age 9, is a "Master" - the old title for a young boy',
+        "Sex alone calls Owen (22) and Frankie (9) both male - Title "
+        "tells the man from the boy",
+        "Signal check: Mrs and Miss survived far more often than Mr; "
+        "Master sits well above adult men",
     ],
-    caption="Grouped Title counts, training set (712 rows). "
-            "Module 2, notebook 1.")
+    caption="Grouped Title counts, training set (712 rows). Master "
+            "highlighted: the boys the Sex column hides. Module 2, "
+            "notebook 1.")
+notes(s, "Start from a real name: 'Cumings, Mrs. John Bradley' - the title "
+         "Mrs is sitting right there in the text. The regex just grabs "
+         "the word before the period; 14 raw titles collapse into five "
+         "buckets. The payoff is Master, the old-fashioned title for a "
+         "young boy: to the Sex column, Owen (22) and Frankie (9) are "
+         "both simply 'male', but Title tells the man from the boy - "
+         "which mattered a lot on a sinking ship. Signal check before "
+         "keeping any new column: Mrs and Miss survived far more often "
+         "than Mr, and Master sits well above adult men.")
 
 # Slide 16 - FamilySize and IsAlone
-ds.image_slide(
+s = ds.image_slide(
     prs,
     "FamilySize = SibSp + Parch + 1 - small families of 2 to 4 fared best",
     f"{FIGS}/fig_family.png",
     kicker="Feature engineering: FamilySize",
     bullets=[
-        "FamilySize = SibSp + Parch + 1: everyone counts themselves",
-        "Owen: SibSp 1, Parch 0 -> FamilySize 2. Frankie: SibSp 0, Parch 2 "
-        "-> FamilySize 3",
-        "IsAlone = 1 when FamilySize is 1: 434 of 712 training passengers - "
-        "none of our three",
-        "Notebook charts: solo travelers and very large families fared badly; "
-        "small families of 2 to 4 did best",
-        "More features is not automatically better - always check for signal",
+        "FamilySize = SibSp (siblings/spouses) + Parch (parents/children) "
+        "+ 1: you count yourself",
+        "Owen: 1 + 0 + himself = 2. Frankie: 0 + 2 + himself = 3",
+        "IsAlone = 1 when FamilySize is 1 - true for 434 of 712 training "
+        "passengers",
+        "Chart: one bar per family size, counting passengers; the blue "
+        "bars are sizes 2 to 4",
+        "Those small families fared best; solo travelers and very large "
+        "families fared badly",
+        "More features is not automatically better - always check for "
+        "signal",
     ],
-    caption="FamilySize distribution, training set. Module 2, notebook 1.")
+    caption="FamilySize distribution, training set. Blue bars: the sizes "
+            "that fared best. Module 2, notebook 1.")
+notes(s, "One addition, one new column: siblings/spouses plus parents/"
+         "children plus yourself. Work the two passengers: Owen has a "
+         "sibling aboard, so 1+0+1 = 2; Frankie has two parents aboard, "
+         "so 0+2+1 = 3. IsAlone flags the 434 solo travelers - more than "
+         "half the training set. On the chart, the blue bars (sizes 2-4) "
+         "are the families that fared best; solo travelers and the very "
+         "large families fared badly. Close with the discipline: a new "
+         "column earns its place only if it carries signal.")
 
 # Slide 17 - Ng's area feature
-ds.two_col_slide(
+s = ds.two_col_slide(
     prs,
     "Multiply two weak columns and you can get one strong feature - Ng's area example",
     ("Andrew Ng - Machine Learning Specialization",
      [
-         "A house lot has frontage (x1) and depth (x2)",
-         "New feature: x3 = x1 * x2 = lot area - exactly Part 1's "
-         "x1 * x2 move, in Ng's own example",
-         "Area is often more predictive than either raw column",
+         "A house lot has a street-facing width (x1, the 'frontage') "
+         "and a depth (x2)",
+         "New feature: x3 = x1 * x2 = the lot's area",
+         "Exactly Part 1's x1 * x2 move, in Ng's own example",
+         "Area often predicts price better than width or depth alone",
          "One multiplication - no new data collected",
      ]),
     ("The same move on the Titanic",
@@ -784,45 +868,64 @@ ds.two_col_slide(
     note="Ng's rule for inventing features, paraphrased: use knowledge or "
          "intuition about the problem to design new columns. Ng, Machine "
          "Learning Specialization.")
+notes(s, "Ng's own example, in plain terms: a house lot has a width facing "
+         "the street (the 'frontage') and a depth. Multiply them and you "
+         "get the area - one new column, often more predictive than "
+         "either raw one, and no new data collected. Then mirror it on "
+         "the Titanic: SibSp + Parch + 1 became FamilySize, and Name "
+         "became Title. Same rule both times: use knowledge about the "
+         "problem to design new columns. Ask the class: what other "
+         "Titanic column pair might multiply into something useful?")
 
 # Slide 18 - MERGED: Frankie's row + the pipeline, one aligned diagram
-ds.image_slide(
+s = ds.image_slide(
     prs,
     "Frankie walks the pipeline: raw row in, 18 leak-proof numbers out",
     f"{FIGS_STORY}/s2_pipeline_frankie.png",
     kicker="Putting it all together",
     bullets=[
+        "Read the top lane first: Frankie's one raw row becomes 18 "
+        "numbers, left to right",
+        "Then the bottom lane: the machinery - impute gaps, encode "
+        "categories, scale numbers",
+        "The dotted link: the top lane's last arrow IS the bottom lane",
         "fit_transform(train) learns every step's values; transform(test) "
         "only applies them",
-        "Numeric: impute median, then scale. Categorical: impute most "
-        'frequent, then one-hot with handle_unknown="ignore"',
-        "Three reasons for a Pipeline: no leakage, no forgotten steps, "
-        "portability",
-        "IsAlone is computed for every row but not on the model's feature "
-        "list - the ColumnTransformer keeps only listed columns",
+        "One Pipeline: no leakage, no forgotten steps, portable",
+        "IsAlone is computed but not on the feature lists - the "
+        "ColumnTransformer drops it",
     ],
     caption="PassengerId 166, raw fields verbatim from the dataset. "
             "The canonical prep, reused verbatim by Sessions 3 and 4. "
             "Module 2, notebook 1.")
+notes(s, "Give the reading order out loud: top lane first - one real boy, "
+         "Frankie, PassengerId 166, raw row on the left, 18 numbers on "
+         "the right. Then the bottom lane: the three machines that do it "
+         "- impute, encode, scale - and the dotted link showing the top "
+         "lane's last arrow IS that machinery. Hammer the verbs once "
+         "more: fit_transform on train learns the values, transform on "
+         "test only applies them. One Pipeline means no leakage, no "
+         "forgotten steps, and the whole thing travels as a single "
+         "object - Sessions 3 and 4 reuse it verbatim. Note IsAlone: "
+         "computed, but dropped by the ColumnTransformer.")
 
 # Slide 19 - close (two-part recap, absorbs the smoke-test number)
 ds.close_slide(
     prs,
     "Two parts, three golden rules",
     [
-        "Part 1, the theory: the model only sees the numbers you construct "
-        "- representation comes first (MIT)",
-        "Missingness has species - MCAR, MAR, MNAR - and the data can't tell "
-        "you which",
+        "Part 1, the theory: the model only sees the numbers you "
+        "construct (MIT)",
+        "Missing values have species - MCAR, MAR, MNAR - and the data "
+        "cannot tell you which",
         "Features change the geometry: Ng's area, MIT's XOR, Harvard's "
         "x-squared - good columns beat fancier algorithms",
         "Part 2, the practice: split first (80/20, seed 42, stratified); "
-        "fit on train only - imputers, encoders, and scalers learn from the "
-        "712 training rows; Pipelines always",
-        "Proof it works: a plain Logistic Regression scores 0.838 on the 179 "
-        "unseen passengers - train 0.829, no memorization gap; choosing the "
-        "best model is Session 3's whole job",
-        "Practice now: notebook 01-data-prep-and-feature-engineering in Colab",
+        "fit on train only; Pipelines always",
+        "Proof it works: a plain Logistic Regression scores 0.838 on the "
+        "179 unseen passengers - train 0.829, no memorization gap",
+        "Choosing the best model is Session 3's job. Practice now: "
+        "notebook 01-data-prep-and-feature-engineering in Colab",
     ])
 
 out = "../m2-session-2-data-prep-and-feature-engineering.pptx"

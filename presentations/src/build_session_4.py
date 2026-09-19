@@ -35,10 +35,11 @@ for b, v in zip(bars, vals):
     ax.text(b.get_x() + b.get_width() / 2, v + 0.0012, f"{v:.4f}", ha="center",
             fontsize=12, fontweight="bold", color=pal["navy"])
 ax.set_ylim(0.75, 0.842)
-ax.set_ylabel("5-fold CV accuracy")
+ax.set_ylabel("5-fold CV accuracy\n(practice-test score)")
 ax.set_title("The tuning arc: 0.7937 to 0.8259 to 0.8274")
-ax.text(0.02, 0.97, "y-axis starts at 0.75", transform=ax.transAxes,
-        ha="left", va="top", fontsize=8.5, color=pal["gray"])
+ax.text(0.02, 0.97, "y-axis starts at 0.75, not 0 - gaps are zoomed",
+        transform=ax.transAxes, ha="left", va="top", fontsize=8.5,
+        color=pal["gray"])
 fig.savefig(f"{FIGS}/tuning_arc.png")
 plt.close(fig)
 
@@ -59,8 +60,9 @@ for b, v in zip(bars, vals):
 ax.set_ylim(0.75, 0.842)
 ax.set_ylabel("Accuracy")
 ax.set_title("CV and test agree: a gap of only 0.0006")
-ax.text(0.02, 0.97, "y-axis starts at 0.75", transform=ax.transAxes,
-        ha="left", va="top", fontsize=8.5, color=pal["gray"])
+ax.text(0.02, 0.97, "y-axis starts at 0.75, not 0 - gaps are zoomed",
+        transform=ax.transAxes, ha="left", va="top", fontsize=8.5,
+        color=pal["gray"])
 fig.savefig(f"{FIGS}/cv_vs_test_bar.png")
 plt.close(fig)
 
@@ -81,8 +83,8 @@ ax.add_patch(FancyBboxPatch((4.1, 0.95), 2.35, 1.25, boxstyle="round,pad=0.05",
                             facecolor=pal["blue"], edgecolor=pal["blue"], lw=1.4))
 ax.text(5.275, 1.90, "5-fold CV", ha="center", va="center",
         fontweight="bold", color="white", fontsize=12)
-ax.text(5.275, 1.38, "the same referee\nas Session 3", ha="center", va="center",
-        color=pal["sky"], fontsize=8.5)
+ax.text(5.275, 1.38, "the same 5 practice\ntests as Session 3", ha="center",
+        va="center", color=pal["sky"], fontsize=8.5)
 ax.add_patch(FancyArrowPatch((6.52, 1.575), (7.28, 1.575), arrowstyle="-|>",
                              mutation_scale=15, color=pal["blue"], lw=1.6))
 ax.add_patch(FancyBboxPatch((7.35, 0.95), 2.3, 1.25, boxstyle="round,pad=0.05",
@@ -145,8 +147,8 @@ plt.close(fig)
 fig, ax = plt.subplots(figsize=(7.4, 4.1))
 cols = ["", "Precision", "Recall", "Verdict", "F1"]
 col_x, col_w = [0.0, 2.1, 3.7, 5.3, 7.3], [2.1, 1.6, 1.6, 2.0, 1.6]
-rows = [("Classifier A", "0.95", "0.60", "A wins this...", "0.74"),
-        ("Classifier B", "0.85", "0.75", "...B wins this", "0.80")]
+rows = [("Classifier A", "0.95", "0.60", "wins precision", "0.74"),
+        ("Classifier B", "0.85", "0.75", "wins recall", "0.80")]
 top, row_h = 3.4, 0.78
 for x, w, c in zip(col_x, col_w, cols):
     fc = pal["blue"] if c == "F1" else pal["navy"]
@@ -280,10 +282,10 @@ plt.close(fig)
 
 # ---- Chart F (theory): Ng's orthogonalization ladder (DLS-C3) ----
 fig, ax = plt.subplots(figsize=(7.4, 4.9))
-rungs = [  # bottom to top: bar, its own knobs, TODAY marker
-    ("1. Fit the training set", "knob: bigger / better model", False),
-    ("2. Generalize to validation", "knob: regularize or add data", True),
-    ("3. Hold up on the test set", "knob: a bigger, fresher validation set", False),
+rungs = [  # bottom to top: rung, its own knobs, TODAY marker
+    ("1. Learn the training data", "knob: bigger / better model", False),
+    ("2. Pass the practice tests (CV)", "knob: rein the model in or add data", True),
+    ("3. Hold up on the final exam", "knob: a bigger, fresher batch of practice tests", False),
     ("4. Work in the real world", "knob: fix the data or the metric", True),
 ]
 # ladder rails
@@ -311,9 +313,12 @@ for i, (label, knob, today) in enumerate(rungs):
                 color="white", fontweight="bold", fontsize=9.5)
 ax.add_patch(FancyArrowPatch((0.18, 0.55), (0.18, 5.55), arrowstyle="-|>",
                              mutation_scale=18, color=pal["blue"], lw=2.0))
-ax.text(0.02, 3.05, "clear the bars in order", rotation=90, ha="center",
+ax.text(0.02, 3.05, "climb the rungs in order", rotation=90, ha="center",
         va="center", color=pal["gray"], fontsize=9.5)
-ax.text(3.35, 6.0, "One knob per bar - never turn them all at once",
+ax.annotate("start here", xy=(6.25, 0.92), xytext=(6.6, 0.92),
+            ha="left", va="center", color=pal["gray"], fontsize=9.5,
+            arrowprops=dict(arrowstyle="-|>", color=pal["gray"], lw=1.2))
+ax.text(3.35, 6.0, "One knob per rung - never turn them all at once",
         ha="center", va="center", fontweight="bold", color=pal["navy"],
         fontsize=12.5)
 ax.set_xlim(-0.35, 7.75)
@@ -466,10 +471,10 @@ plt.close(fig)
 fig, ax = plt.subplots(figsize=(12.0, 1.3))
 rows = [
     (1.05, pal["panel"], pal["navy"],
-     "M1 - descriptive analytics: 38.4% on a chart a person reads, "
-     "then decides."),
+     "M1 - descriptive analytics: \"38.4% survived\" - a chart a person "
+     "reads, then decides."),
     (0.10, pal["blue"], "white",
-     "M2 - machine learning: 3% for an Owen-like passenger, answered "
+     "M2 - machine learning: \"3% for a passenger like Owen\" - answered "
      "on demand by a program."),
 ]
 for y0, fc, hc, head in rows:
@@ -493,38 +498,42 @@ prs = ds.new_deck()
 
 # 1. Title
 ds.title_slide(prs, "Session 4 of 4", "Tuning and Shipping the Model",
-               "The forest gets tuned, the test set gets its one look, and the "
-               "model leaves the notebook: a public app anyone can ask about a "
-               "passenger like Owen or Florence.")
+               "Session 3's Random Forest gets tuned, the test set gets its "
+               "one look, and the model leaves the notebook: a public app "
+               "anyone can ask about a passenger like Owen or Florence.")
 
 # 2. Where we are + Ng's orthogonalization ladder (REPLACED per plan)
 s = ds.image_slide(
-    prs, "Tune one knob per problem: four bars, each with its own dials",
+    prs, "Tune one knob at a time: four rungs, each with its own knobs",
     f"{FIGS_THEORY}/orthogonalization_ladder.png",
     kicker="Where we are - Ng's orthogonalization",
     bullets=[
         "Orthogonalization - in plain words: one knob does one job; a "
         "radio whose knobs all do everything is untunable.",
-        "Where we are: leak-proof pipeline (712/179, 18 features); LogReg "
-        "champion CV 0.819 / test 0.838, no knobs left; Random Forest "
-        "0.797 has the most knobs - today's candidate.",
-        "Ng's tuning philosophy: clear four bars in order - fit training, "
-        "generalize to validation, hold up on test, work in the world - "
-        "each bar with its OWN knobs.",
-        "The cures, per bar: bigger model / regularize or add data / a "
-        "fresher validation set / fix the data or the metric.",
-        "Diagnose WHICH bar you are failing (Session 3's two numbers) "
-        "before touching any knob. Today: the validation bar, then the "
-        "world bar.",
+        "How to read the ladder: climb from the bottom rung; each rung is "
+        "one problem, fixed by its OWN knobs - never someone else's.",
+        "Where we are: a leak-proof pipeline, 712 training / 179 test "
+        "rows, 18 features.",
+        "LogReg won Session 3 (CV 0.819, test 0.838) but has no knobs "
+        "left; the Random Forest (CV 0.797) has the most - today's "
+        "candidate.",
+        "Diagnose WHICH rung you are failing before touching any knob: "
+        "compare the training score with the practice-test (CV) score.",
+        "TODAY tags our rungs: pass the practice tests (tuning), then "
+        "work in the real world (shipping).",
     ],
-    caption="Ng's orthogonalization ladder: one job per knob. Ng, Deep "
+    caption="Ng's orthogonalization ladder: one job per knob. \"Practice "
+            "tests\" = 5-fold cross-validation from Session 3. Ng, Deep "
             "Learning Specialization C3 \"Structuring ML Projects\".")
 notes(s, "Orthogonalization is a long word for a simple demand: one knob, "
          "one job. A radio where every knob changes volume, station and "
          "tone at once cannot be tuned - and turning random ML knobs is "
-         "that radio. First name the bar you are failing, then reach for "
-         "that bar's knob only. Ask the class: your model aces training but "
-         "flops on validation - which bar, which knob?")
+         "that radio. Walk the ladder bottom-up: learn the training data, "
+         "pass the practice tests (that is cross-validation from Session "
+         "3), hold up on the final exam, work in the real world. First "
+         "name the rung you are failing, then reach for that rung's knob "
+         "only. Ask the class: your model aces training but flops on the "
+         "practice tests - which rung, which knob?")
 
 # 3. Section divider: Part 1 - theory
 ds.section_slide(prs, "01", "Part 1 - The theory: tuning and judging "
@@ -546,10 +555,11 @@ s = ds.two_col_slide(
       "Examples: n_estimators (how many trees), max_depth (how deep).",
       "Tuning = try different knob positions, keep the best result.",
       "In the kitchen: the oven temperature - set before baking.",
-      "MIT's sharper cut: hyperparameters sit OUTSIDE Session 1's three "
-      "slots - they define the game the learner plays.",
-      "Same algorithm, two settings = best thought of as two different "
-      "algorithms. MIT 6.390, Appendix C."]),
+      "MIT's sharper cut: they sit OUTSIDE Session 1's three-slot recipe "
+      "(model, loss, optimizer).",
+      "They define the game the learner plays - before it starts.",
+      "Same algorithm, two settings = two different algorithms. "
+      "MIT 6.390, Appendix C."]),
     kicker="Theory - two kinds of settings",
     note="Baking analogy: the oven temperature is a hyperparameter you set; how the "
          "ingredients turn into cake is the parameters.")
@@ -569,12 +579,14 @@ s = ds.image_slide(
     bullets=[
         "Tuning - in plain words: Session 3's tournament again, now "
         "between versions of one model.",
+        "How to read it: two settings walk in; one referee - the same 5 "
+        "practice tests (cross-validation) - picks the winner.",
         "MIT's reframe: a forest capped at depth 4 and a forest allowed "
         "depth 8 are two different algorithms - same name, different game.",
         "So tuning is a problem you already solved: Session 3 compared "
-        "six families; tuning compares variants of one.",
-        "The referee never changes: run each variant, score it on folds "
-        "it never trained on, keep the best.",
+        "six model families; tuning compares variants of one.",
+        "The referee never changes: each variant is scored on rows it "
+        "never trained on; the best score wins.",
         "Harvard files hyperparameter tuning under model selection, next "
         "to choosing predictors: one discipline, not two.",
     ],
@@ -594,18 +606,19 @@ s = ds.image_slide(
     f"{FIGS_THEORY}/grid_vs_random.png",
     kicker="Theory - search strategy",
     bullets=[
+        "How to read it: each dot = one try; darker blue = better score; "
+        "the ticks below count the distinct values tried.",
         "Grid vs random - in plain words: a grid re-tests the same few "
         "values; random tries a new value every time.",
         "Typically one or two knobs dominate the score - and you do not "
         "know in advance which.",
-        "A 3x3 grid spends nine trials on only three distinct values of "
-        "each knob - six trials are repeats.",
-        "Nine random draws test nine NEW values of every knob at once - "
-        "nine chances instead of three where it counts.",
-        "Same budget, more information: that is why random search "
+        "The grid's nine tries line up in three columns: only three "
+        "values of the knob that matters.",
+        "Nine random tries scatter: nine values of that same knob.",
+        "Same budget, more information - that is why random search "
         "usually wins beyond a couple of knobs.",
-        "The referee never changes: every candidate - grid cell or "
-        "random draw - is scored by the same cross-validation.",
+        "The referee never changes: every try is scored by the same "
+        "cross-validation.",
     ],
     caption="Nine trials spent two ways on a landscape where one knob "
             "matters - illustration.")
@@ -623,19 +636,16 @@ s = ds.image_slide(
     f"{FIGS_THEORY}/error_analysis_sheet.png",
     kicker="Theory - error analysis",
     bullets=[
-        "Pull the misclassified validation examples and look at them by hand "
-        "- about 100 when you have them.",
-        "Tally them into categories in a spreadsheet; add new categories as "
-        "they emerge.",
-        "The bottom row of percentages IS your priority list: a category "
-        "worth 5% of errors caps its payoff at almost nothing; one worth 50% "
-        "is where the month goes.",
-        "Guard: split a large validation set into an \"Eyeball\" part you "
-        "inspect and a \"Blackbox\" part you never look at - you will overfit "
-        "whatever you stare at.",
-        "Exercise: pull our champion's misclassified test-set passengers in "
-        "the notebook and tally your own categories (family size? fare band? "
-        "title?) - no fixing allowed before the counting.",
+        "How to read it: each row = one wrong prediction; each X = the "
+        "category it falls into; the bottom row totals the percentages.",
+        "The method: pull ~100 wrong predictions, look at them by hand, "
+        "tally them in a spreadsheet.",
+        "The bottom row IS the priority list: a 5% category cannot repay "
+        "a month of work; the 50% one (shaded) is where the month goes.",
+        "Guard: inspect only an \"Eyeball\" sample; keep a \"Blackbox\" "
+        "part you never look at - you overfit whatever you stare at.",
+        "Exercise: tally our champion's wrong test predictions (family "
+        "size? fare band? title?) - count first, fix second.",
     ],
     caption="The method, on Ng's classic image-classifier example - "
             "illustration, not our data. Ng, Machine Learning Yearning "
@@ -655,15 +665,16 @@ s = ds.image_slide(
     f"{FIGS_THEORY}/single_number_scoreboard.png",
     kicker="Theory - one number to steer by",
     bullets=[
+        "The deadlock in the table: A wins precision, B wins recall - "
+        "two numbers cannot rank two models.",
+        "The blue F1 column combines both into one number - and B wins. "
+        "Deadlock broken.",
         "The doctrine - in plain words: one scoreboard; teams argue "
         "forever with two scoreboards.",
-        "Two numbers cannot rank two models: A wins precision, B wins "
-        "recall - deadlock until one combiner (F1) breaks it.",
         "F1 punishes imbalance: precision 0.9 with recall 0.1 scores "
         "near 0.18, not 0.5 - a useless side cannot hide.",
-        "When one number is genuinely not enough (safety, latency): make "
-        "those SATISFICING - bars to clear, not scores to chase - and "
-        "keep exactly ONE metric to maximize.",
+        "Something else matters too (safety, speed)? SATISFICE it: a bar "
+        "to clear, not a score to chase. Maximize exactly ONE metric.",
         "Set the metric and the validation data at project start: they "
         "define \"better\" for the whole team.",
     ],
@@ -684,17 +695,18 @@ s = ds.image_slide(
     kicker="Theory - selection vs assessment",
     bullets=[
         "In plain words: practice tests choose your strategy; the final "
-        "exam grades it - and you only sit the final once.",
-        "Model SELECTION picks the knob values - done on validation data "
-        "or by CV, repeatable a thousand times.",
-        "Model ASSESSMENT estimates real-world performance - done exactly "
+        "exam grades it - you sit the final once.",
+        "SELECTION picks the knob values - done on the practice tests "
+        "(CV), repeatable a thousand times.",
+        "ASSESSMENT estimates real-world performance - done exactly "
         "once, on the untouched test set.",
+        "How to read the bar (from Session 2): pale = 712 training rows "
+        "(FIT); hatched = practice tests (CHOOSE); dark = 179 sealed "
+        "test rows (REPORT).",
         "Select on the test set and it silently becomes a practice test: "
-        "you tuned toward it, so its score flatters.",
+        "its score flatters.",
         "A number you optimized against is a target you hit, not a "
-        "forecast - that is why REPORT opens once.",
-        "The verbs bar, unchanged since Session 2: FIT on train, CHOOSE "
-        "inside it by CV, REPORT on the sealed test rows.",
+        "forecast - so REPORT opens once.",
     ],
     caption="Two jobs over the same verbs bar: selection lives left of the "
             "seal; assessment spends it. Harvard CS109A / ISLR ch. 5.")
@@ -718,28 +730,31 @@ s = ds.image_slide(
     f"{FIGS}/tuning_arc.png",
     kicker="Practice - grid and random search",
     bullets=[
-        "Grid search = CV plus nested for-loops, no magic: 2x3x3 = 18 combos "
-        "x 5 folds = 90 trainings. Best (max_depth 4, min_samples_leaf 5, "
-        "100 trees): CV 0.8259, +0.0322 over the 0.7937 default.",
-        "Grids explode: 5 knobs x 6 values = 7,776 combos - nearly 39,000 "
-        "trainings. 15 random draws instead test up to 15 distinct values of "
-        "every knob: CV 0.8274, beating the grid with fewer tries.",
-        "Part 1 in action: all 33 candidates ran Session 3's tournament "
-        "again - same referee (5-fold CV), new contestants - and the test "
-        "set stayed sealed.",
-        "Read the winning knobs: capped depth and bigger leaves are "
-        "complexity BRAKES - regularization by another name: a little bias "
-        "buys a big drop in variance. Session 3's U-curve, found automatically.",
+        "How to read it: each bar = the forest's practice-test (CV) score "
+        "at one stage; the y-axis starts at 0.75, so gaps are zoomed.",
+        "Grid search = CV plus for-loops, no magic: 18 combos x 5 folds = "
+        "90 trainings. Best: CV 0.8259 (+0.0322 over the default).",
+        "Grids explode: 5 knobs x 6 values = 7,776 combos - nearly "
+        "39,000 trainings.",
+        "15 random draws test up to 15 values of every knob: CV 0.8274 - "
+        "beats the grid with fewer tries, as slide 6 predicted.",
+        "All 33 candidates sat the same 5 practice tests; the test set "
+        "stayed sealed.",
+        "The winning knobs (capped depth, bigger leaves) are complexity "
+        "brakes: less freedom to memorize, so it generalizes better.",
     ],
     caption="Random Forest 5-fold CV accuracy at each tuning stage. "
             "Module 2, notebook 3.")
 notes(s, "Theory made real: 18 grid combos and 15 random draws all ran "
          "Session 3's tournament again, refereed by the same 5-fold CV, "
-         "test set sealed. Random found a better setting than the grid with "
-         "fewer tries - exactly the slide-6 prediction. Read the winning "
-         "knobs out loud: capped depth and bigger leaves are brakes, "
-         "regularization by another name. Ask the class: why is it no "
-         "surprise the winner has LESS freedom than the default forest?")
+         "test set sealed. Grid best: max_depth 4, min_samples_leaf 5, 100 "
+         "trees. Random found a better setting with fewer tries - exactly "
+         "the slide-6 prediction. Read the winning knobs out loud: capped "
+         "depth and bigger leaves are brakes - 'regularization' is the "
+         "textbook word for such brakes. A little bias buys a big drop in "
+         "variance: Session 3's U-curve, found automatically. Ask the "
+         "class: why is it no surprise the winner has LESS freedom than "
+         "the default forest?")
 
 # 12. Practice: the one test look
 s = ds.image_slide(
@@ -748,16 +763,17 @@ s = ds.image_slide(
     f"{FIGS}/cv_vs_test_bar.png",
     kicker="Practice - the honest final exam",
     bullets=[
+        "How to read it: left bar = what the practice tests (CV) "
+        "promised; right bar = the one real exam. Y-axis starts at 0.75.",
         "Final exam: 179 passengers the model has never seen, scored one "
         "time: accuracy 0.8268, F1 0.7597.",
         "CV promised 0.8274; the sealed test answered 0.8268 - a search "
         "judged honestly generalizes.",
         "Peeking at test scores while tuning silently turns the test set "
         "into training data.",
-        "Honest expectation: tuning buys a percentage point or two, not miracles.",
-        "This was Part 1's assessment step, executed: selection used CV "
-        "only, and 0.8268 is the only forecast of real-world performance "
-        "we own.",
+        "Honest expectation: tuning buys a percentage point or two, not "
+        "miracles.",
+        "0.8268 is the only forecast of real-world performance we own.",
     ],
     caption="Tuned forest: CV score vs the single test-set look. Module 2, "
             "notebook 3.")
@@ -770,98 +786,139 @@ notes(s, "The final exam, sat once: the practice tests promised 0.8274 and "
          "chart look like - and could we still trust it?")
 
 # 13. MIT's retrain-on-all-data pipeline
-ds.image_slide(
+s = ds.image_slide(
     prs, "You don't ship the CV copy: after choosing, retrain the winning "
          "recipe on all the data",
     f"{FIGS_THEORY}/retrain_pipeline.png",
     kicker="The last step before shipping",
     bullets=[
-        "MIT's five steps: compare variants by CV, pick the winner, RETRAIN "
-        "the winning recipe on all available data, ship, and be judged on "
-        "data nobody at the table has seen.",
-        "Step 3 surprises beginners: the fold models were scaffolding; more "
-        "data = a better final model, so refit everything.",
-        "sklearn already does the training-set version: refit=True retrains "
-        "the best settings on all 712 rows automatically - that is the model "
-        "we saved.",
-        "Once the single test look is spent, the recipe - not the score - is "
-        "what you trust: retraining it on all 891 rows before shipping is "
-        "legitimate; re-scoring it is not, because no honest data remains.",
-        "Two contamination arrows are forever forbidden: test data into "
-        "training, and validation scores reused as the final report card.",
+        "How to read it: five steps, left to right; the raised blue box "
+        "is the surprise step; dashed red arrows = forbidden moves.",
+        "MIT's five steps: compare by CV, pick the winner, RETRAIN on all "
+        "data, ship, be judged on unseen data.",
+        "Step 3 surprises beginners: the fold models were scaffolding; "
+        "more data = a better final model, so refit everything.",
+        "sklearn already does this on the training set: refit=True "
+        "retrains the best settings on all 712 rows - the model we saved.",
+        "After the one test look, trust the recipe, not the score: "
+        "retraining on all 891 rows is legitimate; re-scoring is not - no "
+        "honest data remains.",
+        "Forbidden forever: test data flowing into training, and a "
+        "validation score reused as the report card.",
     ],
     caption="MIT's end-to-end evaluation pipeline - the two red arrows are "
             "never allowed. MIT 6.390, Appendix C.")
+notes(s, "Walk the boxes left to right; the raised blue one is the step "
+         "beginners never guess: after CV has chosen the winner, throw the "
+         "fold models away and retrain the winning RECIPE on every row you "
+         "own - more data makes a better final model. Then the two red "
+         "arrows: test data may never flow back into training, and a score "
+         "you selected with may never be your report card. Ask the class: "
+         "after retraining on all 891 rows, why can't we measure the new "
+         "model's accuracy?")
 
 # 14. What production means - the loop diagram
-ds.image_slide(
+s = ds.image_slide(
     prs, "Production is a loop, not a finish line - the model runs where "
          "real users can reach it",
     f"{FIGS_STORY}/s4_production_loop.png",
     kicker="From notebook to production",
     bullets=[
-        "Save the WHOLE pipeline: titanic_model_v1.joblib, 2,599 KB - raw "
-        "data in, prediction out; re-coding the prep by hand invites "
-        "silently wrong predictions",
-        "Load in a fresh process: no retraining, no notebook required",
+        "How to read it: six steps, arrows run clockwise; after "
+        "6. Retrain you are back at 1. Save - the loop never ends.",
+        "Save the WHOLE pipeline (titanic_model_v1.joblib, 2,599 KB): raw "
+        "data in, prediction out - re-coding the prep by hand invites "
+        "silently wrong predictions.",
+        "Load in a fresh process: no retraining, no notebook required.",
         "Version the file name (v1) so you always know what is running - "
-        "and can roll back",
-        "Ng's rollout ladder for steps 4-5: SHADOW mode (model runs beside "
-        "the human, predictions logged but unused), then CANARY (~5% of real "
-        "traffic, watch, ramp), then full swap with a rollback path - "
-        "deployment is a dial, not a switch",
-        "Monitoring closes the loop: drift detected means retrain and reship",
+        "and can roll back.",
+        "Ng's rollout for steps 4-5: SHADOW (predictions logged, unused) "
+        "-> CANARY (~5% of traffic) -> full swap, rollback ready.",
+        "Monitoring closes the loop: drift detected means retrain and "
+        "reship.",
     ],
     caption="The production loop: save, load, wrap, host, monitor, retrain. "
             "Module 2, notebook 3. Ng, Machine Learning Engineering for "
             "Production C1.")
+notes(s, "Production, in plain words: the model runs somewhere real users "
+         "can reach it. Follow the circle clockwise from 1. Save - the "
+         "blue box, today's first step; 6. Retrain is dark because it "
+         "closes the circle and starts it again. Stress Ng's rollout "
+         "ladder: shadow first (the model watches, nobody acts on it), "
+         "canary next (a sliver of real traffic), full swap last - "
+         "deployment is a dial, not a switch. Ask the class: why is there "
+         "no 'done' box anywhere on this diagram?")
 
 # 15. Two passengers - the moment it becomes real
-ds.image_slide(
+s = ds.image_slide(
     prs, "The loaded pipeline answers a real question - a survival gap of 100% vs 3%",
     f"{FIGS}/two_passengers.png",
     kicker="Sanity check on two passengers",
     bullets=[
-        "Loaded from disk, no retraining: raw passenger details in, verdict out.",
-        "An invented first-class woman, 30 (Fare 80, Cherbourg) - a passenger "
-        "like Florence: survives, 100%.",
-        "An invented third-class man, 28 (Fare 7.9, Southampton) - a passenger "
-        "like Owen: does not survive, 3%.",
-        "A probability is confidence, not a guarantee about one individual.",
-        "The gap reflects the Titanic's reality: class and sex decided lifeboat seats.",
+        "How to read it: each bar = the predicted survival chance the "
+        "loaded model gives one invented passenger.",
+        "Loaded from disk, no retraining: raw passenger details in, "
+        "verdict out.",
+        "An invented first-class woman, 30 (Fare 80, Cherbourg) - a "
+        "passenger like Florence: survives, 100%.",
+        "An invented third-class man, 28 (Fare 7.9, Southampton) - a "
+        "passenger like Owen: does not survive, 3%.",
+        "A probability is confidence, not a guarantee about one "
+        "individual.",
+        "The gap reflects the Titanic's reality: class and sex decided "
+        "lifeboat seats.",
     ],
     caption="Two invented sanity-check passengers, scored by the saved "
             "pipeline. Module 2, notebook 3.")
+notes(s, "The moment it becomes real: a saved file, loaded in a fresh "
+         "process, answers about people it has never seen. The two "
+         "passengers are invented, but built to resemble the module's "
+         "recurring ones - Owen, the third-class man, and Florence, the "
+         "first-class woman. Read a probability honestly: 3% means 'of "
+         "100 very similar passengers, about 3 survive' - confidence, not "
+         "a verdict on one person. Ask the class: why test on invented "
+         "passengers instead of rows from the test set?")
 
 # 16. Gradio + Hugging Face Spaces
-ds.two_col_slide(
+s = ds.two_col_slide(
     prs, "A few lines of Gradio turn the pipeline into a web app anyone can use",
     ("Gradio: a function becomes a web form",
-     ["Write a normal Python function: inputs in, answer out.",
+     ["Gradio - in plain words: a Python library that turns a function "
+      "into a web page.",
+      "Write a normal function: inputs in, answer out.",
       "Gradio renders it as sliders, dropdowns and a text box.",
-      "Title is derived by rule (boys under 13 Master, men Mr).",
+      "The app derives the Title feature by rule (boys under 13 -> "
+      "Master, men -> Mr).",
       "On Colab, launch() gives a shareable temporary link."]),
     ("Hugging Face Spaces: free hosting",
-     ["Four files: app.py, the model, requirements.txt, README.md.",
+     ["Spaces - in plain words: a free public host for ML apps.",
+      "Four files: app.py, the model, requirements.txt, README.md.",
       "Pin the scikit-learn version in requirements.txt.",
       "Upload the files in the browser - that is the whole deploy.",
-      "No tokens or keys in code, ever - uploads stay in the browser.",
+      "No tokens or keys in code, ever.",
       "Result: a public URL anyone can open."]),
     kicker="From model to app")
+notes(s, "Demystify both names before the clicks: Gradio is just a Python "
+         "library that draws a web form around a normal function - inputs "
+         "in, answer out. Hugging Face Spaces is just a free public shelf "
+         "that runs that form at a URL. Four files uploaded in the browser "
+         "and the model is live - no server administration. Two habits to "
+         "call out: pin the scikit-learn version so the loaded pipeline "
+         "matches the saved one, and never paste tokens or keys into code.")
 
 # 17. After launch: reality checks (Netflix Prize folded in)
-ds.bullets_slide(
+s = ds.bullets_slide(
     prs, "After launch, reality bites: models go stale and accuracy alone does not ship",
     [
         ("The $1M Netflix Prize ensemble (about 800 models, a 10% RMSE gain) "
          "was never put into production.",
          ["Engineering cost outweighed the accuracy gain, and the business had "
           "moved to streaming. Netflix tech blog, 2012."]),
-        ("Two kinds of drift: DATA drift - the inputs change (different "
-         "passengers start arriving); CONCEPT drift - the hidden rule f "
-         "itself moves.",
-         ["Same inputs, new outcomes: Session 1's Y = f(X) + ε, with f no "
-          "longer standing still. Monitor inputs and outputs separately."]),
+        ("Two kinds of drift make models go stale.",
+         ["DATA drift: the inputs change - different passengers start arriving.",
+          "CONCEPT drift: the hidden rule f itself moves - same inputs, new "
+          "outcomes (Session 1's Y = f(X) + ε).",
+          "Monitor inputs and outputs separately."]),
         ("Google Flu Trends overestimated flu by more than 50% in 2011-13.",
          ["It once claimed about 11% of the US had flu; CDC data said about 6%.",
           "It was essentially never retrained after 2009. Lazer et al., Science, 2014."]),
@@ -869,6 +926,15 @@ ds.bullets_slide(
         "Retrain on a schedule and re-score; monitoring is step 5 of the loop, not an afterthought.",
     ],
     kicker="After launch")
+notes(s, "Two cautionary tales, both real. Netflix paid $1M for a 10% "
+         "better model and never shipped it - accuracy alone does not "
+         "ship; engineering cost and a business that had moved to "
+         "streaming killed it. Google Flu Trends kept running an "
+         "essentially untouched 2009 model and drifted to overestimating "
+         "flu by more than 50% - claiming about 11% of the US had flu "
+         "when CDC data said about 6%. Ask the class: which kind of drift "
+         "was Flu Trends - the inputs changing, or the hidden rule "
+         "moving?")
 
 # 18. The whole module on one slide (MERGE: echo strip above the stage table)
 s14 = ds.table_slide(
@@ -912,8 +978,8 @@ ds.close_slide(
         "look said 0.8268 - the tuning did not fool itself.",
         "Ship the recipe retrained on everything, then the loop: save, load, "
         "wrap, host, monitor - watch for data AND concept drift.",
-        "Survived = 0 for Owen, 1 for Florence, 1 for Frankie - the odds "
-        "were never abstract.",
+        "Survived = 0 for Owen, 1 for Florence, 1 for Frankie (the "
+        "9-year-old \"Master\") - the odds were never abstract.",
         "Practice now: notebook 03-model-optimization-and-deployment in Colab.",
     ])
 
