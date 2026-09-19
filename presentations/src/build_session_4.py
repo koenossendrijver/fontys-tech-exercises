@@ -20,6 +20,11 @@ pal = ds.mpl_theme()
 
 RED = "#C0392B"  # used only for the two forbidden contamination arrows
 
+
+def notes(slide, text):
+    """Speaker notes: a plain-text talk track for the teacher."""
+    slide.notes_slide.notes_text_frame.text = text
+
 # ---- Chart A: the tuning arc (NB3 sec 2-4) ----
 fig, ax = plt.subplots(figsize=(7.5, 4))
 labels = ["Default forest\n(no tuning)", "Grid search\n(18 combinations)",
@@ -493,27 +498,33 @@ ds.title_slide(prs, "Session 4 of 4", "Tuning and Shipping the Model",
                "passenger like Owen or Florence.")
 
 # 2. Where we are + Ng's orthogonalization ladder (REPLACED per plan)
-ds.image_slide(
+s = ds.image_slide(
     prs, "Tune one knob per problem: four bars, each with its own dials",
     f"{FIGS_THEORY}/orthogonalization_ladder.png",
     kicker="Where we are - Ng's orthogonalization",
     bullets=[
+        "Orthogonalization - in plain words: one knob does one job; a "
+        "radio whose knobs all do everything is untunable.",
         "Where we are: leak-proof pipeline (712/179, 18 features); LogReg "
-        "champion CV 0.819 / test 0.838, no knobs left; Random Forest 0.797 "
-        "has the most knobs - today's candidate.",
-        "Ng's tuning philosophy: clear four bars in order - fit the training "
-        "set, generalize to validation, hold up on test, work in the real "
-        "world - and each bar has its OWN knobs.",
-        "Failing training: bigger/better model. Failing validation: "
-        "regularize (= penalize complexity) or add data. Failing test: your "
-        "validation was over-tuned. Failing the world: your data or metric "
-        "misses reality.",
-        "Diagnose WHICH bar you are failing (Session 3's two numbers) before "
-        "touching any knob - random knob-turning is an untunable radio. "
-        "Today: the validation bar's knobs, then the world bar.",
+        "champion CV 0.819 / test 0.838, no knobs left; Random Forest "
+        "0.797 has the most knobs - today's candidate.",
+        "Ng's tuning philosophy: clear four bars in order - fit training, "
+        "generalize to validation, hold up on test, work in the world - "
+        "each bar with its OWN knobs.",
+        "The cures, per bar: bigger model / regularize or add data / a "
+        "fresher validation set / fix the data or the metric.",
+        "Diagnose WHICH bar you are failing (Session 3's two numbers) "
+        "before touching any knob. Today: the validation bar, then the "
+        "world bar.",
     ],
     caption="Ng's orthogonalization ladder: one job per knob. Ng, Deep "
             "Learning Specialization C3 \"Structuring ML Projects\".")
+notes(s, "Orthogonalization is a long word for a simple demand: one knob, "
+         "one job. A radio where every knob changes volume, station and "
+         "tone at once cannot be tuned - and turning random ML knobs is "
+         "that radio. First name the bar you are failing, then reach for "
+         "that bar's knob only. Ask the class: your model aces training but "
+         "flops on validation - which bar, which knob?")
 
 # 3. Section divider: Part 1 - theory
 ds.section_slide(prs, "01", "Part 1 - The theory: tuning and judging "
@@ -523,70 +534,90 @@ ds.section_slide(prs, "01", "Part 1 - The theory: tuning and judging "
                  "sealed.")
 
 # 4. Parameters vs hyperparameters
-ds.two_col_slide(
+s = ds.two_col_slide(
     prs, "The model learns its parameters - you set the hyperparameters before training",
     ("Parameters: the model learns them",
      ["Learned from the data during training - fit() finds them.",
       "Example: the split rules inside every tree of the forest.",
-      "There are thousands; you never set one by hand."]),
+      "There are thousands; you never set one by hand.",
+      "In the kitchen: how the ingredients turn into cake."]),
     ("Hyperparameters: you choose them",
      ["Chosen by you before training starts.",
       "Examples: n_estimators (how many trees), max_depth (how deep).",
       "Tuning = try different knob positions, keep the best result.",
-      "MIT's sharper cut: hyperparameters are settings of the ALGORITHM "
-      "itself - knobs OUTSIDE Session 1's three slots (model + loss + "
-      "optimizer); they define the game the learner plays.",
-      "The same algorithm with two settings is best thought of as two "
-      "different algorithms. MIT 6.390, Appendix C."]),
+      "In the kitchen: the oven temperature - set before baking.",
+      "MIT's sharper cut: hyperparameters sit OUTSIDE Session 1's three "
+      "slots - they define the game the learner plays.",
+      "Same algorithm, two settings = best thought of as two different "
+      "algorithms. MIT 6.390, Appendix C."]),
     kicker="Theory - two kinds of settings",
     note="Baking analogy: the oven temperature is a hyperparameter you set; how the "
          "ingredients turn into cake is the parameters.")
+notes(s, "The kitchen carries this one: the oven temperature is a "
+         "hyperparameter - you set it before baking; what happens to the "
+         "ingredients inside is the parameters - the process finds those "
+         "itself. You never hand-set a parameter, and the model never "
+         "chooses a hyperparameter. Ask the class: max_depth of a tree - "
+         "oven dial or cake batter?")
 
 # 5. NEW theory: tuning IS comparing algorithms (MIT reframe)
-ds.image_slide(
+s = ds.image_slide(
     prs, "Tuning is not a new skill - two settings of one algorithm are two "
          "different algorithms",
     f"{FIGS_THEORY}/two_settings_one_referee.png",
     kicker="Theory - tuning is comparing",
     bullets=[
-        "MIT's reframe: a forest capped at depth 4 and a forest allowed depth "
-        "8 are literally two different algorithms - same name, different game.",
-        "That collapses tuning into a problem you already solved: Session 3 "
-        "compared six model families; tuning compares variants of one.",
-        "Cross-validation referees both questions the same way: run each "
-        "variant, score it on folds it never trained on, keep the best.",
-        "So everything Session 3 taught about honest comparison applies "
-        "unchanged - same referee, same rules; only the contestants changed.",
-        "Harvard files hyperparameter tuning under model selection, next to "
-        "choosing predictors and polynomial degree: one discipline, not two.",
+        "Tuning - in plain words: Session 3's tournament again, now "
+        "between versions of one model.",
+        "MIT's reframe: a forest capped at depth 4 and a forest allowed "
+        "depth 8 are two different algorithms - same name, different game.",
+        "So tuning is a problem you already solved: Session 3 compared "
+        "six families; tuning compares variants of one.",
+        "The referee never changes: run each variant, score it on folds "
+        "it never trained on, keep the best.",
+        "Harvard files hyperparameter tuning under model selection, next "
+        "to choosing predictors: one discipline, not two.",
     ],
     caption="Two settings of one forest, judged by the same referee - "
             "illustration. MIT 6.390, Appendix C; Harvard CS109A.")
+notes(s, "Deflate the new word: tuning is nothing but Session 3's "
+         "tournament run again, with versions of one model as the "
+         "contestants instead of six different families. MIT's reframe "
+         "makes it legitimate: two settings really are two algorithms. Same "
+         "referee, same rules, new entrants. Ask the class: if you already "
+         "trust the tournament from last week, what is actually new today?")
 
 # 6. NEW theory: why random search beats a grid when knobs differ in importance
-ds.image_slide(
+s = ds.image_slide(
     prs, "Knobs are not equally important - random search tests nine values "
          "of the one that matters, a grid tests three",
     f"{FIGS_THEORY}/grid_vs_random.png",
     kicker="Theory - search strategy",
     bullets=[
-        "Typically one or two knobs dominate the score and the rest barely "
-        "move it - and you do not know in advance which is which.",
-        "A 3x3 grid spends nine trials on only three distinct values of each "
-        "knob: every value of the knob that matters is re-tested three times "
-        "while the knob that does not soaks up the repeats.",
-        "Nine random draws test nine NEW values of every knob at once - the "
-        "important dimension gets nine chances instead of three.",
-        "Same budget, more information where it counts: that is why random "
-        "search usually wins once you tune more than a couple of knobs.",
-        "The referee never changes: every candidate - grid cell or random "
-        "draw - is scored by the same cross-validation.",
+        "Grid vs random - in plain words: a grid re-tests the same few "
+        "values; random tries a new value every time.",
+        "Typically one or two knobs dominate the score - and you do not "
+        "know in advance which.",
+        "A 3x3 grid spends nine trials on only three distinct values of "
+        "each knob - six trials are repeats.",
+        "Nine random draws test nine NEW values of every knob at once - "
+        "nine chances instead of three where it counts.",
+        "Same budget, more information: that is why random search "
+        "usually wins beyond a couple of knobs.",
+        "The referee never changes: every candidate - grid cell or "
+        "random draw - is scored by the same cross-validation.",
     ],
     caption="Nine trials spent two ways on a landscape where one knob "
             "matters - illustration.")
+notes(s, "The picture does the arguing: both panels spend nine trials, but "
+         "the grid lines its shots up in three columns, so the knob that "
+         "matters only ever sees three values - the ticks under the axis "
+         "count them. Random scatters, so the important knob gets nine "
+         "different values for the same budget. Ask the class: you get 20 "
+         "trials and five knobs - grid or random, and why?")
 
 # 7. Ng's error analysis: read the mistakes before turning more knobs
-ds.image_slide(
+s = ds.image_slide(
     prs, "Before turning more knobs, read the mistakes - an hour of counting "
          "beats a week of guessing",
     f"{FIGS_THEORY}/error_analysis_sheet.png",
@@ -609,51 +640,70 @@ ds.image_slide(
     caption="The method, on Ng's classic image-classifier example - "
             "illustration, not our data. Ng, Machine Learning Yearning "
             "chs. 14-19.")
+notes(s, "Error analysis is deliberately low-tech: open the mistakes, look "
+         "at them by hand, and tally them into categories in a spreadsheet. "
+         "The bottom row of percentages is the priority list - a 5% "
+         "category cannot pay for a month of work, a 50% category is the "
+         "month. Warn them about the guard: you will overfit whatever you "
+         "stare at, hence the Eyeball/Blackbox split. Ask the class: why "
+         "count first and fix second, not the other way round?")
 
 # 8. NEW theory: the single-number metric doctrine (Ng)
-ds.image_slide(
+s = ds.image_slide(
     prs, "Agree on one evaluation number before you experiment - it makes "
          "every comparison instant",
     f"{FIGS_THEORY}/single_number_scoreboard.png",
     kicker="Theory - one number to steer by",
     bullets=[
-        "One agreed metric ranks ten experiments at a glance; with three "
-        "metrics, every comparison becomes a debate.",
-        "Two numbers cannot rank two models: A wins precision, B wins recall "
-        "- deadlock until one combiner (F1) breaks it.",
-        "F1 punishes imbalance: precision 0.9 with recall 0.1 scores near "
-        "0.18, not 0.5 - a useless side cannot hide behind a strong one.",
-        "When one number is genuinely not enough (safety, latency, size): "
-        "make those SATISFICING constraints - bars to clear - and keep "
-        "exactly one OPTIMIZING metric to maximize.",
-        "Set the metric and the validation data at project start: together "
-        "they define \"better\" for the whole team, and every decision "
-        "gets fast.",
+        "The doctrine - in plain words: one scoreboard; teams argue "
+        "forever with two scoreboards.",
+        "Two numbers cannot rank two models: A wins precision, B wins "
+        "recall - deadlock until one combiner (F1) breaks it.",
+        "F1 punishes imbalance: precision 0.9 with recall 0.1 scores "
+        "near 0.18, not 0.5 - a useless side cannot hide.",
+        "When one number is genuinely not enough (safety, latency): make "
+        "those SATISFICING - bars to clear, not scores to chase - and "
+        "keep exactly ONE metric to maximize.",
+        "Set the metric and the validation data at project start: they "
+        "define \"better\" for the whole team.",
     ],
     caption="A deadlocked scoreboard resolved by one number - illustration. "
             "Ng, Machine Learning Yearning chs. 8-9.")
+notes(s, "One scoreboard: with a single agreed number, ten experiments rank "
+         "themselves; with three numbers, every comparison becomes a "
+         "meeting. When something else genuinely matters - safety, speed - "
+         "it becomes a bar to clear, not a second score to chase; exactly "
+         "one number stays on the scoreboard. Ask the class: A wins "
+         "precision, B wins recall - without a combiner, who ships?")
 
 # 9. NEW theory: selection vs assessment - why REPORT opens exactly once
-ds.image_slide(
+s = ds.image_slide(
     prs, "Choosing and grading are different jobs - CHOOSE as often as you "
          "like, REPORT opens once",
     f"{FIGS_THEORY}/select_vs_assess.png",
     kicker="Theory - selection vs assessment",
     bullets=[
-        "Model SELECTION picks the flexibility and the knob values - done on "
-        "validation data or by CV, repeatable a thousand times.",
-        "Model ASSESSMENT estimates how the final model will do on genuinely "
-        "new data - done exactly once, on the untouched test set.",
-        "Select on the test set and it silently becomes a validation set: "
-        "you tuned toward it, so its score can no longer surprise you - it "
-        "overestimates.",
-        "A number you optimized against is a target you hit, not a forecast "
-        "- that is the whole reason the REPORT band opens once.",
+        "In plain words: practice tests choose your strategy; the final "
+        "exam grades it - and you only sit the final once.",
+        "Model SELECTION picks the knob values - done on validation data "
+        "or by CV, repeatable a thousand times.",
+        "Model ASSESSMENT estimates real-world performance - done exactly "
+        "once, on the untouched test set.",
+        "Select on the test set and it silently becomes a practice test: "
+        "you tuned toward it, so its score flatters.",
+        "A number you optimized against is a target you hit, not a "
+        "forecast - that is why REPORT opens once.",
         "The verbs bar, unchanged since Session 2: FIT on train, CHOOSE "
         "inside it by CV, REPORT on the sealed test rows.",
     ],
     caption="Two jobs over the same verbs bar: selection lives left of the "
             "seal; assessment spends it. Harvard CS109A / ISLR ch. 5.")
+notes(s, "Close the theory on the exam metaphor: practice tests choose your "
+         "strategy - retake them all you like; the final exam grades it - "
+         "and you sit it once. The moment you pick your strategy using the "
+         "final's questions, the final stops measuring anything. Ask the "
+         "class: why does a score you optimized against stop being a "
+         "forecast?")
 
 # 10. Section divider: Part 2 - practice
 ds.section_slide(prs, "02", "Part 2 - Practice: tune it, prove it, ship it",
@@ -662,7 +712,7 @@ ds.section_slide(prs, "02", "Part 2 - Practice: tune it, prove it, ship it",
                  "anyone can ask about a passenger like Owen or Florence.")
 
 # 11. Practice: grid + random search around the tuning-arc chart
-ds.image_slide(
+s = ds.image_slide(
     prs, "Grid and random search lift the forest from 0.7937 to 0.8274 - "
          "random wins with fewer tries",
     f"{FIGS}/tuning_arc.png",
@@ -683,9 +733,16 @@ ds.image_slide(
     ],
     caption="Random Forest 5-fold CV accuracy at each tuning stage. "
             "Module 2, notebook 3.")
+notes(s, "Theory made real: 18 grid combos and 15 random draws all ran "
+         "Session 3's tournament again, refereed by the same 5-fold CV, "
+         "test set sealed. Random found a better setting than the grid with "
+         "fewer tries - exactly the slide-6 prediction. Read the winning "
+         "knobs out loud: capped depth and bigger leaves are brakes, "
+         "regularization by another name. Ask the class: why is it no "
+         "surprise the winner has LESS freedom than the default forest?")
 
 # 12. Practice: the one test look
-ds.image_slide(
+s = ds.image_slide(
     prs, "One look at 179 unseen passengers: 0.8268 - within 0.0006 of CV, "
          "the tuning did not fool itself",
     f"{FIGS}/cv_vs_test_bar.png",
@@ -704,6 +761,13 @@ ds.image_slide(
     ],
     caption="Tuned forest: CV score vs the single test-set look. Module 2, "
             "notebook 3.")
+notes(s, "The final exam, sat once: the practice tests promised 0.8274 and "
+         "the sealed final answered 0.8268 - a gap of 0.0006. That "
+         "agreement is the reward for never peeking: a search judged "
+         "honestly generalizes. Also set expectations: tuning bought about "
+         "one percentage point, not a miracle. Ask the class: if we had "
+         "checked the test score after every tuning try, what would this "
+         "chart look like - and could we still trust it?")
 
 # 13. MIT's retrain-on-all-data pipeline
 ds.image_slide(

@@ -12,6 +12,13 @@ from pptx.util import Inches
 import deck_style as ds
 
 pal = ds.mpl_theme()
+
+
+def notes(slide, text):
+    """Speaker notes: a plain-text talk track for the teacher."""
+    slide.notes_slide.notes_text_frame.text = text
+
+
 FIGS = "/tmp/deck-workshop/figs2"
 FIGS_STORY = "/tmp/deck-workshop/figs-story"
 FIGS_T2 = "/tmp/deck-workshop/figs-theory2"
@@ -293,7 +300,7 @@ MENU = [
      "keeps the ranking,\ninvents no distances"),
     ("KEEP NUMERIC", "a true quantity", pal["sky"], pal["navy"],
      "Age, Fare",
-     ["standardize:", "(value - mean) / std"],
+     ["standardize:", "(value - mean) / std", "std = typical spread"],
      "real distances kept,\nunits made comparable"),
 ]
 fig, ax = plt.subplots(figsize=(7.3, 4.3))
@@ -407,7 +414,7 @@ ds.title_slide(
     "without cheating.")
 
 # Slide 2 - REPLACED: Frame C introduction (FIT | CHOOSE | REPORT bar)
-ds.image_slide(
+s = ds.image_slide(
     prs,
     "One bar rules the module: FIT on train, CHOOSE by validation, "
     "REPORT on test - once",
@@ -416,48 +423,63 @@ ds.image_slide(
     bullets=[
         "Where we left off: 891 manifest rows, split 80/20 into 712 train / "
         "179 test - stratified, seed 42",
-        "Golden rule restated: the model never sees test data during "
-        "preparation - anything learned FROM data (an imputation value, a "
-        "scaler) is part of the model",
+        "In exam terms: study on the train rows, pick your strategy with "
+        "practice tests, sit the final once",
+        "Golden rule restated: anything learned FROM data (a fill-in "
+        "value, a scaler) is part of the model - so it must never see "
+        "test rows",
         "The bar: FIT on the training band; CHOOSE models and settings in a "
         "validation band; REPORT on the test band, opened once",
         "Everything today happens inside the FIT band only",
     ],
     caption="The bar every session returns to. Harvard CS109A / ISLR ch. 5 "
             "(model selection vs model assessment).")
+notes(s, "Re-anchor the exam metaphor before anything new: train rows are "
+         "the study material, validation is the practice tests, the test "
+         "set is the final you sit exactly once. Today never leaves the "
+         "study material - every value we compute comes from the 712 "
+         "training rows. Ask the class: why does even an average count as "
+         "'part of the model'?")
 
 # Slide 3 - Part 1 divider: the theory chapter
 ds.section_slide(
     prs, "01", "Part 1 - The theory: turning the world into vectors",
-    "Before any code: the model only sees the numbers you construct - "
-    "missing values, encodings, scales, and expanded features are design "
-    "decisions, not chores")
+    "A vector is just a row of numbers. Before any code: the model only "
+    "sees the numbers you construct - missing values, encodings, scales, "
+    "and expanded features are design decisions, not chores")
 
 # Slide 4 - NEW: feature representation is a first-class decision (MIT)
-ds.image_slide(
+s = ds.image_slide(
     prs,
     "The model only sees the numbers you construct - representation "
     "comes first",
     f"{FIGS_T2}/fig_representation.png",
     kicker="Feature representation",
     bullets=[
-        "The model never meets a passenger - it meets the row of numbers "
-        "you built for one; the representation IS its whole world",
-        "For tabular problems the representation often matters more than "
-        "the algorithm: a simple model on good features routinely beats a "
-        "fancy model on raw ones",
-        "The core trick: transform the inputs, keep the model - new "
-        "coordinates, same line-fitter",
-        "Change the features, change the geometry: the same points can "
-        "defeat a line in one coordinate system and line up in another",
-        "This chapter: the principled moves - missingness, encodings, "
-        "scaling, expansion - and why each one is honest",
+        "Representation - in plain words: the row of numbers you choose "
+        "to describe each passenger with",
+        "The model never meets a passenger - it meets that row; the "
+        "representation IS its whole world",
+        "Good features beat fancy algorithms: a simple model on good "
+        "columns routinely wins on tables",
+        "The core trick: transform the inputs, keep the model - same "
+        "line-fitter, new coordinates",
+        "Look right: the same points defeat a line on one axis and line "
+        "up perfectly on another",
+        "This chapter: the principled moves - gaps, encodings, scaling, "
+        "expansion - and why each is honest",
     ],
     caption="Illustration - same synthetic points, two coordinate systems. "
             'MIT 6.390, ch. 5 "Feature representation".')
+notes(s, "The model never meets Frankie - it meets the row of numbers you "
+         "built to stand for him, and that row is its entire world. Point "
+         "at the two panels: the dots never move, only the axis changes, "
+         "and suddenly a straight line fits. That is the whole chapter in "
+         "one picture. Ask the class: if the model only sees the numbers, "
+         "who is responsible when it sees the world wrongly?")
 
 # Slide 5 - the three requirements (promoted into the theory chapter)
-ds.table_slide(
+s = ds.table_slide(
     prs,
     "Models are picky eaters: they want numbers only, no gaps, sensible scales",
     ["The model demands", "Raw Titanic reality", "The fix"],
@@ -477,71 +499,101 @@ ds.table_slide(
          "axis per column - words and gaps have no place on an axis. Impute = "
          "fill a gap with a learned substitute. Counts: Module 2, notebook 1.",
     col_widths=[0.22, 0.44, 0.34])
+notes(s, "The kitchen line: models are picky eaters - they only eat "
+         "numbers, refuse plates with gaps, and complain when portions are "
+         "on wildly different scales. Each row of the table is one "
+         "complaint and its fix: encoding, imputation, scaling. Ask the "
+         "class: what would the model make of the word 'Southampton' if we "
+         "fed it raw?")
 
 # Slide 6 - MCAR / MAR / MNAR three-card theory slide
-ds.image_slide(
+s = ds.image_slide(
     prs,
     "Missing values come in three species - and the data cannot tell you which",
     f"{FIGS_T2}/fig_missingness_cards.png",
     kicker="Missing values: the theory",
     bullets=[
-        "Three species: MCAR (random holes), MAR (holes explained by other "
-        "columns), MNAR (holes caused by the hidden value itself)",
-        "The punchline: the deciding variables are unobserved by definition - "
-        "the data alone can never tell you the type; you must reason about "
-        "the world",
+        "MCAR - in plain words: holes poked blindfolded; nothing decides "
+        "where they land",
+        "MAR: the chance of a hole depends on OTHER columns you can see "
+        "(third class recorded less often?)",
+        "MNAR: the hole is caused by the hidden value itself - the "
+        "nastiest species",
+        "The punchline: the data alone can never tell you which - you "
+        "must reason about the world",
         "Discuss: which species could the Titanic's 177 missing ages be? "
         "Argue it - the table cannot",
     ],
     caption="Each Titanic story is plausible, not asserted. Harvard CS109A, "
             "Missing Data lecture (2020, L19).")
+notes(s, "Harvard's device: MCAR is poking holes in the table blindfolded - "
+         "annoying but fair. MAR holes cluster where another visible column "
+         "points, so ignoring them biases you. MNAR holes are caused by the "
+         "very value that is missing - no fill can see that. The deciding "
+         "information is missing by definition, so the table cannot settle "
+         "it. Run the discussion: which species are our 177 missing ages? "
+         "Any argued answer beats a certain one.")
 
 # Slide 7 - NEW: the encodings menu (MIT)
-ds.image_slide(
+s = ds.image_slide(
     prs,
     "Three honest encodings: one-hot labels, thermometer ranks, "
     "standardized numbers",
     f"{FIGS_T2}/fig_encodings_menu.png",
     kicker="Encoding: the theory",
     bullets=[
+        "Encoding - in plain words: translating the world into the only "
+        "language the model speaks: numbers - without accidentally lying",
         "No real order (Embarked C/Q/S): one-hot - one 0/1 column per "
-        "category, exactly one hot; every pair of categories sits at the "
-        "same distance",
-        "Real order, unknown spacing (S < M < L): a thermometer / ordinal "
-        "code keeps the ranking without inventing distances",
-        "True quantities (Age, Fare): keep numeric, then standardize so no "
-        "column dominates just because of its units",
-        "Never arbitrary integers: C=1, Q=2, S=3 claims S is three times C "
-        "- a fake order lies about distance, and the model learns the lie",
+        "category, exactly one switched on",
+        "Real order, unknown spacing (S < M < L): a thermometer code "
+        "keeps the ranking, invents no distances",
+        "True quantities (Age, Fare): keep the number, then standardize "
+        "= re-express as 'how far from average'",
+        "Never arbitrary integers: C=1, Q=2, S=3 claims S is three times "
+        "C - the model learns the lie",
         "The honesty test: an encoding may claim only the structure the "
         "category really has",
     ],
     caption="Illustration - the encoding menu. MIT 6.390, ch. 5, sec. 5.3 "
             '"Hand-constructing features".')
+notes(s, "Frame encoding as translation into the only language the model "
+         "speaks - numbers - and honesty as translating without adding "
+         "claims. Coding red=1, blue=2 quietly tells the model blue is "
+         "twice red; it will believe you. One-hot claims nothing, the "
+         "thermometer claims only order, keeping a real number claims real "
+         "distances. Ask the class: is T-shirt size S/M/L more like "
+         "Embarked or more like Age?")
 
 # Slide 8 - Ng's elongated contours - why scaling helps training
-ds.image_slide(
+s = ds.image_slide(
     prs,
     "Scaling does not change the destination - it straightens the road to it",
     f"{FIGS_T2}/fig_contours_scaling.png",
     kicker="Feature scaling: the why",
     bullets=[
-        "Training walks downhill on the cost surface: nudge the weights in "
-        "whichever direction lowers the average miss fastest",
-        "With Fare 0-512 next to Age 0-80, the bowl becomes a long skinny "
-        "valley - the downhill walk zigzags across the narrow direction "
-        "and crawls",
-        "Rescale to comparable ranges and the contours turn nearly circular - "
-        "the walk heads straight for the minimum",
-        "Scaling changes nothing about what the best model predicts - only "
-        "how fast and reliably you find it: same destination, very "
-        "different trip",
+        "Recall Session 1: training walks downhill on the cost - the "
+        "landscape of the average miss",
+        "With Fare 0-512 next to Age 0-80, the bowl stretches into a "
+        "long skinny valley",
+        "The walk zigzags across the narrow valley and crawls - look "
+        "left: the dotted path",
+        "Rescale to comparable ranges and the bowl turns round - the "
+        "walk heads straight for the star",
+        "Scaling never changes what the best model predicts - only how "
+        "fast and reliably you find it",
     ],
     caption="Illustration - schematic cost surface, not course data. "
             "Ng, Machine Learning Specialization C1W2.")
+notes(s, "Ng's contour story: the downhill walk from Session 1 happens on a "
+         "landscape, and unequal scales stretch that landscape into a "
+         "skinny valley - the walker zigzags and crawls. Rescale and the "
+         "valley becomes a round bowl: straight to the bottom. The "
+         "destination never moves, only the trip changes. Ask the class: "
+         "which of our columns stretches the valley worst, Fare or Age?")
 
 # Slide 9 - MIT's XOR - new features bend the space
-ds.image_slide(
+s = ds.image_slide(
     prs,
     "New features bend the space: four points no line can split become "
     "splittable",
@@ -560,29 +612,45 @@ ds.image_slide(
         "original space - feature engineering IS model power",
     ],
     caption="Illustration - the classic XOR construction. MIT 6.390, ch. 5.")
+notes(s, "Walk the picture slowly: four corner points, diagonal corners "
+         "share a class, and no straight line will ever split them - let "
+         "students try. Then multiply the two coordinates into one new "
+         "column and the four points sort themselves onto two spots a "
+         "single threshold separates. We never touched the model - we "
+         "changed what it looks at. Ask the class: did the model get "
+         "smarter, or did the world get simpler?")
 
 # Slide 10 - NEW: basis expansion (Harvard/ISLR)
-ds.image_slide(
+s = ds.image_slide(
     prs,
     "Give a line x-squared as a column and it learns curves - flexibility "
     "bought with features",
     f"{FIGS_T2}/fig_basis_expansion.png",
     kicker="Basis expansion",
     bullets=[
-        "Basis expansion: append transformed copies of the columns you "
-        "already have - x squared, x cubed, x1 * x2 - as new features",
-        "Nothing about the fitter changes: it is still a linear model, just "
-        "reading a wider table - the same math finds the weights",
-        "A line in the expanded coordinates is a curve in the original ones "
-        "- flexibility bought with features, not with a new algorithm",
-        "XOR's product feature (previous slide) is the same family: powers "
-        "and products of what you already measured",
-        "The price: every added column is flexibility the model can spend "
-        "on noise - Session 3: what too much flexibility costs",
+        "Basis expansion - in plain words: give the line new ingredients "
+        "(x squared) and it can cook curves",
+        "Append transformed copies of columns you already have - x "
+        "squared, x cubed, x1 * x2 - as new features",
+        "Nothing about the fitter changes: still a linear model, just "
+        "reading a wider table",
+        "A line in the new coordinates is a curve in the old ones - "
+        "flexibility bought with features, not a new algorithm",
+        "XOR's product column (previous slide) is the same family: "
+        "powers and products of what you measured",
+        "The price: every added column is flexibility the model can "
+        "spend on noise - Session 3 counts that cost",
     ],
     caption="Illustration - one fitter, two feature tables, synthetic "
             'points. Harvard CS109A, Lecture 4 "Polynomial Regression" '
             "/ ISLR.")
+notes(s, "Stay in the kitchen: the line is the cook, the columns are the "
+         "ingredients. Hand the cook x squared as one more ingredient and "
+         "the same recipe starts producing curves - no new cook, no new "
+         "technique. But every extra ingredient is also freedom to cook "
+         "nonsense that matches noise; Session 3 puts a price on that. Ask "
+         "the class: what column would you hand the line so it could bend "
+         "twice?")
 
 # Slide 11 - Part 2 divider: the practice chapter
 ds.section_slide(
@@ -598,7 +666,8 @@ ds.image_slide(
     f"{FIGS}/fig_impute.png",
     kicker="Missing values the ML way",
     bullets=[
-        'SimpleImputer(strategy="median"): fit(train) learns median Age 28.5',
+        'SimpleImputer(strategy="median"): fit(train) learns median (the '
+        "middle value) Age 28.5",
         "transform(train) and transform(test) both fill gaps with that same 28.5",
         'The test-only median (27.0) is "exactly the information we refuse to use"',
         "Never call fit on the test set - treat it like the future",
@@ -660,7 +729,8 @@ ds.image_slide(
     f"{FIGS}/fig_titles.png",
     kicker="Feature engineering: Title",
     bullets=[
-        'Regex " ([A-Za-z]+)\\." grabs the word before the period - the title',
+        'A regex (text-search pattern) " ([A-Za-z]+)\\." grabs the word '
+        "before the period - the title",
         '"Cumings, Mrs. John Bradley" yields Mrs for Florence; 14 raw titles '
         "group into 5 buckets: Mr, Miss, Mrs, Master, Rare",
         'Frankie, age 9, is a "Master" - the old title for young boys, '
