@@ -14,9 +14,11 @@ import deck_style as ds
 FIGS = "/tmp/deck-workshop/figs1"
 FIGS_STORY = "/tmp/deck-workshop/figs-story"
 FIGS_CONCEPTS = "/tmp/deck-workshop/figs-concepts"
+FIGS_THEORY = "/tmp/deck-workshop/figs-theory1"
 os.makedirs(FIGS, exist_ok=True)
 os.makedirs(FIGS_STORY, exist_ok=True)
 os.makedirs(FIGS_CONCEPTS, exist_ok=True)
+os.makedirs(FIGS_THEORY, exist_ok=True)
 pal = ds.mpl_theme()
 
 
@@ -60,6 +62,166 @@ def make_charts():
     ax.axis("off")
     ax.set_title("Split first: one manifest becomes train and test")
     fig.savefig(f"{FIGS_STORY}/s1_split_story.png")
+    plt.close(fig)
+
+
+def make_error_stack_fig():
+    """Frame B motif: stacked bar of total error - grey noise base,
+    shrinkable colored top. Schematic, no numbers on either segment."""
+    from matplotlib.patches import Rectangle, FancyArrowPatch
+    fig, ax = plt.subplots(figsize=(6.8, 5.2))
+    bx, bw = 0.30, 0.46  # bar x, width
+    split = 0.40         # boundary between the two segments
+    ax.add_patch(Rectangle((bx, 0.0), bw, split, facecolor=pal["gray"],
+                           edgecolor="none"))
+    ax.add_patch(Rectangle((bx, split), bw, 1.0 - split,
+                           facecolor=pal["blue"], edgecolor="none"))
+    ax.text(bx + bw / 2, split / 2, "noise\n(irreducible)", ha="center",
+            va="center", color="white", fontweight="bold", fontsize=12)
+    ax.text(bx + bw / 2, split + (1.0 - split) / 2, "reducible",
+            ha="center", va="center", color="white", fontweight="bold",
+            fontsize=13)
+    # downward arrow on the reducible segment ONLY
+    ax.add_patch(FancyArrowPatch((bx + bw + 0.10, 0.97),
+                                 (bx + bw + 0.10, split + 0.05),
+                                 arrowstyle="-|>", mutation_scale=20,
+                                 color=pal["blue"], lw=2.2))
+    # right-side annotations
+    tx = bx + bw + 0.24
+    ax.text(tx, 0.80, "REDUCIBLE - your job", color=pal["navy"],
+            fontweight="bold", fontsize=13.5)
+    ax.text(tx, 0.62, "your estimate of the hidden rule is off:\nbetter "
+            "features, models, or data\nshrink this part", color=pal["gray"],
+            fontsize=11.5, va="top")
+    ax.text(tx, 0.28, "IRREDUCIBLE (noise ε) -\nnobody can remove this",
+            color=pal["navy"], fontweight="bold", fontsize=13.5, va="top")
+    ax.text(tx, 0.12, "randomness no manifest records -\nthe floor under "
+            "any model, however perfect", color=pal["gray"], fontsize=11.5,
+            va="top")
+    # left bracket label
+    ax.annotate("", xy=(bx - 0.10, 0.0), xytext=(bx - 0.10, 1.0),
+                arrowprops=dict(arrowstyle="-", color=pal["gray"], lw=1.2))
+    ax.text(bx - 0.17, 0.5, "total prediction error", rotation=90,
+            ha="center", va="center", color=pal["ink"], fontsize=12)
+    ax.text(bx - 0.17 + 0.0, 1.10, "Y = f(X) + ε", color=pal["navy"],
+            fontweight="bold", fontsize=15)
+    ax.set_xlim(0, 2.05)
+    ax.set_ylim(-0.04, 1.2)
+    ax.axis("off")
+    fig.savefig(f"{FIGS_THEORY}/s1_error_stack.png")
+    plt.close(fig)
+
+
+def make_recipe_fig():
+    """Frame A motif: the three-slot recipe as three boxes -> best rule,
+    with one worked filling (Logistic Regression) beneath."""
+    from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
+    fig, ax = plt.subplots(figsize=(12.2, 5.4))
+    slots = [
+        (0.30, "SLOT 1 - THE MODEL", "candidate rules",
+         "a family of rules to\nchoose from (the\nhypothesis class)"),
+        (3.35, "SLOT 2 - THE LOSS", "the scorecard",
+         "how bad is each wrong\nprediction? 0-1 loss =\njust count mistakes"),
+        (6.40, "SLOT 3 - THE OPTIMIZER", "the search",
+         "finds the family member\nwith the lowest\naverage loss"),
+    ]
+    w, h, y0 = 2.55, 2.15, 2.30
+    for x, head, sub, det in slots:
+        ax.add_patch(FancyBboxPatch((x, y0), w, h, boxstyle="round,pad=0.05",
+                                    facecolor=pal["panel"],
+                                    edgecolor=pal["blue"], lw=1.6))
+        ax.text(x + w / 2, y0 + h - 0.32, head, ha="center", color=pal["navy"],
+                fontweight="bold", fontsize=11.5)
+        ax.text(x + w / 2, y0 + h - 0.68, sub, ha="center", color=pal["blue"],
+                fontsize=11)
+        ax.text(x + w / 2, y0 + 0.62, det, ha="center", color=pal["gray"],
+                fontsize=9.8)
+    for xp in (3.10, 6.15):
+        ax.text(xp, y0 + h / 2, "+", ha="center", va="center",
+                color=pal["navy"], fontsize=26, fontweight="bold")
+    ax.add_patch(FancyArrowPatch((9.05, y0 + h / 2), (9.55, y0 + h / 2),
+                                 arrowstyle="-|>", mutation_scale=20,
+                                 color=pal["navy"], lw=2.0))
+    ax.add_patch(FancyBboxPatch((9.62, y0), 2.45, h, boxstyle="round,pad=0.05",
+                                facecolor=pal["blue"], edgecolor=pal["blue"]))
+    ax.text(10.845, y0 + h - 0.55, "THE BEST RULE", ha="center",
+            color="white", fontweight="bold", fontsize=12.5)
+    ax.text(10.845, y0 + 0.75, "one fitted model,\nready to predict",
+            ha="center", color=pal["sky"], fontsize=10.5)
+    # worked filling lane: heading row on top, fillings row beneath
+    ax.add_patch(FancyBboxPatch((0.30, 0.30), 11.77, 1.30,
+                                boxstyle="round,pad=0.05",
+                                facecolor="white", edgecolor=pal["sky"],
+                                lw=1.4))
+    ax.text(6.185, 1.30, "One worked filling - Session 3's champion, "
+            "Logistic Regression:", ha="center", color=pal["navy"],
+            fontweight="bold", fontsize=10.5)
+    fillings = [(0.30 + w / 2, "weighted scorecard"),
+                (3.35 + w / 2, "+  log loss"),
+                (6.40 + w / 2, "+  gradient descent"),
+                (10.845, "survival probability\nper passenger")]
+    for x, label in fillings:
+        ax.text(x, 0.72, label, ha="center", va="center", color=pal["blue"],
+                fontsize=10.5, fontweight="bold")
+    for x, _, _, _ in slots:
+        ax.plot([x + w / 2, x + w / 2], [1.68, y0 - 0.05], ls=":",
+                color=pal["sky"], lw=1.4)
+    ax.plot([10.845, 10.845], [1.68, y0 - 0.05], ls=":", color=pal["sky"],
+            lw=1.4)
+    ax.set_xlim(0, 12.3)
+    ax.set_ylim(0.10, 4.75)
+    ax.axis("off")
+    fig.savefig(f"{FIGS_THEORY}/s1_recipe_slots.png")
+    plt.close(fig)
+
+
+def make_cost_downhill_fig():
+    """Cost + gradient descent intuition: three candidate rules with their
+    J values (Ng's illustrative numbers) and a ball walking down a 1-D bowl.
+    Synthetic data only - labeled as illustration on the slide."""
+    import numpy as np
+    rng = np.random.default_rng(42)
+    x = np.linspace(0.5, 9.5, 12)
+    y = 1.6 * x + 3 + rng.normal(0, 1.4, x.size)
+    b, a = np.polynomial.polynomial.polyfit(x, y, 1)  # best line
+    cands = [("A bad rule:  J = 480", lambda t: 16.5 - 1.1 * t),
+             ("A decent rule:  J = 90", lambda t: 1.05 * t + 7.2),
+             ("The best rule:  J = 12", lambda t: a * t + b)]
+    fig, axes = plt.subplots(2, 2, figsize=(7.8, 5.8))
+    for ax, (title, f) in zip(axes.flat[:3], cands):
+        xs = np.linspace(0, 10, 40)
+        for xi, yi in zip(x, y):  # miss bars, point to line
+            ax.plot([xi, xi], [yi, f(xi)], color=pal["sky"], lw=1.6)
+        ax.scatter(x, y, s=26, color=pal["navy"], zorder=3)
+        ax.plot(xs, f(xs), color=pal["blue"], lw=2.2)
+        ax.set_title(title, fontsize=12.5)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_xlim(0, 10)
+        ax.set_ylim(-1, 22)
+    axes.flat[0].set_ylabel("target y", fontsize=10)
+    axes.flat[0].set_xlabel("feature x", fontsize=10)
+    # panel 4: the downhill walk on J
+    ax = axes.flat[3]
+    wgrid = np.linspace(-3, 3, 120)
+    ax.plot(wgrid, wgrid ** 2, color=pal["gray"], lw=2)
+    steps = np.array([-2.6, -1.85, -1.25, -0.78, -0.44, -0.2, 0.0])
+    ax.scatter(steps, steps ** 2, s=34, color=pal["blue"], zorder=3)
+    for w0, w1 in zip(steps[:-1], steps[1:]):
+        ax.annotate("", xy=(w1, w1 ** 2), xytext=(w0, w0 ** 2),
+                    arrowprops=dict(arrowstyle="-|>", color=pal["blue"],
+                                    lw=1.3, shrinkA=3, shrinkB=3))
+    ax.annotate("start: any guess", (-2.6, 6.76), xytext=(-2.35, 8.6),
+                color=pal["ink"], fontsize=10)
+    ax.annotate("smallest J", (0, 0), xytext=(0.55, 0.7),
+                color=pal["ink"], fontsize=10)
+    ax.set_title("The search: walk downhill on J", fontsize=12.5)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_xlabel("a model knob (parameter)", fontsize=10)
+    ax.set_ylabel("cost J", fontsize=10)
+    fig.tight_layout(h_pad=1.6, w_pad=1.4)
+    fig.savefig(f"{FIGS_THEORY}/s1_cost_downhill.png")
     plt.close(fig)
 
 
@@ -264,11 +426,12 @@ def slides():
             "The climb, session by session: S1 what ML is and honest "
             "splits; S2 features; S3 the model tournament; S4 tune and ship",
         ],
-        caption="Reference points: Andrew Ng's specialization, Harvard "
-                "CS109A and MIT 6.390 climb the same way - one worked "
-                "example, honest validation early, features first-class.",
+        caption="MIT draws the same line by goal, not tools: statistics "
+                "asks 'does the model explain?' - ML asks 'does the "
+                "prediction hold up?' (MIT 6.390, Intro chapter). Reference "
+                "points: Ng, Harvard CS109A and MIT 6.390 climb this ladder.",
     )
-    # 4. What machine learning is
+    # 4. What machine learning is (absorbs old types table + everyday examples)
     ds.bullets_slide(
         prs,
         "ML learns the rules from examples instead of being told them",
@@ -279,70 +442,26 @@ def slides():
               "faster than you can type"]),
             ("Machine learning: you show labeled examples, the algorithm "
              "finds the rules",
-             ["Thousands of emails already flagged spam or not-spam go in; "
-              "a filter that judges brand-new email comes out"]),
-            ("The same move on our data",
-             ["891 passengers with known outcomes go in; a pattern that "
-              "predicts new passengers comes out"]),
-            ("Supervised learning = learning from examples that include the "
-             "right answer (the label)",
-             ["Our label: Survived, 1 or 0"]),
+             ["Arthur Samuel called it the \"field of study that gives "
+              "computers the ability to learn without being explicitly "
+              "programmed\" - his 1950s checkers program beat its own "
+              "programmer after tens of thousands of self-played games"]),
+            ("It is already in your day",
+             ["Recommendations predict what you will want next; map "
+              "arrival times predict a trip nobody has driven in exactly "
+              "these conditions"]),
+            "The same move on our data: 891 passengers with known outcomes "
+            "go in; a pattern that predicts new passengers comes out",
+            "Supervised learning = learning from examples that include the "
+            "right answer (the label) - ours: Survived, 1 or 0",
             "A model is a function with adjustable knobs (parameters); "
             "training turns the knobs until predictions match the examples",
         ],
         kicker="What ML is",
-        note="Spam filtering has been Andrew Ng's canonical everyday example "
-             "since his original 2012 ML course; his specialization also "
-             "opens with supervised learning taught through worked examples.",
-    )
-
-    # 5. Types of machine learning
-    ds.table_slide(
-        prs,
-        "Machines learn in three ways - this module is supervised "
-        "classification",
-        ["Type", "How it learns", "Everyday example", "In this module?"],
-        [
-            ["Supervised",
-             "From labeled examples: inputs plus the right answer",
-             "A spam filter trained on mail users already flagged",
-             "Yes - all of M2"],
-            ["Unsupervised",
-             "Finds structure in unlabeled data - no right answer is given",
-             "Grouping a shop's customers by what they tend to buy",
-             "No"],
-            ["Reinforcement",
-             "By trial and error: actions earn rewards or penalties",
-             "Game-playing agents and robots improving with practice",
-             "No"],
-        ],
-        kicker="Types of machine learning",
-        note="M2 end to end: supervised classification - the label is "
-             "Survived (1 or 0), a category. Predicting a number instead "
-             "(say, Fare) would be supervised regression.",
-        col_widths=[1.3, 3.2, 3.2, 1.4],
-    )
-
-    # 6. ML is already in your day
-    ds.bullets_slide(
-        prs,
-        "You already used machine learning today - probably before breakfast",
-        [
-            ("Spam filter: classifies every new email as spam or not",
-             ["learned from millions of messages users already flagged"]),
-            "Music and film recommendations: predict what you will want "
-            "next from what you (and people like you) played before",
-            "Map arrival times: predict the duration of a trip nobody has "
-            "driven in exactly these conditions",
-            "Phone face unlock: predicts whether the face in a brand-new "
-            "camera frame is the owner",
-            "Translation apps: predict the most likely sentence in the "
-            "other language",
-        ],
-        kicker="ML in your day",
-        note="The common thread: each one answers a question about a NEW "
-             "case, and software acts on the answer - the machine-learning "
-             "lane of this session's opening contrast.",
+        note="Beyond supervised: unsupervised finds structure without "
+             "labels, reinforcement learns from rewards - this module is "
+             "supervised classification end to end. Samuel's phrase, quoted "
+             "by Ng - Machine Learning Specialization C1W1.",
     )
 
     # 5. Features and target
@@ -353,7 +472,8 @@ def slides():
             "The columns that describe each passenger",
             "Age, Sex, Pclass, Fare, SibSp, Parch, Embarked",
             "In code: X = everything except the answer",
-            "Also called predictors or inputs",
+            "Also called predictors or covariates - the whole table is "
+            "n observations x p predictors",
         ]),
         ("Target y = the answer to learn", [
             "One column: Survived, 1 or 0",
@@ -364,7 +484,81 @@ def slides():
         ]),
         kicker="Framing",
         note="Same table, different y: predicting the Fare a passenger paid "
-             "would make this a regression problem instead.",
+             "would make this a regression problem instead. Vocabulary: "
+             "Harvard CS109A / ISLR ch. 2.",
+    )
+
+    # 6. NEW - Frame B: Y = f(X) + epsilon, reducible vs irreducible error
+    ds.image_slide(
+        prs,
+        "Every outcome is a hidden rule plus noise - only the rule part "
+        "is learnable",
+        f"{FIGS_THEORY}/s1_error_stack.png",
+        kicker="The hidden rule and the noise",
+        bullets=[
+            "The outcome is a hidden rule plus noise: Y = f(X) + ε. "
+            "Learning estimates the rule; nothing can predict the noise. "
+            "Error you can shrink is reducible; the noise floor is "
+            "irreducible.",
+            "On the Titanic: survival = some true, unknown rule of class, "
+            "sex, age... plus randomness no manifest records",
+            "A model is an estimate f-hat of the hidden rule - learning = "
+            "estimating f from noisy samples",
+            "Better features, models, or data shrink reducible error; ε - "
+            "chaos on a sinking ship - yields to no model, however perfect",
+            "This is why 100% accuracy is not the goal and never will be - "
+            "Session 3 pays this off",
+        ],
+        caption="Schematic illustration - no course numbers on this chart. "
+                "Harvard CS109A / ISLR ch. 2.",
+    )
+
+    # 7. NEW - Frame A: the three-slot recipe
+    ds.image_slide(
+        prs,
+        "Every learner you will meet is the same recipe: candidate rules "
+        "+ a score + a search",
+        f"{FIGS_THEORY}/s1_recipe_slots.png",
+        kicker="The three-slot recipe",
+        bullets=[
+            "Every supervised learner is the same three-slot recipe: a set "
+            "of candidate rules (the model), a score for how wrong a "
+            "prediction is (the loss), and a search that finds the "
+            "best-scoring rule (the optimizer).",
+            "Choosing the family of candidate rules is YOUR call, made "
+            "before any data is touched",
+            "Different ML methods = different fillings of the same three "
+            "slots",
+            "Session 3 refills slot 1 six times; Session 4 tunes the knobs "
+            "around the recipe",
+        ],
+        caption="One recipe, every method in this module. MIT 6.390, Intro "
+                "chapter & Appendix C 'Supervised learning in a nutshell'.",
+    )
+
+    # 8. NEW - cost function + downhill training (fills slots 2-3)
+    ds.image_slide(
+        prs,
+        "Training is nothing mystical: make one number - the average miss "
+        "- small",
+        f"{FIGS_THEORY}/s1_cost_downhill.png",
+        kicker="How training works",
+        bullets=[
+            "Every candidate rule makes errors on the 891 labeled examples; "
+            "average them into one number J - the cost",
+            "J scores how badly a rule fits ALL the data at once - training "
+            "= searching for the rule with the smallest J",
+            "The search walks downhill: from any starting guess, nudge the "
+            "knobs in the direction that lowers J fastest - a hillside "
+            "descent in fog",
+            "Step size matters: too small crawls, too large overshoots the "
+            "valley",
+            "The same downhill walk trains Session 3's scorecard - no magic "
+            "anywhere in this module",
+        ],
+        caption="Illustration - synthetic data; illustrative J values, not "
+                "course results. Method: Ng, Machine Learning "
+                "Specialization C1 / Stanford CS229 notes.",
     )
 
     # 6. The dataset (chart)
@@ -443,9 +637,13 @@ def slides():
             "Improve, then ship: tune, engineer, deploy (Session 4)",
             "Evaluation sends you back to preparation more often than "
             "forward",
+            "Harvard teaches it as a five-stage loop - ask, get, explore, "
+            "model, communicate: modeling is one box of five, and answers "
+            "routinely send you back a stage",
         ],
         caption="Harvard CS109A teaches the same shape: one workflow "
-                "revisited all semester on messy real data.",
+                "revisited all semester on messy real data. Source: Harvard "
+                "CS109A, Lecture 1 (the data science process).",
     )
 
     # 10. The golden rule: split first (chart)
@@ -456,38 +654,22 @@ def slides():
         kicker="The golden rule",
         bullets=[
             "80/20 split first: 712 training rows, 179 test rows (seed 42)",
-            "Data leakage = test-set information sneaking into training",
+            "Data leakage = test-set information sneaking into training - "
+            "even 'fill missing ages with the average' leaks if that "
+            "average used all rows",
             "Analogy: the test set is the final exam - seeing the questions "
             "while studying inflates your score and proves nothing",
-            "'Fill missing ages with the average' already leaks if that "
-            "average was computed over all rows",
             "stratify=y keeps the survivor share equal in both halves",
+            "Leakage bites professionals: KDD Cup 2008 teams found "
+            "'Patient ID' predicted breast cancer - the ID encoded which "
+            "hospital, not the tumor",
+            "A feature that works suspiciously well deserves suspicion, "
+            "not celebration",
         ],
         caption="The split and the preserved survivor share. "
-                "Source: Module 2, notebook 01, section 3.",
-    )
-
-    # 10. Real-world leakage story
-    ds.bullets_slide(
-        prs,
-        "Leakage happens to professionals: a patient ID predicted cancer",
-        [
-            ("KDD Cup 2008: teams competed to predict breast cancer from "
-             "medical images",
-             ["A serious research competition with experienced teams"]),
-            ("The 'Patient ID' column turned out to be hugely predictive",
-             ["IDs were assigned per source institution - and some sources "
-              "treated far more cancer-heavy cases"]),
-            "The ID leaked where the data came from, not anything about "
-            "the tumor itself",
-            "Lesson 1: a feature that works suspiciously well deserves "
-            "suspicion, not celebration",
-            "Lesson 2: this is exactly why identifiers left our feature "
-            "list two slides ago",
-        ],
-        kicker="Real-world leakage",
-        note="Source: Kaufman, Rosset & Perlich, 'Leakage in Data Mining', "
-             "KDD 2011.",
+                "Source: Module 2, notebook 01, section 3. Leakage story: "
+                "Kaufman, Rosset & Perlich, 'Leakage in Data Mining', "
+                "KDD 2011.",
     )
     # 14. What "good" will mean
     ds.big_number_slide(
@@ -498,23 +680,25 @@ def slides():
         "floor every real model must beat",
         foot="Dummy classifier, 5-fold cross-validation on the training set. "
              "Source: Module 2, notebook 02. Beating the floor is the entry "
-             "ticket, not the goal.",
+             "ticket, not the goal. Accuracy is 0-1 loss in disguise - the "
+             "simplest filling of the recipe's loss slot (MIT 6.390, Intro "
+             "chapter).",
         kicker="Honest evaluation preview",
     )
 
     # 15. Close (course mechanics folded in)
     ds.close_slide(
         prs,
-        "From describing to predicting",
+        "You now predict, not describe - and every claim gets a number",
         [
-            "ML learns patterns from labeled examples; supervised learning "
-            "needs features X and a target y",
-            "The Titanic is our spine: 891 passengers - Owen, Florence, "
-            "Frankie and 888 more - 38.4% survived",
+            "ML learns rules from labeled examples - features X in, "
+            "target y out",
+            "Y = f(X) + ε: we estimate the hidden rule, we never beat "
+            "the noise",
+            "Every learner = model + loss + optimizer; training = making "
+            "one number (the cost J) small",
             "Split first: 712 train / 179 test, stratified - the test set "
             "is the exam you take once",
-            "Leakage fools professionals; identifiers and peeking are how "
-            "it starts",
             "Every claim gets a number, and the floor is 0.617",
             "Practice now, zero setup: open notebook 01 in Colab (badge "
             "click), Runtime > Run all, work sections 1-3 - exercises at "
@@ -527,6 +711,9 @@ def slides():
 
 if __name__ == "__main__":
     make_charts()
+    make_error_stack_fig()
+    make_recipe_fig()
+    make_cost_downhill_fig()
     make_loop_chart()
     make_hero_fig()
     make_ladder_fig()

@@ -7,13 +7,17 @@ import os
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import numpy as np
+from pptx.util import Inches
 import deck_style as ds
 
 pal = ds.mpl_theme()
 FIGS = "/tmp/deck-workshop/figs2"
 FIGS_STORY = "/tmp/deck-workshop/figs-story"
+FIGS_T2 = "/tmp/deck-workshop/figs-theory2"
 os.makedirs(FIGS, exist_ok=True)
 os.makedirs(FIGS_STORY, exist_ok=True)
+os.makedirs(FIGS_T2, exist_ok=True)
 
 # ---------------- Figure 1: imputation - fit on train only ----------------
 fig, axes = plt.subplots(1, 2, figsize=(7.5, 4))
@@ -87,89 +91,204 @@ fig.tight_layout()
 fig.savefig(f"{FIGS}/fig_family.png")
 plt.close(fig)
 
-# ------------- Figure 5 (story): the pipeline as a flow diagram -------------
-from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
+# -------- Frame C (cross-deck): the FIT | CHOOSE | REPORT verbs bar --------
+# One canonical drawing, shared with Decks 3 and 4 via shared_figs.
+from matplotlib.patches import Rectangle
+from shared_figs import make_frame_c
 
-fig, ax = plt.subplots(figsize=(9.2, 3.6))
-boxes = [("Raw\npassengers", "12 columns,\ngaps and text", 0.30, "panel"),
-         ("Impute", "median Age 28.5,\nEmbarked \"S\"\n(from train)", 2.45, "panel"),
-         ("Encode", "one-hot:\n13 x 0/1 columns", 4.60, "panel"),
-         ("Scale", "StandardScaler,\n5 numeric columns", 6.75, "panel"),
-         ("Model-ready\nmatrix", "712 x 18 train\n179 x 18 test", 8.90, "blue"),
-         ("Model", "any of Session\n3's contestants", 11.05, "navy")]
-for name, sub, x, kind in boxes:
-    fc = {"panel": pal["panel"], "blue": pal["blue"], "navy": pal["navy"]}[kind]
-    txt = pal["navy"] if kind == "panel" else "white"
-    sub_c = pal["gray"] if kind == "panel" else pal["sky"]
-    ax.add_patch(FancyBboxPatch((x, 1.30), 1.75, 1.55,
-                                boxstyle="round,pad=0.05", facecolor=fc,
-                                edgecolor=pal["blue"], lw=1.3))
-    ax.text(x + 0.875, 2.52, name, ha="center", va="center",
-            fontweight="bold", color=txt, fontsize=11.5)
-    ax.text(x + 0.875, 1.78, sub, ha="center", va="center",
-            color=sub_c, fontsize=8.2)
-for x0 in (2.10, 4.25, 6.40, 8.55, 10.70):
-    ax.add_patch(FancyArrowPatch((x0, 2.07), (x0 + 0.32, 2.07),
-                                 arrowstyle="-|>", mutation_scale=14,
-                                 color=pal["blue"], lw=1.5))
-# bracket: the three middle steps live inside one Pipeline object
-ax.plot([2.45, 2.45, 8.50, 8.50], [3.18, 3.42, 3.42, 3.18],
-        color=pal["navy"], lw=1.3)
-ax.text(5.475, 3.62, "one Pipeline + ColumnTransformer: fit on train only, "
-        "transform train and test", ha="center", color=pal["navy"],
-        fontsize=10, fontweight="bold")
-ax.text(1.175, 0.88, "Name, Ticket, Cabin, PassengerId:\ndropped automatically",
-        ha="center", color=pal["gray"], fontsize=8.2)
-ax.set_xlim(0, 13.1)
-ax.set_ylim(0.4, 4.0)
+make_frame_c(f"{FIGS_T2}/frame_c_bar_s2.png",
+             tag="hatched CHOOSE band: built in Session 3")
+
+# -------- Theory figure: MCAR / MAR / MNAR three-card diagram --------
+CARDS = [
+    ("MCAR", "missing completely at random", pal["sky"], pal["navy"], [
+        ("MEANING", "Holes land blindly -\nnothing decides where"),
+        ("TITANIC STORY (PLAUSIBLE)", "What if a clerk copying the\nmanifest skipped lines at random?"),
+        ("IF IGNORED", "Rows lost, but no bias"),
+        ("WHAT TO DO", "Drop or impute simply - safe"),
+    ]),
+    ("MAR", "missing at random", pal["blue"], "white", [
+        ("MEANING", "The chance of a hole depends\non OTHER observed columns"),
+        ("TITANIC STORY (PLAUSIBLE)", "What if third-class ages were\nrecorded less often than first?"),
+        ("IF IGNORED", "Results become biased"),
+        ("WHAT TO DO", "Model the fill from the\ncolumns you did observe"),
+    ]),
+    ("MNAR", "missing not at random", pal["navy"], "white", [
+        ("MEANING", "The hole depends on the\nmissing value itself"),
+        ("TITANIC STORY (PLAUSIBLE)", "What if an age was kept off the\nrecord because of the age itself?"),
+        ("IF IGNORED", "Bias no fill can see"),
+        ("WHAT TO DO", "No imputation fully repairs\nit - reason about the world"),
+    ]),
+]
+fig, ax = plt.subplots(figsize=(7.3, 4.5))
+for i, (name, sub, head_fc, head_tc, rows) in enumerate(CARDS):
+    x = 0.15 + i * 4.0
+    ax.add_patch(Rectangle((x, 0.2), 3.7, 8.1, facecolor=pal["panel"],
+                           edgecolor=pal["sky"], lw=1.2))
+    ax.add_patch(Rectangle((x, 8.3), 3.7, 1.5, facecolor=head_fc))
+    ax.text(x + 1.85, 9.25, name, ha="center", va="center", fontsize=13,
+            fontweight="bold", color=head_tc)
+    ax.text(x + 1.85, 8.62, sub, ha="center", va="center", fontsize=7.2,
+            color=head_tc)
+    y = 7.75
+    for label, text in rows:
+        ax.text(x + 0.18, y, label, ha="left", va="top", fontsize=6.4,
+                fontweight="bold", color=pal["gray"])
+        ax.text(x + 0.18, y - 0.55, text, ha="left", va="top", fontsize=8.2,
+                color=pal["ink"])
+        y -= 0.62 + 0.62 * (text.count("\n") + 1) + 0.28
+ax.set_xlim(0, 12.1)
+ax.set_ylim(0, 9.9)
 ax.axis("off")
-fig.savefig(f"{FIGS_STORY}/s2_pipeline_flow.png")
+fig.savefig(f"{FIGS_T2}/fig_missingness_cards.png")
 plt.close(fig)
 
-# ------- Figure 6 (story): one passenger's row transforms (Frankie) -------
-# All raw values verbatim from the Titanic CSV, PassengerId 166.
-fig, ax = plt.subplots(figsize=(9.6, 4.0))
-panels = [
-    ("Raw row (PassengerId 166)",
-     'Name: Goldsmith, Master. Frank\nJohn William "Frankie"\n'
-     "Pclass 3    Sex male    Age 9\nSibSp 0    Parch 2    Fare 20.525\n"
-     "Embarked S    Cabin (blank)",
-     0.25, 3.30, "panel"),
-    ("Engineered",
-     'Title = "Master"\n(regex on Name)\nFamilySize = 0 + 2 + 1 = 3\n'
-     "IsAlone = 0",
-     4.75, 2.80, "blue"),
-    ("18 numbers the model sees",
-     "Title_Master, Pclass_3,\nSex_male, Embarked_S = 1\n"
-     "(the other 9 one-hot\ncolumns stay 0)\n"
-     "Age, Fare, SibSp, Parch,\nFamilySize: scaled",
-     8.75, 3.30, "navy"),
-]
-for head, body, x, w, kind in panels:
+# -------- Theory figure: Ng's elongated contours (scaling) --------
+def gd_path(cx, cy, lr, steps, start=(2.0, 2.4)):
+    x, y = start
+    xs, ys = [x], [y]
+    for _ in range(steps):
+        x, y = x - lr * 2 * cx * x, y - lr * 2 * cy * y
+        xs.append(x)
+        ys.append(y)
+    return xs, ys
+
+
+fig, axes = plt.subplots(1, 2, figsize=(7.6, 3.9))
+grid = np.linspace(-3, 3, 320)
+W1, W2 = np.meshgrid(grid, grid)
+for ax, (cx, cy, lr, steps, title) in zip(axes, [
+        (25, 1, 0.037, 34, "unscaled: a long skinny valley"),
+        (2, 2, 0.2, 8, "scaled: a nearly round bowl")]):
+    Z = cx * W1 ** 2 + cy * W2 ** 2
+    ax.contour(W1, W2, Z, levels=np.geomspace(0.4, Z.max() * 0.8, 9),
+               colors=pal["sky"], linewidths=1.1)
+    xs, ys = gd_path(cx, cy, lr, steps)
+    ax.plot(xs, ys, ":o", color=pal["navy"], lw=1.2, ms=2.8)
+    ax.plot(0, 0, "*", color=pal["blue"], ms=13)
+    ax.set_title(title, fontsize=11)
+    ax.set_xlabel("weight for Fare", fontsize=9.5)
+    ax.set_ylabel("weight for Age", fontsize=9.5)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_aspect("equal")
+axes[0].text(-2.8, -2.8, "the walk zigzags\nand crawls", fontsize=8.5,
+             color=pal["ink"], ha="left", va="bottom",
+             bbox=dict(facecolor="white", edgecolor="none", pad=1.5))
+axes[1].text(-2.8, -2.8, "straight to the\nminimum (star)", fontsize=8.5,
+             color=pal["ink"], ha="left", va="bottom",
+             bbox=dict(facecolor="white", edgecolor="none", pad=1.5))
+fig.tight_layout()
+fig.savefig(f"{FIGS_T2}/fig_contours_scaling.png")
+plt.close(fig)
+
+# -------- Theory figure: MIT's XOR - features bend the space --------
+fig, axes = plt.subplots(1, 2, figsize=(7.6, 3.8),
+                         gridspec_kw={"width_ratios": [1.1, 1]})
+ax = axes[0]
+for m in ((-2.2, 0.4), (0.6, -1.4), (-0.8, 2.6)):  # failed candidate lines
+    xs = np.array([-1.9, 1.9])
+    ax.plot(xs, m[1] * xs + m[0] * 0.3, "--", color=pal["gray"],
+            lw=1.0, alpha=0.45)
+ax.scatter([1, -1], [1, -1], s=110, color=pal["blue"], marker="o",
+           zorder=3, label="one class")
+ax.scatter([1, -1], [-1, 1], s=110, color=pal["navy"], marker="s",
+           zorder=3, label="the other")
+ax.legend(loc="upper left", fontsize=8, frameon=False)
+ax.set_title("raw axes x1, x2: no line works", fontsize=11)
+ax.set_xlabel("x1", fontsize=9.5)
+ax.set_ylabel("x2", fontsize=9.5)
+ax.set_xlim(-1.9, 1.9)
+ax.set_ylim(-1.9, 1.9)
+ax.set_xticks([-1, 0, 1])
+ax.set_yticks([-1, 0, 1])
+ax = axes[1]
+ax.axhline(0, color=pal["gray"], lw=1.2)
+ax.scatter([1, 1], [0.18, -0.18], s=110, color=pal["blue"], marker="o", zorder=3)
+ax.scatter([-1, -1], [0.18, -0.18], s=110, color=pal["navy"], marker="s", zorder=3)
+ax.axvline(0, color=pal["blue"], lw=1.6, ls="--")
+ax.text(0.06, 0.85, "one threshold\nseparates them", fontsize=8.5,
+        color=pal["blue"], ha="left")
+ax.text(-1, -0.55, "(-1,+1) and (+1,-1)\nland at -1", fontsize=8,
+        color=pal["gray"], ha="center")
+ax.text(1, -0.55, "(+1,+1) and (-1,-1)\nland at +1", fontsize=8,
+        color=pal["gray"], ha="center")
+ax.set_title("engineered axis x1 * x2: separable", fontsize=11)
+ax.set_xlabel("x1 * x2", fontsize=9.5)
+ax.set_xlim(-1.8, 1.8)
+ax.set_ylim(-1.0, 1.2)
+ax.set_xticks([-1, 0, 1])
+ax.set_yticks([])
+ax.spines["left"].set_visible(False)
+fig.tight_layout()
+fig.savefig(f"{FIGS_T2}/fig_xor_features.png")
+plt.close(fig)
+
+# --- Figure 5 (story): Frankie's row (top lane) + the Pipeline (bottom lane) ---
+from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
+
+fig, ax = plt.subplots(figsize=(7.6, 4.8))
+ax.text(0.15, 7.65, "TOP LANE: ONE PASSENGER'S ROW", fontsize=7.5,
+        fontweight="bold", color=pal["gray"])
+top = [("Raw row (PassengerId 166)",
+        'Goldsmith, Master. Frank\nJohn William "Frankie"\n'
+        "Pclass 3, male, Age 9, SibSp 0,\nParch 2, Fare 20.525, Embarked S",
+        0.15, 3.05, "panel"),
+       ("Engineered",
+        'Title = "Master"\nFamilySize = 0 + 2 + 1 = 3\nIsAlone = 0',
+        3.85, 2.65, "blue"),
+       ("18 numbers the model sees",
+        "Title_Master, Pclass_3,\nSex_male, Embarked_S = 1\n"
+        "(9 other one-hot columns 0);\n5 numeric columns scaled",
+        7.15, 2.85, "navy")]
+for head, body, x, w, kind in top:
     fc = {"panel": pal["panel"], "blue": pal["blue"], "navy": pal["navy"]}[kind]
     txt = pal["navy"] if kind == "panel" else "white"
     body_c = pal["ink"] if kind == "panel" else "white"
-    ax.add_patch(FancyBboxPatch((x, 1.30), w, 2.10,
-                                boxstyle="round,pad=0.06", facecolor=fc,
-                                edgecolor=pal["blue"], lw=1.3))
-    ax.text(x + w / 2, 3.12, head, ha="center", va="center",
-            fontweight="bold", color=txt, fontsize=11.0)
-    ax.text(x + w / 2, 2.18, body, ha="center", va="center",
-            color=body_c, fontsize=9.0)
-for x0, lab in ((3.72, "engineer\nnew columns"),
-                (7.72, "impute, one-hot,\nscale")):
-    ax.add_patch(FancyArrowPatch((x0, 2.30), (x0 + 0.86, 2.30),
-                                 arrowstyle="-|>", mutation_scale=15,
-                                 color=pal["blue"], lw=1.6))
-    ax.text(x0 + 0.43, 1.02, lab, ha="center", va="top",
-            color=pal["gray"], fontsize=8.0)
-ax.text(6.1, 0.32, "IsAlone is computed for every row but not on the model's "
-        "feature list - the ColumnTransformer keeps only listed columns.",
-        ha="center", color=pal["gray"], fontsize=8.5)
-ax.set_xlim(0, 12.2)
-ax.set_ylim(0.1, 3.6)
+    ax.add_patch(FancyBboxPatch((x, 5.0), w, 2.45, boxstyle="round,pad=0.05",
+                                facecolor=fc, edgecolor=pal["blue"], lw=1.2))
+    ax.text(x + w / 2, 7.12, head, ha="center", va="center",
+            fontweight="bold", color=txt, fontsize=8.6)
+    ax.text(x + w / 2, 6.02, body, ha="center", va="center",
+            color=body_c, fontsize=7.4)
+for x0, lab in ((3.28, "engineer\nnew columns"), (6.58, "impute, one-hot,\nscale")):
+    ax.add_patch(FancyArrowPatch((x0, 6.2), (x0 + 0.5, 6.2),
+                                 arrowstyle="-|>", mutation_scale=13,
+                                 color=pal["blue"], lw=1.5))
+    ax.text(x0 + 0.25, 4.78, lab, ha="center", va="top",
+            color=pal["gray"], fontsize=6.8)
+ax.text(0.15, 3.85, "BOTTOM LANE: THE PIPELINE THAT DOES IT", fontsize=7.5,
+        fontweight="bold", color=pal["gray"])
+bot = [("Impute", 'median Age 28.5,\nEmbarked "S" (from train)', 0.55, 2.75),
+       ("Encode", "one-hot:\n13 x 0/1 columns", 3.95, 2.55),
+       ("Scale", "StandardScaler,\n5 numeric columns", 7.15, 2.55)]
+for head, body, x, w in bot:
+    ax.add_patch(FancyBboxPatch((x, 1.55), w, 1.85, boxstyle="round,pad=0.05",
+                                facecolor=pal["panel"], edgecolor=pal["blue"],
+                                lw=1.2))
+    ax.text(x + w / 2, 3.05, head, ha="center", va="center",
+            fontweight="bold", color=pal["navy"], fontsize=8.6)
+    ax.text(x + w / 2, 2.25, body, ha="center", va="center",
+            color=pal["ink"], fontsize=7.4)
+for x0 in (3.42, 6.62):
+    ax.add_patch(FancyArrowPatch((x0, 2.45), (x0 + 0.4, 2.45),
+                                 arrowstyle="-|>", mutation_scale=13,
+                                 color=pal["blue"], lw=1.5))
+# aligned link: the top lane's second arrow is implemented by the bottom lane
+ax.plot([6.83, 6.83], [4.35, 5.9], ls=":", color=pal["navy"], lw=1.3)
+ax.plot([6.83, 5.0], [4.35, 3.62], ls=":", color=pal["navy"], lw=1.3)
+ax.plot([0.55, 0.55, 9.70, 9.70], [1.15, 0.92, 0.92, 1.15],
+        color=pal["navy"], lw=1.2)
+ax.text(5.125, 0.62, "one Pipeline + ColumnTransformer: fit on train only, "
+        "transform train and test", ha="center", va="top", color=pal["navy"],
+        fontsize=8.4, fontweight="bold")
+ax.text(5.125, 0.02, "Name, Ticket, Cabin, PassengerId, IsAlone: not on the "
+        "feature lists - dropped automatically", ha="center", va="top",
+        color=pal["gray"], fontsize=7.4)
+ax.set_xlim(0, 10.2)
+ax.set_ylim(-0.5, 7.9)
 ax.axis("off")
-fig.savefig(f"{FIGS_STORY}/s2_row_transform.png")
+fig.savefig(f"{FIGS_STORY}/s2_pipeline_frankie.png")
 plt.close(fig)
 
 # ================================ DECK ================================
@@ -183,32 +302,29 @@ ds.title_slide(
     "scales that disagree. Today we turn passengers into signals - "
     "without cheating.")
 
-# Slide 2 - recap + today's map
-ds.bullets_slide(
+# Slide 2 - REPLACED: Frame C introduction (FIT | CHOOSE | REPORT bar)
+ds.image_slide(
     prs,
-    "Last session we split first - today we build everything else on that rule",
-    [
-        ("Where we left off: 891 names on the manifest - Owen, Florence, "
-         "Frankie and 888 more - split 80/20 into 712 train / 179 test",
-         ["Stratified with random_state=42: both halves keep roughly 38% "
-          "survivors (0.383 / 0.385)"]),
-        "Golden rule: the model must never see the test data during preparation",
-        ("Data leakage = information from the test set sneaking into training",
-         ["The test set is the final exam: seeing the questions while studying "
-          "inflates the score and predicts nothing"]),
-        ("Leakage bites professionals too: the KDD Cup 2008 breast-cancer "
-         "challenge",
-         ["Patient ID 'predicted' cancer - IDs traced to cancer-heavy hospitals "
-          "(Kaufman, Rosset and Perlich, KDD 2011)"]),
-        ("Today's route: gaps to fill, text to numbers, scales to align, new "
-         "features to invent",
-         ["Then one Pipeline that does all of it in the right order, every time"]),
-    ],
+    "One bar rules the module: FIT on train, CHOOSE by validation, "
+    "REPORT on test - once",
+    f"{FIGS_T2}/frame_c_bar_s2.png",
     kicker="Recap and roadmap",
-    note="Split first, prepare after. Splits and counts: Module 2, notebook 1.")
+    bullets=[
+        "Where we left off: 891 manifest rows, split 80/20 into 712 train / "
+        "179 test - stratified, seed 42",
+        "Golden rule restated: the model never sees test data during "
+        "preparation - anything learned FROM data (an imputation value, a "
+        "scaler) is part of the model",
+        "The bar: FIT on the training band; CHOOSE models and settings in a "
+        "validation band - Session 3 builds it with cross-validation; REPORT "
+        "on the test band, opened once",
+        "Everything today happens inside the FIT band only",
+    ],
+    caption="The bar every session returns to. Harvard CS109A / ISLR ch. 5 "
+            "(model selection vs model assessment).")
 
-# Slide 3 - the three requirements
-ds.table_slide(
+# Slide 3 - the three requirements (DEEPENED: MIT feature-representation line)
+s3 = ds.table_slide(
     prs,
     "Models are picky eaters: they want numbers only, no gaps, sensible scales",
     ["The model demands", "Raw Titanic reality", "The fix"],
@@ -226,9 +342,16 @@ ds.table_slide(
     kicker="Why preparation exists",
     note="Why so picky? A model sees each passenger as a point in space, one "
          "axis per column - words and gaps have no place on an axis. Impute = "
-         "fill a gap with a learned substitute. Harvard's CS109A gives missing "
-         "data its own lecture (Fall 2021). Counts: Module 2, notebook 1.",
+         "fill a gap with a learned substitute. Counts: Module 2, notebook 1.",
     col_widths=[0.22, 0.44, 0.34])
+s3b = ds._box(s3, ds.MARGIN, Inches(5.95), ds.CONTENT_W, Inches(0.55))
+ds._para(
+    s3b.text_frame,
+    "MIT gives feature representation its own chapter: how you represent the "
+    "data usually matters more than which algorithm you run - a simple model "
+    "on good features routinely beats a fancy model on raw ones. "
+    'MIT 6.390, ch. 5 "Feature representation".',
+    12, ds.NAVY, first=True)
 
 # Slide 4 - imputation the ML way
 ds.image_slide(
@@ -245,10 +368,29 @@ ds.image_slide(
     ],
     caption="Missing Age rows and learned medians. Module 2, notebook 1.")
 
-# Slide 5 - one-hot encoding by hand
-ds.table_slide(
+# Slide 5 - NEW: MCAR / MAR / MNAR three-card theory slide
+ds.image_slide(
     prs,
-    "One-hot gives each category its own 0/1 column - exactly one is hot per row",
+    "Missing values come in three species - and the data cannot tell you which",
+    f"{FIGS_T2}/fig_missingness_cards.png",
+    kicker="Missing values: the theory",
+    bullets=[
+        "Three species: MCAR (random holes), MAR (holes explained by other "
+        "columns), MNAR (holes caused by the hidden value itself)",
+        "The punchline: the deciding variables are unobserved by definition - "
+        "the data alone can never tell you the type; you must reason about "
+        "the world",
+        "Discuss: which species could the Titanic's 177 missing ages be? "
+        "Argue it - the table cannot",
+    ],
+    caption="Each Titanic story is plausible, not asserted. Harvard CS109A, "
+            "Missing Data lecture (2020, L19).")
+
+# Slide 6 - MERGED: one-hot by hand + the get_dummies trap + MIT's menu
+s6 = ds.table_slide(
+    prs,
+    "One-hot gives each category its own 0/1 column - and the training set "
+    "fixes the columns once",
     ["Passenger", "Embarked", "Embarked_C", "Embarked_Q", "Embarked_S"],
     [
         ["1", "S", "0", "0", "1"],
@@ -257,34 +399,27 @@ ds.table_slide(
         ["4", "S", "0", "0", "1"],
     ],
     kicker="Encoding categorical features",
-    note="Encoding = translating words into coordinates the model can plot. "
-         'Why not C=1, Q=2, S=3? That would tell the model S is "three times" C '
-         "- and models will try to use it. A fake order lies about distance. "
+    note='Why not C=1, Q=2, S=3? That would tell the model S is "three times" '
+         "C - and models will try to use it. A fake order lies about distance. "
          "Module 2, notebook 1.",
     col_widths=[0.18, 0.22, 0.20, 0.20, 0.20])
-
-# Slide 6 - the get_dummies trap
-ds.two_col_slide(
-    prs,
-    "sklearn encoders remember the training columns - pd.get_dummies does not",
-    ("pd.get_dummies: columns drift",
-     [
-         "Builds columns from whatever categories it happens to see",
-         "Train and test batches can end up with different columns",
-         "Notebook demo: encoding train and test separately misaligns them",
-         "The model then crashes - or silently misreads features",
-     ]),
-    ("OneHotEncoder: train fixes the columns once",
-     [
-         "fit(train) memorizes the exact column layout",
-         "transform(test) always produces those same columns",
-         'handle_unknown="ignore": unseen category = all zeros, no crash',
-         "Same contract as the imputer: learn on train, apply everywhere",
-     ]),
-    kicker="Encoding categorical features",
-    note="Rule of thumb: real order (shirt sizes S < M < L) -> OrdinalEncoder; "
-         "no real order -> OneHotEncoder; when in doubt, one-hot. A fake order "
-         "hurts more than a few extra columns.")
+s6b = ds._box(s6, ds.MARGIN, Inches(4.68), ds.CONTENT_W, Inches(1.2))
+for i, line in enumerate([
+        "fit(train) memorizes the exact column layout; transform(test) always "
+        "reproduces those same columns",
+        'handle_unknown="ignore": an unseen category becomes all zeros - '
+        "no crash",
+        "pd.get_dummies instead builds columns from whatever it happens to "
+        "see - train and test drift apart (the notebook demo misaligns them)"]):
+    ds._para(s6b.text_frame, line, 13.5, ds.INK, first=(i == 0), bullet=True,
+             space_after=6)
+s6m = ds._box(s6, ds.MARGIN, Inches(5.98), ds.CONTENT_W, Inches(0.55))
+ds._para(
+    s6m.text_frame,
+    "MIT's encoding menu: true quantity -> numeric; ordered -> thermometer "
+    "code; otherwise -> one-hot - never arbitrary integer codes: the model "
+    "learns from the lie. MIT 6.390, ch. 5.",
+    12, ds.NAVY, first=True)
 
 # Slide 7 - scaling
 ds.image_slide(
@@ -300,12 +435,34 @@ ds.image_slide(
         'Trees only ask questions like "is Fare > 30?" - scale never matters',
         "StandardScaler: Fare becomes mean -0.00, std 1.00. MinMaxScaler: "
         "Fare squeezed into 0.0 to 1.0",
-        "The histogram shape does not change - only the numbers on the axis do",
+        "The histogram shape does not change - only the numbers on the axis "
+        "do. So why do equation models care? Next slide",
     ],
     caption="Raw training ranges: Age 0 to 80, Fare 0 to 512.3. "
             "Module 2, notebook 1.")
 
-# Slide 8 - section divider
+# Slide 8 - NEW: Ng's elongated contours - why scaling helps training
+ds.image_slide(
+    prs,
+    "Scaling does not change the destination - it straightens the road to it",
+    f"{FIGS_T2}/fig_contours_scaling.png",
+    kicker="Feature scaling: the why",
+    bullets=[
+        "Training walks downhill on the cost surface: nudge the weights in "
+        "whichever direction lowers the average miss fastest",
+        "With Fare 0-512 next to Age 0-80, the bowl becomes a long skinny "
+        "valley - the downhill walk zigzags across the narrow direction "
+        "and crawls",
+        "Rescale to comparable ranges and the contours turn nearly circular - "
+        "the walk heads straight for the minimum",
+        "Scaling changes nothing about what the best model predicts - only "
+        "how fast and reliably you find it: same destination, very "
+        "different trip",
+    ],
+    caption="Illustration - schematic cost surface, not course data. "
+            "Ng, Machine Learning Specialization C1W2.")
+
+# Slide 9 - section divider
 ds.section_slide(
     prs, "02", "Feature engineering",
     "Where humans still beat machines: the manifest already knows Frankie is "
@@ -371,57 +528,63 @@ ds.two_col_slide(
     note='Ng\'s rule for inventing features: "use knowledge or intuition about '
          'the problem to design new features."')
 
-# Slide 12 - one passenger's row transforms (story visual)
+# Slide 13 - NEW: MIT's XOR - new features bend the space
 ds.image_slide(
     prs,
-    "The engineered row says what the raw row only hints: Frankie is a boy "
-    "traveling with family",
-    f"{FIGS_STORY}/s2_row_transform.png",
-    kicker="Engineering in action",
-    caption="PassengerId 166, raw fields verbatim from the dataset. "
-            "Module 2, notebook 1.")
+    "New features bend the space: four points no line can split become "
+    "splittable",
+    f"{FIGS_T2}/fig_xor_features.png",
+    kicker="Feature engineering: the geometry",
+    bullets=[
+        "Four points at (+1 or -1, +1 or -1); diagonal corners share a class "
+        "- no straight line can separate them, ever",
+        "Add one engineered column, x1 * x2: it is +1 for one class and -1 "
+        "for the other - a single threshold now separates them perfectly",
+        "We did not change the model; we changed the space it looks at",
+        "Titanic parallel: Title and FamilySize are our x1 * x2 - new axes "
+        "that make patterns the raw columns only hint at linearly visible",
+        "A linear model on transformed features is a non-linear model in the "
+        "original space - feature engineering IS model power",
+    ],
+    caption="Illustration - the classic XOR construction. MIT 6.390, ch. 5.")
 
-# Slide 13 - pipelines: the whole machine in one picture
+# Slide 14 - MERGED: Frankie's row + the pipeline, one aligned diagram
 ds.image_slide(
     prs,
-    "One Pipeline remembers every step - leakage and forgotten steps become "
-    "impossible",
-    f"{FIGS_STORY}/s2_pipeline_flow.png",
+    "Frankie walks the pipeline: raw row in, 18 leak-proof numbers out",
+    f"{FIGS_STORY}/s2_pipeline_frankie.png",
     kicker="Putting it all together",
     bullets=[
-        "Numeric (Age, Fare, SibSp, Parch, FamilySize): impute median, "
-        "then StandardScaler",
-        "Categorical (Pclass, Sex, Embarked, Title): impute most frequent, "
-        'then OneHotEncoder(handle_unknown="ignore")',
-        "Name, Ticket, Cabin, PassengerId: unlisted, dropped automatically",
-        "fit_transform(train) learns; transform(test) only applies",
-        "Three reasons: no leakage, no forgotten steps, portability",
+        "fit_transform(train) learns every step's values; transform(test) "
+        "only applies them",
+        "Numeric: impute median, then scale. Categorical: impute most "
+        'frequent, then one-hot with handle_unknown="ignore"',
+        "Three reasons for a Pipeline: no leakage, no forgotten steps, "
+        "portability",
+        "IsAlone is computed for every row but not on the model's feature "
+        "list - the ColumnTransformer keeps only listed columns",
     ],
-    caption="The canonical prep, reused verbatim by Sessions 3 and 4. "
+    caption="PassengerId 166, raw fields verbatim from the dataset. "
+            "The canonical prep, reused verbatim by Sessions 3 and 4. "
             "Module 2, notebook 1.")
 
-# Slide 13 - proof it works
-ds.big_number_slide(
-    prs,
-    "The smoke test passes: a plain Logistic Regression scores 0.838 on "
-    "unseen data",
-    "0.838",
-    "Test accuracy on the 179 held-out passengers - train accuracy 0.829, "
-    "so no memorization gap",
-    foot="Input: the 712 x 18 prepared matrix. Just a smoke test - choosing "
-         "the best model is next session's whole job. Module 2, notebook 1.",
-    kicker="Sanity checkpoint")
-
-# Slide 14 - close
+# Slide 15 - close (absorbs the smoke-test number)
 ds.close_slide(
     prs,
     "Three golden rules",
     [
         "Split first: 80/20 before any preparation (seed 42, stratified)",
-        "Fit on train only: imputers, encoders, and scalers learn from the "
-        "712 training rows",
-        "Pipelines always: one object that remembers every step and kills leakage",
-        "Good features often improve a model more than a fancier algorithm does",
+        "Fit on train only - the FIT band of the bar: imputers, encoders, "
+        "and scalers learn from the 712 training rows",
+        "Pipelines always: one object that remembers every step and kills "
+        "leakage",
+        "Missingness has species - MCAR, MAR, MNAR - and the data can't tell "
+        "you which",
+        "Features change the geometry: good columns beat fancier algorithms "
+        "(Ng's area, MIT's XOR)",
+        "Proof it works: a plain Logistic Regression scores 0.838 on the 179 "
+        "unseen passengers - train 0.829, no memorization gap; choosing the "
+        "best model is Session 3's whole job",
         "Practice now: notebook 01-data-prep-and-feature-engineering in Colab",
     ])
 
