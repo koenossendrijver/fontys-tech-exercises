@@ -9,7 +9,7 @@ Four teaching presentations for the "M2 - Machine Learning" module. Each session
 | 3 | `m2-session-3-model-selection-and-evaluation.pptx` | 02 |
 | 4 | `m2-session-4-optimization-and-deployment.pptx` | 03 |
 
-15 slides per deck. White and blue design, action titles, real charts.
+19-21 slides per deck, each in two parts: **Part 1 - a theory chapter** (frameworks drawn from MIT 6.390, Andrew Ng's courses and Machine Learning Yearning, and Harvard CS109A / ISLR — attributed on the slides) followed by **Part 2 - practice on the Titanic**. White and blue design, action titles, real charts; synthetic teaching diagrams are labeled as illustrations.
 
 ## Regenerating the decks
 

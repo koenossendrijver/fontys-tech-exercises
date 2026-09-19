@@ -4,6 +4,7 @@ import os
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
 
 import deck_style as ds
 
@@ -37,13 +38,13 @@ fig.savefig(f"{FIGS}/tuning_arc.png")
 plt.close(fig)
 
 # ---- Frame C: the FIT | CHOOSE | REPORT verbs bar (Harvard/ISLR motif) ----
-# One canonical drawing, shared with Decks 2 and 3 via shared_figs.
+# One canonical drawing, shared with Decks 2 and 3 via shared_figs. The bar
+# now lives on the Part 1 selection-vs-assessment theory slide; the practice
+# chart keeps only the real numbers.
 from shared_figs import draw_frame_c
 
-# ---- Chart B: CV vs one-shot test score, Frame C bar re-shown beneath ----
-fig, (ax, axb) = plt.subplots(2, 1, figsize=(7.5, 5.3),
-                              gridspec_kw={"height_ratios": [2.9, 1.0],
-                                           "hspace": 0.52})
+# ---- Chart B (practice): CV vs the one-shot test score ----
+fig, ax = plt.subplots(figsize=(7.5, 4.2))
 labels = ["Cross-validation\n(training data only)", "Test set\n(179 unseen passengers)"]
 vals = [0.8274, 0.8268]
 bars = ax.bar(labels, vals, color=[pal["sky"], pal["blue"]], width=0.4)
@@ -55,8 +56,162 @@ ax.set_ylabel("Accuracy")
 ax.set_title("CV and test agree: a gap of only 0.0006")
 ax.text(0.02, 0.97, "y-axis starts at 0.75", transform=ax.transAxes,
         ha="left", va="top", fontsize=8.5, color=pal["gray"])
+fig.savefig(f"{FIGS}/cv_vs_test_bar.png")
+plt.close(fig)
+
+# ---- Chart T1 (theory): two settings of one algorithm, one CV referee ----
+fig, ax = plt.subplots(figsize=(7.5, 3.7))
+contestants = [("Random Forest\nmax_depth = 4", 2.05), ("Random Forest\nmax_depth = 8", -0.05)]
+for label, cy in contestants:
+    ax.add_patch(FancyBboxPatch((0.15, cy), 2.5, 1.15, boxstyle="round,pad=0.05",
+                                facecolor=pal["panel"], edgecolor=pal["blue"], lw=1.4))
+    ax.text(1.4, cy + 0.575, label, ha="center", va="center",
+            fontweight="bold", color=pal["navy"], fontsize=11)
+    ax.add_patch(FancyArrowPatch((2.72, cy + 0.575), (4.03, 1.85 if cy > 1 else 1.3),
+                                 arrowstyle="-|>", mutation_scale=15,
+                                 color=pal["blue"], lw=1.6))
+ax.text(1.4, 3.55, "two settings = two algorithms", ha="center", va="center",
+        color=pal["gray"], fontsize=9.5, style="italic")
+ax.add_patch(FancyBboxPatch((4.1, 0.95), 2.35, 1.25, boxstyle="round,pad=0.05",
+                            facecolor=pal["blue"], edgecolor=pal["blue"], lw=1.4))
+ax.text(5.275, 1.90, "5-fold CV", ha="center", va="center",
+        fontweight="bold", color="white", fontsize=12)
+ax.text(5.275, 1.38, "the same referee\nas Session 3", ha="center", va="center",
+        color=pal["sky"], fontsize=8.5)
+ax.add_patch(FancyArrowPatch((6.52, 1.575), (7.28, 1.575), arrowstyle="-|>",
+                             mutation_scale=15, color=pal["blue"], lw=1.6))
+ax.add_patch(FancyBboxPatch((7.35, 0.95), 2.3, 1.25, boxstyle="round,pad=0.05",
+                            facecolor=pal["navy"], edgecolor=pal["navy"], lw=1.4))
+ax.text(8.5, 1.90, "Winner", ha="center", va="center",
+        fontweight="bold", color="white", fontsize=12)
+ax.text(8.5, 1.38, "the setting with the\nbetter CV score", ha="center", va="center",
+        color=pal["sky"], fontsize=8.5)
+ax.text(9.65, -0.35, "illustration", ha="right", va="center",
+        color=pal["gray"], fontsize=8.5, style="italic")
+ax.set_xlim(-0.1, 9.75)
+ax.set_ylim(-0.55, 3.9)
+ax.axis("off")
+fig.savefig(f"{FIGS_THEORY}/two_settings_one_referee.png")
+plt.close(fig)
+
+# ---- Chart T2 (theory): grid vs random over an importance-skewed landscape ----
+import numpy as np
+
+rng = np.random.default_rng(42)
+gx, gy = np.meshgrid(np.linspace(0, 1, 220), np.linspace(0, 1, 220))
+# score depends strongly on x (the knob that matters), barely on y
+score = np.exp(-((gx - 0.68) ** 2) / 0.045) * (0.92 + 0.08 * np.cos(3 * gy))
+fig, axes = plt.subplots(1, 2, figsize=(7.6, 4.0))
+grid_pts = [(x, y) for x in (0.17, 0.5, 0.83) for y in (0.17, 0.5, 0.83)]
+rand_pts = list(zip(rng.uniform(0.04, 0.96, 9), rng.uniform(0.04, 0.96, 9)))
+panels = [
+    ("Grid: 9 trials,\n3 values of the knob that matters", grid_pts),
+    ("Random: 9 trials,\n9 values of the knob that matters", rand_pts),
+]
+for axp, (ttl, pts) in zip(axes, panels):
+    axp.imshow(score, extent=(0, 1, 0, 1), origin="lower", cmap="Blues",
+               vmin=0, vmax=1.55, aspect="auto")
+    xs, ys = [p[0] for p in pts], [p[1] for p in pts]
+    axp.scatter(xs, ys, s=52, color=pal["navy"], edgecolor="white",
+                lw=1.1, zorder=3)
+    # projection ticks: what each trial learned about the important knob
+    for x in xs:
+        axp.plot([x, x], [-0.048, -0.012], color=pal["blue"], lw=1.8,
+                 clip_on=False, zorder=3)
+    axp.set_title(ttl, fontsize=10.5)
+    axp.set_xlabel("knob that matters\n(ticks: distinct values tried)",
+                   fontsize=9.5, labelpad=17)
+    axp.set_xlim(0, 1)
+    axp.set_ylim(0, 1)
+    axp.set_xticks([])
+    axp.set_yticks([])
+    for sp in axp.spines.values():
+        sp.set_visible(True)
+        sp.set_color(pal["gray"])
+axes[0].set_ylabel("knob that barely matters", fontsize=9.5)
+axes[1].text(1.0, -0.30, "darker background = better score - illustration",
+             transform=axes[1].transAxes, ha="right", va="top",
+             fontsize=8.5, style="italic", color=pal["gray"])
+fig.subplots_adjust(bottom=0.24, wspace=0.14)
+fig.savefig(f"{FIGS_THEORY}/grid_vs_random.png")
+plt.close(fig)
+
+# ---- Chart T3 (theory): the single-number scoreboard (Ng's A-vs-B device) ----
+fig, ax = plt.subplots(figsize=(7.4, 4.1))
+cols = ["", "Precision", "Recall", "Verdict", "F1"]
+col_x, col_w = [0.0, 2.1, 3.7, 5.3, 7.3], [2.1, 1.6, 1.6, 2.0, 1.6]
+rows = [("Classifier A", "0.95", "0.60", "A wins this...", "0.74"),
+        ("Classifier B", "0.85", "0.75", "...B wins this", "0.80")]
+top, row_h = 3.4, 0.78
+for x, w, c in zip(col_x, col_w, cols):
+    fc = pal["blue"] if c == "F1" else pal["navy"]
+    ax.add_patch(plt.Rectangle((x, top), w, row_h, facecolor=fc,
+                               edgecolor="white", lw=1.0, zorder=2))
+    ax.text(x + w / 2, top + row_h / 2, c, ha="center", va="center",
+            color="white", fontweight="bold", fontsize=11, zorder=3)
+for r, vals in enumerate(rows, start=1):
+    y = top - r * row_h
+    for x, w, v in zip(col_x, col_w, vals):
+        winner = (v == "0.80")
+        fc = pal["panel"] if x == col_x[4] else "white"
+        ax.add_patch(plt.Rectangle((x, y), w, row_h, facecolor=fc,
+                                   edgecolor=pal["sky"], lw=0.8, zorder=1))
+        ax.text(x + (0.15 if x == 0 else w / 2), y + row_h / 2, v,
+                ha="left" if x == 0 else "center", va="center",
+                color=pal["blue"] if winner else pal["ink"],
+                fontweight="bold" if (winner or x == 0) else "normal",
+                fontsize=10.5, zorder=3)
+ax.text(6.3, top + row_h + 0.28, "deadlock", ha="center", va="center",
+        color=pal["gray"], fontsize=9.5, style="italic")
+ax.text(8.1, top + row_h + 0.28, "one number decides", ha="center", va="center",
+        color=pal["blue"], fontsize=9.5, fontweight="bold")
+# below: optimize one, satisfice the rest
+by = top - 2 * row_h - 1.45
+ax.add_patch(FancyBboxPatch((0.0, by), 4.25, 1.0, boxstyle="round,pad=0.05",
+                            facecolor=pal["blue"], edgecolor=pal["blue"]))
+ax.text(2.125, by + 0.68, "OPTIMIZE one metric", ha="center", va="center",
+        color="white", fontweight="bold", fontsize=11)
+ax.text(2.125, by + 0.30, "maximize F1", ha="center", va="center",
+        color=pal["sky"], fontsize=9.5)
+ax.add_patch(FancyBboxPatch((4.65, by), 4.25, 1.0, boxstyle="round,pad=0.05",
+                            facecolor=pal["panel"], edgecolor=pal["blue"], lw=1.3))
+ax.text(6.775, by + 0.68, "SATISFICE the rest", ha="center", va="center",
+        color=pal["navy"], fontweight="bold", fontsize=11)
+ax.text(6.775, by + 0.30, "constraints to clear, e.g. latency under 100 ms",
+        ha="center", va="center", color=pal["gray"], fontsize=9.5)
+ax.text(8.9, by - 0.35, "illustration", ha="right", va="center",
+        color=pal["gray"], fontsize=8.5, style="italic")
+ax.set_xlim(-0.2, 9.1)
+ax.set_ylim(by - 0.6, top + row_h + 0.6)
+ax.axis("off")
+fig.savefig(f"{FIGS_THEORY}/single_number_scoreboard.png")
+plt.close(fig)
+
+# ---- Chart T4 (theory): selection vs assessment, Frame C bar beneath ----
+# (canonical bar from shared_figs - same drawing as Decks 2 and 3)
+fig, (axt, axb) = plt.subplots(2, 1, figsize=(7.5, 3.9),
+                               gridspec_kw={"height_ratios": [1.15, 1.0],
+                                            "hspace": 0.62})
+jobs = [
+    (0.0, pal["panel"], pal["navy"], "SELECTION - choosing", "compare settings on validation / CV\nrun it as many times as you like"),
+    (4.65, pal["navy"], "white", "ASSESSMENT - grading", "one look at the untouched test set\na score you never tuned toward"),
+]
+for x, fc, hc, head, sub in jobs:
+    axt.add_patch(FancyBboxPatch((x, 0.0), 4.25, 1.5, boxstyle="round,pad=0.05",
+                                 facecolor=fc, edgecolor=pal["blue"], lw=1.4))
+    axt.text(x + 2.125, 1.05, head, ha="center", va="center",
+             color=hc, fontweight="bold", fontsize=12)
+    axt.text(x + 2.125, 0.48, sub, ha="center", va="center",
+             color=pal["gray"] if fc == pal["panel"] else pal["sky"], fontsize=9)
+axt.text(2.125, 1.78, "different jobs, different data", ha="center", va="center",
+         color=pal["gray"], fontsize=9, style="italic")
+axt.text(6.775, 1.78, "spent the moment you use it", ha="center", va="center",
+         color=pal["gray"], fontsize=9, style="italic")
+axt.set_xlim(-0.2, 9.1)
+axt.set_ylim(-0.25, 2.05)
+axt.axis("off")
 draw_frame_c(axb)
-fig.savefig(f"{FIGS_THEORY}/cv_vs_test_bar.png")
+fig.savefig(f"{FIGS_THEORY}/select_vs_assess.png")
 plt.close(fig)
 
 # ---- Chart C: two passengers from the loaded pipeline (NB3 sec 7) ----
@@ -75,8 +230,6 @@ fig.savefig(f"{FIGS}/two_passengers.png")
 plt.close(fig)
 
 # ---- Chart D (story): the production loop, circular (NB3 sec 6) ----
-from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
-
 fig, ax = plt.subplots(figsize=(8.2, 4.9))
 nodes = [
     ("1. Save", "joblib: the whole\npipeline, versioned v1", (0.0, 2.05), "blue"),
@@ -356,16 +509,18 @@ ds.image_slide(
         "validation was over-tuned. Failing the world: your data or metric "
         "misses reality.",
         "Diagnose WHICH bar you are failing (Session 3's two numbers) before "
-        "touching any knob - turning random knobs at once is an untunable radio.",
+        "touching any knob - random knob-turning is an untunable radio. "
         "Today: the validation bar's knobs, then the world bar.",
     ],
     caption="Ng's orthogonalization ladder: one job per knob. Ng, Deep "
             "Learning Specialization C3 \"Structuring ML Projects\".")
 
-# 3. Section divider: tuning
-ds.section_slide(prs, "01", "Squeeze more from the forest",
-                 "Search the settings honestly - the referee stays 5-fold "
-                 "cross-validation, and the test set stays sealed.")
+# 3. Section divider: Part 1 - theory
+ds.section_slide(prs, "01", "Part 1 - The theory: tuning and judging "
+                 "without fooling yourself",
+                 "Six ideas that hold for every model you will ever tune - "
+                 "the referee stays cross-validation, and the test set stays "
+                 "sealed.")
 
 # 4. Parameters vs hyperparameters
 ds.two_col_slide(
@@ -383,39 +538,59 @@ ds.two_col_slide(
       "optimizer); they define the game the learner plays.",
       "The same algorithm with two settings is best thought of as two "
       "different algorithms. MIT 6.390, Appendix C."]),
-    kicker="Tuning - two kinds of settings",
+    kicker="Theory - two kinds of settings",
     note="Baking analogy: the oven temperature is a hyperparameter you set; how the "
          "ingredients turn into cake is the parameters.")
 
-# 5. Grid + random search, merged around the tuning-arc chart (plan MERGE)
+# 5. NEW theory: tuning IS comparing algorithms (MIT reframe)
 ds.image_slide(
-    prs, "Tuning is Session 3's tournament again - every setting is a "
-         "contestant, CV is the referee",
-    f"{FIGS}/tuning_arc.png",
-    kicker="Tuning - grid and random search",
+    prs, "Tuning is not a new skill - two settings of one algorithm are two "
+         "different algorithms",
+    f"{FIGS_THEORY}/two_settings_one_referee.png",
+    kicker="Theory - tuning is comparing",
     bullets=[
-        "Grid search = CV plus nested for-loops, no magic: 2x3x3 = 18 combos "
-        "x 5 folds = 90 trainings. Best (max_depth 4, min_samples_leaf 5, "
-        "100 trees): CV 0.8259, +0.0322 over the 0.7937 default.",
-        "Grids explode: 5 knobs x 6 values = 7,776 combos - nearly 39,000 "
-        "trainings. 15 random draws instead test up to 15 distinct values of "
-        "every knob: CV 0.8274, beating the grid with fewer tries.",
-        "MIT's reframe: picking a hyperparameter value IS comparing learning "
-        "algorithms - same referee, same rules; the contestants are settings "
-        "instead of model families.",
-        "Read the winning knobs: capped depth and bigger leaves are "
-        "complexity BRAKES - regularization by another name: a little bias "
-        "buys a big drop in variance. Session 3's U-curve, found automatically.",
+        "MIT's reframe: a forest capped at depth 4 and a forest allowed depth "
+        "8 are literally two different algorithms - same name, different game.",
+        "That collapses tuning into a problem you already solved: Session 3 "
+        "compared six model families; tuning compares variants of one.",
+        "Cross-validation referees both questions the same way: run each "
+        "variant, score it on folds it never trained on, keep the best.",
+        "So everything Session 3 taught about honest comparison applies "
+        "unchanged - same referee, same rules; only the contestants changed.",
+        "Harvard files hyperparameter tuning under model selection, next to "
+        "choosing predictors and polynomial degree: one discipline, not two.",
     ],
-    caption="Random Forest 5-fold CV accuracy at each tuning stage. "
-            "Module 2, notebook 3. MIT 6.390, Appendix C.")
+    caption="Two settings of one forest, judged by the same referee - "
+            "illustration. MIT 6.390, Appendix C; Harvard CS109A.")
 
-# 6. Ng's error analysis: read the mistakes before turning more knobs (NEW)
+# 6. NEW theory: why random search beats a grid when knobs differ in importance
+ds.image_slide(
+    prs, "Knobs are not equally important - random search tests nine values "
+         "of the one that matters, a grid tests three",
+    f"{FIGS_THEORY}/grid_vs_random.png",
+    kicker="Theory - search strategy",
+    bullets=[
+        "Typically one or two knobs dominate the score and the rest barely "
+        "move it - and you do not know in advance which is which.",
+        "A 3x3 grid spends nine trials on only three distinct values of each "
+        "knob: every value of the knob that matters is re-tested three times "
+        "while the knob that does not soaks up the repeats.",
+        "Nine random draws test nine NEW values of every knob at once - the "
+        "important dimension gets nine chances instead of three.",
+        "Same budget, more information where it counts: that is why random "
+        "search usually wins once you tune more than a couple of knobs.",
+        "The referee never changes: every candidate - grid cell or random "
+        "draw - is scored by the same cross-validation.",
+    ],
+    caption="Nine trials spent two ways on a landscape where one knob "
+            "matters - illustration.")
+
+# 7. Ng's error analysis: read the mistakes before turning more knobs
 ds.image_slide(
     prs, "Before turning more knobs, read the mistakes - an hour of counting "
          "beats a week of guessing",
     f"{FIGS_THEORY}/error_analysis_sheet.png",
-    kicker="Tuning - error analysis",
+    kicker="Theory - error analysis",
     bullets=[
         "Pull the misclassified validation examples and look at them by hand "
         "- about 100 when you have them.",
@@ -435,26 +610,102 @@ ds.image_slide(
             "illustration, not our data. Ng, Machine Learning Yearning "
             "chs. 14-19.")
 
-# 7. The honest final exam + Frame C closes (bar re-shown under the chart)
+# 8. NEW theory: the single-number metric doctrine (Ng)
 ds.image_slide(
-    prs, "The test set is used exactly once - tune against it and it becomes training data",
-    f"{FIGS_THEORY}/cv_vs_test_bar.png",
-    kicker="The honest final exam",
+    prs, "Agree on one evaluation number before you experiment - it makes "
+         "every comparison instant",
+    f"{FIGS_THEORY}/single_number_scoreboard.png",
+    kicker="Theory - one number to steer by",
+    bullets=[
+        "One agreed metric ranks ten experiments at a glance; with three "
+        "metrics, every comparison becomes a debate.",
+        "Two numbers cannot rank two models: A wins precision, B wins recall "
+        "- deadlock until one combiner (F1) breaks it.",
+        "F1 punishes imbalance: precision 0.9 with recall 0.1 scores near "
+        "0.18, not 0.5 - a useless side cannot hide behind a strong one.",
+        "When one number is genuinely not enough (safety, latency, size): "
+        "make those SATISFICING constraints - bars to clear - and keep "
+        "exactly one OPTIMIZING metric to maximize.",
+        "Set the metric and the validation data at project start: together "
+        "they define \"better\" for the whole team, and every decision "
+        "gets fast.",
+    ],
+    caption="A deadlocked scoreboard resolved by one number - illustration. "
+            "Ng, Machine Learning Yearning chs. 8-9.")
+
+# 9. NEW theory: selection vs assessment - why REPORT opens exactly once
+ds.image_slide(
+    prs, "Choosing and grading are different jobs - CHOOSE as often as you "
+         "like, REPORT opens once",
+    f"{FIGS_THEORY}/select_vs_assess.png",
+    kicker="Theory - selection vs assessment",
+    bullets=[
+        "Model SELECTION picks the flexibility and the knob values - done on "
+        "validation data or by CV, repeatable a thousand times.",
+        "Model ASSESSMENT estimates how the final model will do on genuinely "
+        "new data - done exactly once, on the untouched test set.",
+        "Select on the test set and it silently becomes a validation set: "
+        "you tuned toward it, so its score can no longer surprise you - it "
+        "overestimates.",
+        "A number you optimized against is a target you hit, not a forecast "
+        "- that is the whole reason the REPORT band opens once.",
+        "The verbs bar, unchanged since Session 2: FIT on train, CHOOSE "
+        "inside it by CV, REPORT on the sealed test rows.",
+    ],
+    caption="Two jobs over the same verbs bar: selection lives left of the "
+            "seal; assessment spends it. Harvard CS109A / ISLR ch. 5.")
+
+# 10. Section divider: Part 2 - practice
+ds.section_slide(prs, "02", "Part 2 - Practice: tune it, prove it, ship it",
+                 "Grid and random search for real, one honest look at the "
+                 "test set, then the model leaves the notebook - a public app "
+                 "anyone can ask about a passenger like Owen or Florence.")
+
+# 11. Practice: grid + random search around the tuning-arc chart
+ds.image_slide(
+    prs, "Grid and random search lift the forest from 0.7937 to 0.8274 - "
+         "random wins with fewer tries",
+    f"{FIGS}/tuning_arc.png",
+    kicker="Practice - grid and random search",
+    bullets=[
+        "Grid search = CV plus nested for-loops, no magic: 2x3x3 = 18 combos "
+        "x 5 folds = 90 trainings. Best (max_depth 4, min_samples_leaf 5, "
+        "100 trees): CV 0.8259, +0.0322 over the 0.7937 default.",
+        "Grids explode: 5 knobs x 6 values = 7,776 combos - nearly 39,000 "
+        "trainings. 15 random draws instead test up to 15 distinct values of "
+        "every knob: CV 0.8274, beating the grid with fewer tries.",
+        "Part 1 in action: all 33 candidates ran Session 3's tournament "
+        "again - same referee (5-fold CV), new contestants - and the test "
+        "set stayed sealed.",
+        "Read the winning knobs: capped depth and bigger leaves are "
+        "complexity BRAKES - regularization by another name: a little bias "
+        "buys a big drop in variance. Session 3's U-curve, found automatically.",
+    ],
+    caption="Random Forest 5-fold CV accuracy at each tuning stage. "
+            "Module 2, notebook 3.")
+
+# 12. Practice: the one test look
+ds.image_slide(
+    prs, "One look at 179 unseen passengers: 0.8268 - within 0.0006 of CV, "
+         "the tuning did not fool itself",
+    f"{FIGS}/cv_vs_test_bar.png",
+    kicker="Practice - the honest final exam",
     bullets=[
         "Final exam: 179 passengers the model has never seen, scored one "
         "time: accuracy 0.8268, F1 0.7597.",
-        "Test is close to CV (0.8274): the tuning did not fool itself.",
-        "Peeking at test scores while tuning silently turns the test set into training data.",
+        "CV promised 0.8274; the sealed test answered 0.8268 - a search "
+        "judged honestly generalizes.",
+        "Peeking at test scores while tuning silently turns the test set "
+        "into training data.",
         "Honest expectation: tuning buys a percentage point or two, not miracles.",
-        "The bar closes: we FIT on 712 rows, CHOSE by CV inside them - the "
-        "REPORT band opens now, exactly once, and its score (0.8268) is the "
-        "only forecast of real-world performance we own.",
+        "This was Part 1's assessment step, executed: selection used CV "
+        "only, and 0.8268 is the only forecast of real-world performance "
+        "we own.",
     ],
     caption="Tuned forest: CV score vs the single test-set look. Module 2, "
-            "notebook 3. Harvard CS109A / ISLR ch. 5 (model selection vs "
-            "model assessment).")
+            "notebook 3.")
 
-# 8. MIT's retrain-on-all-data pipeline (NEW)
+# 13. MIT's retrain-on-all-data pipeline
 ds.image_slide(
     prs, "You don't ship the CV copy: after choosing, retrain the winning "
          "recipe on all the data",
@@ -478,12 +729,7 @@ ds.image_slide(
     caption="MIT's end-to-end evaluation pipeline - the two red arrows are "
             "never allowed. MIT 6.390, Appendix C.")
 
-# 9. Section divider: production
-ds.section_slide(prs, "02", "Ship it",
-                 "A model in a notebook helps nobody - ship it where anyone "
-                 "can ask about a passenger like Owen or Florence.")
-
-# 10. What production means - the loop diagram
+# 14. What production means - the loop diagram
 ds.image_slide(
     prs, "Production is a loop, not a finish line - the model runs where "
          "real users can reach it",
@@ -506,7 +752,7 @@ ds.image_slide(
             "Module 2, notebook 3. Ng, Machine Learning Engineering for "
             "Production C1.")
 
-# 11. Two passengers - the moment it becomes real
+# 15. Two passengers - the moment it becomes real
 ds.image_slide(
     prs, "The loaded pipeline answers a real question - a survival gap of 100% vs 3%",
     f"{FIGS}/two_passengers.png",
@@ -523,7 +769,7 @@ ds.image_slide(
     caption="Two invented sanity-check passengers, scored by the saved "
             "pipeline. Module 2, notebook 3.")
 
-# 12. Gradio + Hugging Face Spaces
+# 16. Gradio + Hugging Face Spaces
 ds.two_col_slide(
     prs, "A few lines of Gradio turn the pipeline into a web app anyone can use",
     ("Gradio: a function becomes a web form",
@@ -539,7 +785,7 @@ ds.two_col_slide(
       "Result: a public URL anyone can open."]),
     kicker="From model to app")
 
-# 13. After launch: reality checks (Netflix Prize folded in)
+# 17. After launch: reality checks (Netflix Prize folded in)
 ds.bullets_slide(
     prs, "After launch, reality bites: models go stale and accuracy alone does not ship",
     [
@@ -560,7 +806,7 @@ ds.bullets_slide(
     ],
     kicker="After launch")
 
-# 14. The whole module on one slide (MERGE: echo strip above the stage table)
+# 18. The whole module on one slide (MERGE: echo strip above the stage table)
 s14 = ds.table_slide(
     prs, "M1 dashboards inform people - M2 models act inside products: "
          "the whole module in one table",
@@ -589,18 +835,21 @@ for shp in s14.shapes:
 s14.shapes.add_picture(f"{FIGS_CONCEPTS}/echo_da_vs_ml_strip.png",
                        ds.MARGIN, ds.Inches(2.02), width=ds.CONTENT_W)
 
-# 15. Close
+# 19. Close
 ds.close_slide(
     prs, "Session 4 - what to remember",
     [
-        "Hyperparameters are the algorithm's own settings - tune them with CV, "
-        "never the test set; every setting is a different algorithm.",
+        "Part 1, the theory: every setting is a different algorithm - tune "
+        "with CV, never the test set; random search spends trials where "
+        "grids waste them.",
         "Diagnose the failing bar before turning any knob; when knobs stall, "
-        "count your errors before guessing.",
-        "Random search reached CV 0.8274; the one test look said 0.8268 - the tuning did not fool itself.",
-        "Ship the recipe retrained on everything, then the loop: save, load, wrap, "
-        "host, monitor - and watch for data drift AND concept drift.",
-        "The manifest's last word: Survived = 0 for Owen, 1 for Florence, 1 for Frankie. The odds were never abstract.",
+        "count errors; steer by ONE metric - CHOOSE often, REPORT once.",
+        "Part 2, the practice: random search reached CV 0.8274; the one test "
+        "look said 0.8268 - the tuning did not fool itself.",
+        "Ship the recipe retrained on everything, then the loop: save, load, "
+        "wrap, host, monitor - watch for data AND concept drift.",
+        "Survived = 0 for Owen, 1 for Florence, 1 for Frankie - the odds "
+        "were never abstract.",
         "Practice now: notebook 03-model-optimization-and-deployment in Colab.",
     ])
 

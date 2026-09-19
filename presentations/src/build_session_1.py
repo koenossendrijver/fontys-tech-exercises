@@ -225,6 +225,98 @@ def make_cost_downhill_fig():
     plt.close(fig)
 
 
+def make_induction_fig():
+    """The induction problem: finitely many labeled points -> a rule ->
+    a question mark on a never-seen point. Synthetic - captioned as
+    illustration on the slide."""
+    import numpy as np
+    from matplotlib.patches import FancyArrowPatch
+    rng = np.random.default_rng(7)
+    x = np.array([0.8, 1.5, 2.2, 2.9, 3.6, 4.3, 5.1, 5.9])
+    y = 0.62 * x + 2.2 + rng.normal(0, 0.5, x.size)
+    b, a = np.polynomial.polynomial.polyfit(x, y, 1)
+    fig, ax = plt.subplots(figsize=(8.0, 5.2))
+    xs = np.linspace(0.2, 9.5, 40)
+    ax.plot(xs, a * xs + b, color=pal["blue"], lw=2.4)
+    ax.scatter(x, y, s=55, color=pal["navy"], zorder=3)
+    ax.plot([0.6, 6.1], [1.35, 1.35], color=pal["gray"], lw=1.1)
+    ax.text(3.35, 1.05, "the examples you have - finitely many",
+            ha="center", va="top", color=pal["navy"], fontsize=11.5,
+            fontweight="bold")
+    ax.text(3.35, 0.45, "estimation: see through the noise\nin the data "
+            "you have", ha="center", va="top", color=pal["gray"],
+            fontsize=10.5)
+    ax.text(7.0, a * 7.0 + b - 1.05, "the rule you leap to",
+            color=pal["blue"], fontsize=11.5, fontweight="bold", rotation=10)
+    xq = 8.7
+    yq = a * xq + b
+    ax.scatter([xq], [yq], s=600, facecolor="white", edgecolor=pal["blue"],
+               lw=2.0, zorder=4)
+    ax.text(xq, yq, "?", ha="center", va="center", color=pal["blue"],
+            fontsize=19, fontweight="bold", zorder=5)
+    ax.add_patch(FancyArrowPatch((3.3, 6.6), (xq - 0.35, yq + 0.8),
+                                 connectionstyle="arc3,rad=-0.14",
+                                 arrowstyle="-|>", mutation_scale=18,
+                                 color=pal["navy"], lw=1.8))
+    ax.text(4.9, 9.65, "generalization: answer for a case never seen",
+            ha="center", color=pal["navy"], fontsize=11.5, fontweight="bold")
+    ax.text(4.9, 9.1, "possible only if new data looks like old (i.i.d.)",
+            ha="center", color=pal["gray"], fontsize=10.5)
+    ax.set_xlim(0, 10.2)
+    ax.set_ylim(-1.1, 10.3)
+    ax.axis("off")
+    fig.savefig(f"{FIGS_THEORY}/s1_induction.png")
+    plt.close(fig)
+
+
+def make_hypothesis_fig():
+    """The hypothesis class: two candidate families through the same
+    points - faint members are the class, the bold one is the member the
+    search returns. Synthetic - captioned as illustration."""
+    import numpy as np
+    rng = np.random.default_rng(11)
+    x = np.linspace(0.4, 9.6, 11)
+    y = 2.0 + 1.1 * x - 0.055 * x ** 2 + rng.normal(0, 0.55, x.size)
+    xs = np.linspace(0, 10, 120)
+    fig, axes = plt.subplots(1, 2, figsize=(8.8, 4.9), sharey=True)
+    ax = axes[0]
+    for slope, icpt in [(0.2, 4.2), (0.45, 3.2), (0.95, 0.4),
+                        (1.05, -0.5), (0.15, 1.6), (0.8, 2.6)]:
+        ax.plot(xs, icpt + slope * xs, color=pal["sky"], lw=1.5)
+    b, a = np.polynomial.polynomial.polyfit(x, y, 1)
+    ax.plot(xs, a * xs + b, color=pal["blue"], lw=2.8, zorder=3)
+    ax.set_title("A simple family: straight lines", fontsize=12.5)
+    ax.text(5, 9.2, "faint = candidate rules the family allows",
+            ha="center", color=pal["gray"], fontsize=10.5)
+    ax.annotate("bold = the member\nthe search returns",
+                xy=(7.6, a * 7.6 + b), xytext=(6.4, 0.3),
+                color=pal["blue"], fontsize=10.5, fontweight="bold",
+                arrowprops=dict(arrowstyle="-|>", color=pal["blue"],
+                                lw=1.3))
+    ax = axes[1]
+    for seed in range(5):
+        r2 = np.random.default_rng(seed + 30)
+        coef = np.polynomial.polynomial.polyfit(
+            x, y + r2.normal(0, 1.0, x.size), 4)
+        ax.plot(xs, np.polynomial.polynomial.polyval(xs, coef),
+                color=pal["sky"], lw=1.5)
+    coef = np.polynomial.polynomial.polyfit(x, y, 3)
+    ax.plot(xs, np.polynomial.polynomial.polyval(xs, coef),
+            color=pal["blue"], lw=2.8, zorder=3)
+    ax.set_title("A flexible family: curves", fontsize=12.5)
+    ax.text(5, 9.2, "same points - a roomier family to search",
+            ha="center", color=pal["gray"], fontsize=10.5)
+    for ax in axes:
+        ax.scatter(x, y, s=42, color=pal["navy"], zorder=4)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_xlim(0, 10)
+        ax.set_ylim(-1, 10)
+    fig.tight_layout(w_pad=1.6)
+    fig.savefig(f"{FIGS_THEORY}/s1_hypothesis.png")
+    plt.close(fig)
+
+
 def make_loop_chart():
     """Fig 3 (story): the ML workflow drawn as a loop with one exit."""
     from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
@@ -393,22 +485,32 @@ def slides():
         "From Analytics to Machine Learning",
         "On the night of 14-15 April 1912 the Titanic went down; 549 of the "
         "891 passengers on our manifest died. One question for four "
-        "sessions: could the data have told us who lives?",
+        "sessions: could the data have told us who lives? First the ideas, "
+        "then the manifest.",
     )
 
-    # 2. HERO: descriptive analytics vs machine learning
+    # 2. Part 1 divider
+    ds.section_slide(
+        prs,
+        "01",
+        "Part 1 - The theory: what learning is",
+        "Ideas before code: what a machine actually does when it learns, "
+        "and why the leap to unseen cases can work at all.",
+    )
+
+    # 3. The DA-vs-ML hero infographic: the CONTRAST in one picture
     ds.image_slide(
         prs,
         "Descriptive analytics reads the past - machine learning answers "
         "about the future",
         f"{FIGS_CONCEPTS}/hero_da_vs_ml.png",
         kicker="The bridge from M1",
-        caption="M1 drew the line itself: describing is not predicting - "
-                "'we stop here.' M2 starts exactly there, on the same 891 "
-                "passengers.",
+        caption="Same past data - a different question, and an output a "
+                "program can use. M1 drew the line itself: describing is "
+                "not predicting. M2 starts exactly there.",
     )
 
-    # 3. The analytics ladder
+    # 4. The analytics ladder: the PROGRESSION (where M2 sits on the climb)
     ds.image_slide(
         prs,
         "Prediction is the next rung on a ladder you are already halfway up",
@@ -417,8 +519,8 @@ def slides():
         bullets=[
             "Descriptive and diagnostic: M1. You told what happened and dug "
             "into why - groupbys, crosstabs, correlations",
-            "Predictive: M2, this module. What will happen to a new, unseen "
-            "case?",
+            "Predictive: M2, this module. What will happen to a new, "
+            "unseen case?",
             "Prescriptive sits on top: what should we do - decisions built "
             "on predictions you can trust",
             "Your M1 skills stay load-bearing: 80% of the daily job is "
@@ -428,8 +530,8 @@ def slides():
         ],
         caption="MIT draws the same line by goal, not tools: statistics "
                 "asks 'does the model explain?' - ML asks 'does the "
-                "prediction hold up?' (MIT 6.390, Intro chapter). Reference "
-                "points: Ng, Harvard CS109A and MIT 6.390 climb this ladder.",
+                "prediction hold up?' (MIT 6.390, Intro chapter). Ng, "
+                "Harvard CS109A and MIT 6.390 all climb this same ladder.",
     )
     # 4. What machine learning is (absorbs old types table + everyday examples)
     ds.bullets_slide(
@@ -452,16 +554,40 @@ def slides():
               "these conditions"]),
             "The same move on our data: 891 passengers with known outcomes "
             "go in; a pattern that predicts new passengers comes out",
-            "Supervised learning = learning from examples that include the "
-            "right answer (the label) - ours: Survived, 1 or 0",
             "A model is a function with adjustable knobs (parameters); "
             "training turns the knobs until predictions match the examples",
         ],
         kicker="What ML is",
-        note="Beyond supervised: unsupervised finds structure without "
-             "labels, reinforcement learns from rewards - this module is "
-             "supervised classification end to end. Samuel's phrase, quoted "
-             "by Ng - Machine Learning Specialization C1W1.",
+        note="Samuel's phrase, quoted by Ng - Machine Learning "
+             "Specialization C1W1.",
+    )
+
+    # Types of machine learning - the three families
+    ds.bullets_slide(
+        prs,
+        "Machines learn in three ways - this module lives in the first",
+        [
+            ("Supervised learning: the examples include the right answer "
+             "(the label)",
+             ["A spam filter learns from mail already marked spam or not "
+              "spam - ours: 891 passengers, each labeled Survived, 1 or 0"]),
+            ("Unsupervised learning: no labels - find the structure "
+             "yourself",
+             ["Grouping shoppers into segments nobody named in advance: "
+              "there is no right answer in the data to copy"]),
+            ("Reinforcement learning: no examples at all - act, get "
+             "rewarded or penalized, improve",
+             ["Samuel's checkers program improving through wins and losses "
+              "in self-play is the classic seed of the idea"]),
+            "The families differ in what the data gives you: answers, "
+            "no answers, or only consequences",
+            "This module is supervised classification end to end - the "
+            "other two families are a later course",
+        ],
+        kicker="Types of machine learning",
+        note="Supervised learning comes first because it covers most ML "
+             "used in industry today - Ng, Machine Learning Specialization "
+             "C1W1.",
     )
 
     # 5. Features and target
@@ -513,7 +639,55 @@ def slides():
                 "Harvard CS109A / ISLR ch. 2.",
     )
 
-    # 7. NEW - Frame A: the three-slot recipe
+    # NEW - The induction problem (MIT)
+    ds.image_slide(
+        prs,
+        "Learning is a leap from a few examples to cases never seen - one "
+        "assumption makes it work",
+        f"{FIGS_THEORY}/s1_induction.png",
+        kicker="The induction problem",
+        bullets=[
+            "Every learner makes the same leap: finitely many examples in, "
+            "a rule that must answer for cases nobody has seen yet",
+            "Philosophers call it the problem of induction: nothing "
+            "logically guarantees the future resembles the past",
+            "MIT splits the difficulty in two: estimation - see through "
+            "the noise in the data you have - and generalization - say "
+            "something about inputs you never saw",
+            "The bridge is an assumption, not a proof: new data is drawn "
+            "from the same world as the old (i.i.d.) - no assumption, no "
+            "generalization",
+            "Part 2 builds exactly this leap: 712 passengers teach a rule "
+            "that 179 unseen ones will judge",
+        ],
+        caption="Illustration - synthetic data. MIT 6.390, Intro chapter "
+                "('the problem of induction').",
+    )
+
+    # NEW - The hypothesis class (MIT)
+    ds.image_slide(
+        prs,
+        "You choose the space of candidate rules - the algorithm only "
+        "finds its best member",
+        f"{FIGS_THEORY}/s1_hypothesis.png",
+        kicker="The hypothesis class",
+        bullets=[
+            "A hypothesis is one concrete rule with its numbers filled in; "
+            "the hypothesis class is the whole family of rules of that "
+            "shape",
+            "Learning is a SEARCH: the algorithm scans the family and "
+            "returns the member that fits the examples best",
+            "Which family to search is YOUR design decision, made before "
+            "any data is touched: straight lines, or flexible curves?",
+            "Flexibility cuts both ways: a roomier family can follow the "
+            "pattern more closely - and can follow the noise too",
+            "MIT separates model selection (choose the class) from model "
+            "fitting (find the member) - Session 3 turns exactly this dial",
+        ],
+        caption="Illustration - synthetic data. MIT 6.390, Intro chapter.",
+    )
+
+    # The three-slot recipe - the chapter's synthesis
     ds.image_slide(
         prs,
         "Every learner you will meet is the same recipe: candidate rules "
@@ -525,8 +699,8 @@ def slides():
             "of candidate rules (the model), a score for how wrong a "
             "prediction is (the loss), and a search that finds the "
             "best-scoring rule (the optimizer).",
-            "Choosing the family of candidate rules is YOUR call, made "
-            "before any data is touched",
+            "Slot 1 is the hypothesis class you just met - choosing it "
+            "stays YOUR call, made before any data is touched",
             "Different ML methods = different fillings of the same three "
             "slots",
             "Session 3 refills slot 1 six times; Session 4 tunes the knobs "
@@ -561,7 +735,16 @@ def slides():
                 "Specialization C1 / Stanford CS229 notes.",
     )
 
-    # 6. The dataset (chart)
+    # Part 2 divider
+    ds.section_slide(
+        prs,
+        "02",
+        "Part 2 - Practice: the Titanic manifest",
+        "The ideas land on 891 real passengers: one dataset, one honest "
+        "split, and a floor every model must beat.",
+    )
+
+    # The dataset (chart)
     ds.image_slide(
         prs,
         "One dataset carries every concept: 891 passengers, 38.4% survived",
@@ -631,7 +814,8 @@ def slides():
         f"{FIGS_STORY}/s1_workflow_loop.png",
         kicker="The workflow",
         bullets=[
-            "Prepare: split, clean, encode, scale (Sessions 1-2)",
+            "Prepare: split, clean, encode, scale (Sessions 1-2) - today "
+            "you started it on the 891-row manifest",
             "Train: fit models on the training set only (Session 3)",
             "Evaluate: score on data the model has never seen (Session 3)",
             "Improve, then ship: tune, engineer, deploy (Session 4)",
@@ -691,14 +875,16 @@ def slides():
         prs,
         "You now predict, not describe - and every claim gets a number",
         [
-            "ML learns rules from labeled examples - features X in, "
-            "target y out",
+            "Part 1, the ideas: ML learns rules from labeled examples - a "
+            "leap from seen cases to unseen ones, licensed by one "
+            "assumption (new data looks like old)",
+            "You choose the hypothesis class; every learner = model + loss "
+            "+ optimizer, and training = making one number (the cost J) "
+            "small",
             "Y = f(X) + ε: we estimate the hidden rule, we never beat "
             "the noise",
-            "Every learner = model + loss + optimizer; training = making "
-            "one number (the cost J) small",
-            "Split first: 712 train / 179 test, stratified - the test set "
-            "is the exam you take once",
+            "Part 2, the manifest: 891 passengers, split first - 712 train "
+            "/ 179 test, stratified; the test set is the exam you take once",
             "Every claim gets a number, and the floor is 0.617",
             "Practice now, zero setup: open notebook 01 in Colab (badge "
             "click), Runtime > Run all, work sections 1-3 - exercises at "
@@ -714,6 +900,8 @@ if __name__ == "__main__":
     make_error_stack_fig()
     make_recipe_fig()
     make_cost_downhill_fig()
+    make_induction_fig()
+    make_hypothesis_fig()
     make_loop_chart()
     make_hero_fig()
     make_ladder_fig()

@@ -1,6 +1,11 @@
 """Build M2 Session 3 deck: Choosing a Model You Can Trust.
 
-All numbers come from the executed notebook M2/02-model-selection.ipynb.
+Two-part architecture: Part 1 is a theory chapter (ERM, generalization and
+Ng's two-number diagnostic, bias-variance, structural vs estimation error,
+regularization, flexibility vs interpretability, cross-validation); Part 2
+is the Titanic tournament practice.
+
+All practice numbers come from the executed notebook M2/02-model-selection.ipynb.
 The depth-sweep arrays below were recomputed with the notebook's exact code
 (same prep, seed 42) and match its printed anchors: best CV 0.815 at depth 3;
 depth 20 train 0.985 vs CV 0.749, gap 0.236. The learning-curve arrays were
@@ -253,6 +258,180 @@ ax.text(0.66, 0.60, "regime sketches - illustration", transform=ax.transAxes,
 fig.savefig(f"{FIGS_T}/learning_curve.png")
 plt.close(fig)
 
+# ---------------------------------------------------------------- chart 9
+# ERM: candidate rules ranked by average training loss (synthetic values).
+fig, ax = plt.subplots(figsize=(7.4, 3.9))
+rows = [
+    ("Rule A - fixed answer", "rigid", "0.38"),
+    ("Rule B - one threshold", "modest", "0.27"),
+    ("Rule C - weighted scorecard", "medium", "0.19"),
+    ("Rule D - unlimited flowchart", "maximal", "0.00"),
+]
+headers = ["Candidate rule", "Flexibility", "Train loss"]
+col_x = [0.03, 0.56, 0.79]
+ax.add_patch(plt.Rectangle((0, 4), 1.0, 0.75, facecolor=pal["navy"]))
+for x, htxt in zip(col_x, headers):
+    ax.text(x, 4.37, htxt, fontsize=11, color="white", fontweight="bold", va="center")
+for i, (name, flex, loss) in enumerate(rows):
+    y = 3 - i
+    is_d = (i == 3)
+    face = pal["panel"] if i % 2 else "white"
+    ax.add_patch(plt.Rectangle((0, y), 1.0, 0.94, facecolor=face,
+                               edgecolor=pal["blue"] if is_d else "none",
+                               lw=2 if is_d else 0))
+    ink = pal["navy"] if is_d else pal["ink"]
+    ax.text(col_x[0], y + 0.47, name, fontsize=11, color=ink, va="center",
+            fontweight="bold" if is_d else "normal")
+    ax.text(col_x[1], y + 0.47, flex, fontsize=11, color=pal["gray"], va="center")
+    ax.text(col_x[2], y + 0.47, loss, fontsize=12, color=ink, va="center",
+            fontweight="bold" if is_d else "normal")
+ax.annotate("the search keeps the\nlowest number - Rule D wins",
+            xy=(0.965, 0.47), xytext=(1.04, 1.6), fontsize=10.5,
+            color=pal["blue"], fontweight="bold",
+            arrowprops=dict(arrowstyle="->", color=pal["blue"], lw=1.2))
+ax.text(1.04, 0.75, "suspiciously perfect:\nit memorized the rows.\nAbout the future it\nsays nothing.",
+        fontsize=10.5, color=pal["gray"], va="top")
+ax.set_xlim(0, 1.45)
+ax.set_ylim(-0.25, 4.95)
+ax.axis("off")
+ax.set_title("Four candidates, one prize: the lowest average loss on the past")
+fig.savefig(f"{FIGS_T}/erm_rules.png")
+plt.close(fig)
+
+# ---------------------------------------------------------------- chart 10
+# Ng's two-number diagnostic as a 2x2 grid (labeled teaching examples).
+fig, ax = plt.subplots(figsize=(7.2, 4.3))
+cells = [
+    (0, 1, "Healthy", "both numbers small:\nlearned, and it generalizes", pal["panel"], None),
+    (1, 1, "High variance", "memorized the quirks:\nsimplify or regularize",
+     pal["sky"], "Ng's example:\ntrain 1% / dev 11%"),
+    (0, 0, "High bias", "too simple even for the past:\nricher model or features",
+     pal["sky"], "Ng's example:\ntrain 15% / dev 16%"),
+    (1, 0, "Both", "the worst corner:\nfix bias first, then variance", pal["panel"], None),
+]
+for cx, cy, head, body, face, card in cells:
+    ax.add_patch(plt.Rectangle((cx, cy), 0.97, 0.97, facecolor=face,
+                               edgecolor="white", lw=3))
+    ax.text(cx + 0.06, cy + 0.82, head, fontsize=14, fontweight="bold", color=pal["navy"])
+    ax.text(cx + 0.06, cy + 0.60, body, fontsize=10.5, color=pal["ink"], va="top")
+    if card:
+        ax.add_patch(plt.Rectangle((cx + 0.06, cy + 0.05), 0.60, 0.26,
+                                   facecolor="white", edgecolor=pal["blue"], lw=1.2))
+        ax.text(cx + 0.36, cy + 0.18, card, fontsize=9, color=pal["blue"],
+                ha="center", va="center", fontweight="bold")
+ax.text(0.485, 2.10, "gap to validation SMALL", ha="center", fontsize=11.5,
+        color=pal["gray"], fontweight="bold")
+ax.text(1.455, 2.10, "gap to validation BIG", ha="center", fontsize=11.5,
+        color=pal["gray"], fontweight="bold")
+ax.text(1.455, 2.02, "(variance out of control)", ha="center", fontsize=9.5, color=pal["gray"])
+ax.text(-0.05, 1.485, "training\nerror LOW", ha="right", va="center", fontsize=10.5,
+        color=pal["gray"], fontweight="bold")
+ax.text(-0.05, 0.485, "training\nerror HIGH", ha="right", va="center", fontsize=10.5,
+        color=pal["gray"], fontweight="bold")
+ax.text(-0.05, 0.28, "(bias)", ha="right", va="center", fontsize=9.5, color=pal["gray"])
+ax.set_xlim(-0.55, 2.0)
+ax.set_ylim(-0.12, 2.3)
+ax.axis("off")
+ax.set_title("Read two numbers, land in one of four boxes")
+fig.savefig(f"{FIGS_T}/ng_grid.png")
+plt.close(fig)
+
+# ---------------------------------------------------------------- chart 11
+# Structural vs estimation error: schematic two-zone diagram (no real data).
+fig, ax = plt.subplots(figsize=(7.4, 4.0))
+xf = np.linspace(0, 1, 300)
+structural = 0.52 * np.exp(-3.4 * xf) + 0.05
+estimation = 0.03 + 0.46 * xf ** 2.1
+total = structural + estimation
+ax.plot(xf, structural, color=pal["gray"], lw=2.2, label="structural error")
+ax.plot(xf, estimation, color=pal["blue"], lw=2.2, label="estimation error")
+ax.plot(xf, total, color=pal["navy"], lw=1.8, ls="--", label="sum of the two")
+best = xf[np.argmin(total)]
+ax.axvspan(0, 0.22, color=pal["panel"])
+ax.axvspan(0.62, 1.0, color=pal["panel"])
+ax.text(0.11, 0.60, "TOO RIGID\nstructural error\ndominates", ha="center",
+        fontsize=10, color=pal["gray"], fontweight="bold")
+ax.text(0.81, 0.60, "TOO FLEXIBLE\nestimation error\ndominates", ha="center",
+        fontsize=10, color=pal["gray"], fontweight="bold")
+ax.annotate("sweet spot", xy=(best, total.min()), xytext=(best - 0.02, 0.33),
+            fontsize=10.5, color=pal["navy"], fontweight="bold", ha="center",
+            arrowprops=dict(arrowstyle="->", color=pal["navy"], lw=1))
+ax.set_xlabel("flexibility of the hypothesis family (schematic)")
+ax.set_ylabel("error (schematic)")
+ax.set_xticks([])
+ax.set_yticks([])
+ax.set_ylim(0, 0.72)
+ax.legend(loc="upper center", fontsize=9.5, frameon=False)
+ax.set_title("One error falls as flexibility grows, the other rises - the sum is a U")
+fig.savefig(f"{FIGS_T}/structural_estimation.png")
+plt.close(fig)
+
+# ---------------------------------------------------------------- chart 12
+# Regularization: same synthetic points, penalty too low / right / too high.
+rng2 = np.random.default_rng(7)
+xr = np.sort(rng2.uniform(0, 1, 22))
+yr = 0.5 * np.sin(2.1 * np.pi * xr) + 0.55 * xr + rng2.normal(0, 0.12, 22)
+xg2 = np.linspace(0, 1, 250)
+
+
+def ridge_fit(lam, deg=9):
+    Xd = np.vander(xr, deg + 1, increasing=True)
+    Xg = np.vander(xg2, deg + 1, increasing=True)
+    w = np.linalg.solve(Xd.T @ Xd + lam * np.eye(deg + 1), Xd.T @ yr)
+    return Xg @ w
+
+
+fig, axes = plt.subplots(1, 3, figsize=(8.2, 3.1), sharey=True)
+panels = [(1e-9, "Penalty ~ zero:\nchases every point"),
+          (2e-3, "Penalty right:\nfollows the trend"),
+          (30.0, "Penalty huge:\nignores the data")]
+for axp, (lam, label) in zip(axes, panels):
+    axp.scatter(xr, yr, s=22, color=pal["navy"], zorder=3)
+    axp.plot(xg2, ridge_fit(lam), color=pal["blue"], lw=2.2)
+    axp.set_title(label, fontsize=11)
+    axp.set_xticks([])
+    axp.set_yticks([])
+    axp.set_ylim(-0.9, 1.5)
+fig.text(0.5, -0.04, "one dial: minimize (average loss + λ × complexity) - same 22 points in all three panels",
+         ha="center", fontsize=11.5, color=pal["ink"], fontweight="bold")
+fig.savefig(f"{FIGS_T}/regularization_leash.png")
+plt.close(fig)
+
+# ---------------------------------------------------------------- chart 13
+# Flexibility vs interpretability, ISLR fig 2.7 device, our six contestants.
+fig, ax = plt.subplots(figsize=(7.3, 4.4))
+contestants = [
+    ("Dummy", 0.04, 0.96, "nothing to fit, nothing to read into"),
+    ("Logistic Regression", 0.22, 0.82, "read the weights"),
+    ("Decision Tree", 0.40, 0.68, "read the flowchart"),
+    ("K-Nearest Neighbors", 0.58, 0.42, "show the neighbors"),
+    ("Random Forest", 0.78, 0.22, "hundreds of trees"),
+    ("Gradient Boosting", 0.90, 0.12, "hundreds of sequential trees"),
+]
+ax.add_patch(plt.Polygon([(0.14, 0.91), (0.52, 0.91), (0.52, 0.56), (0.14, 0.56)],
+                         closed=True, facecolor=pal["panel"], edgecolor=pal["blue"],
+                         lw=1.2, ls="--", zorder=1))
+ax.text(0.33, 0.535, "the explainable point:\nwhat a bank or hospital may choose",
+        fontsize=9.5, color=pal["blue"], ha="center", va="top", fontweight="bold")
+for name, fx, iy, note in contestants:
+    ax.scatter(fx, iy, s=110, color=pal["blue"], zorder=3,
+               edgecolor="white", lw=1.5)
+    ax.annotate(name, (fx, iy), xytext=(fx + 0.025, iy + 0.045),
+                fontsize=11.5, fontweight="bold", color=pal["navy"])
+    ax.annotate(note, (fx, iy), xytext=(fx + 0.025, iy - 0.01),
+                fontsize=9, color=pal["gray"])
+ax.annotate("", xy=(0.98, 0.04), xytext=(0.04, 0.98),
+            arrowprops=dict(arrowstyle="-", color=pal["sky"], lw=14, alpha=0.5))
+ax.set_xlabel("Flexibility: range of shapes the family can fit (low to high)")
+ax.set_ylabel("Interpretability: how readable the fitted rule is")
+ax.set_xticks([])
+ax.set_yticks([])
+ax.set_xlim(-0.02, 1.28)
+ax.set_ylim(-0.02, 1.12)
+ax.set_title("The trade-off: flexibility up, readability down (schematic)")
+fig.savefig(f"{FIGS_T}/flex_interp.png")
+plt.close(fig)
+
 print("Charts written to", FIGS, "and", FIGS_T)
 
 # ================================================================ slides
@@ -276,12 +455,176 @@ ds.image_slide(
         "in the CHOOSE band, by cross-validation.",
         "Model ASSESSMENT = grading the final choice. Done once, in the REPORT band. "
         "Select on the test set and its score stops being a forecast.",
-        "The plan: a floor, a fair referee, the right metric - then one look at the test set.",
+        "Today in two parts: Part 1 is theory - how to judge a learner honestly. "
+        "Part 2 is practice - the tournament that puts every idea to work.",
     ],
     caption="One bar rules the module, re-shown from Session 2. "
             "Harvard CS109A / ISLR ch. 5 (model selection vs model assessment).")
 
-# 3 - the model zoo (+ Frame A callback footer)
+# 3 - PART 1 divider
+ds.section_slide(
+    prs, "01", "Part 1 - The theory: how to judge a learner honestly",
+    "Seven ideas that explain every chart you will see in Part 2: what "
+    "training really does, why it flatters itself, and how to measure "
+    "without fooling yourself.")
+
+# 4 - NEW theory: empirical risk minimization in plain words
+ds.image_slide(
+    prs, "Training just minimizes average loss on the past - and a flexible "
+         "rule can always ace the past",
+    f"{FIGS_T}/erm_rules.png",
+    kicker="Empirical risk minimization",
+    bullets=[
+        "Almost every learning algorithm does the same thing: among all "
+        "candidate rules in its family, return the one with the lowest "
+        "average loss on the training rows.",
+        "That average is the empirical risk - measured on the sample you "
+        "have, not on the future you care about. Training loss is only a "
+        "stand-in for real-world error.",
+        "The catch: make the family flexible enough and some rule always "
+        "scores perfectly on the past - it simply memorizes every row.",
+        "So a perfect training score proves nothing about tomorrow. The "
+        "rest of Part 1 is about closing that gap honestly.",
+    ],
+    caption="Illustration - invented rules and loss values. "
+            "MIT 6.390, ch. 1 and appendix C (empirical risk minimization).")
+
+# 5 - theory (promoted): generalization + Ng's two-number diagnostic
+ds.image_slide(
+    prs, "Two numbers diagnose any model: the training error and the gap "
+         "to the honest score",
+    f"{FIGS_T}/ng_grid.png",
+    kicker="Generalization",
+    bullets=[
+        "Generalization = doing well on rows the model has never seen. "
+        "Only that is the report card: training error can always be driven "
+        "down by memorizing.",
+        "Ng's diagnostic: read TWO numbers. The training error itself is "
+        "the bias signal - too high means the model is too simple even "
+        "for the past.",
+        "The gap between training and validation error is the variance "
+        "signal - too wide means it memorized quirks that do not travel.",
+        "Ng's labeled teaching examples: train 1% / dev 11% = variance "
+        "problem; train 15% / dev 16% = bias problem.",
+        "Diagnose first - the cures are different and often opposite.",
+    ],
+    caption="Grid cards: Ng's teaching examples, not course numbers. "
+            "Ng, Machine Learning Yearning chs. 20-21.")
+
+# 6 - theory (promoted): bias-variance via Harvard's 2000-models device
+ds.image_slide(
+    prs, "Refit on fresh samples and watch: simple models miss together, "
+         "flexible models scatter",
+    f"{FIGS_T}/models_2000.png",
+    kicker="Bias-variance decomposition",
+    bullets=[
+        "Thought experiment: refit the same model on many different samples "
+        "from the same population - parallel universes - and watch the fits "
+        "scatter.",
+        "Simple families form a tight bundle: they miss the same way every "
+        "time. That systematic miss is bias.",
+        "Flexible families form spaghetti: right on average, but every "
+        "sample yields a wildly different fit. That instability is variance.",
+        "Total error = bias² + variance + noise. The noise floor ε is "
+        "irreducible - your work lives in the other two terms.",
+        "Hold this image: in Part 2, five cross-validation folds act as "
+        "five mini-universes and make the wobble measurable.",
+    ],
+    caption="Illustration - synthetic data, 60 refits per panel. "
+            "Device from Harvard CS109A L6 / ISLR §2.2.")
+
+# 7 - NEW theory: structural vs estimation error (MIT vocabulary)
+ds.image_slide(
+    prs, "Name the two errors: a family too rigid, or too little data to "
+         "find its best member",
+    f"{FIGS_T}/structural_estimation.png",
+    kicker="Structural vs estimation error",
+    bullets=[
+        "Structural error: the family is too rigid - the true rule is not "
+        "in your space, so even its best member misses. Underfitting has a "
+        "surname.",
+        "Estimation error: the family is so flexible that limited data "
+        "cannot reliably point at its best member - the search lands on a "
+        "memorizer. That is overfitting.",
+        "Grow flexibility and the two trade places: structural error falls, "
+        "estimation error rises - their sum is U-shaped.",
+        "This is the grammar of the U-curve. In Part 2 you will watch a "
+        "real one, drawn by a decision tree growing one level at a time.",
+    ],
+    caption="Illustration - schematic curves, no real data. "
+            "MIT 6.390, ch. 2 and ch. 5 (structural vs estimation error).")
+
+# 8 - NEW theory: regularization - complexity on a leash
+ds.image_slide(
+    prs, "Don't choose simple-or-flexible once: take the flexible family "
+         "and make complexity pay",
+    f"{FIGS_T}/regularization_leash.png",
+    kicker="Complexity on a leash",
+    bullets=[
+        "Regularization adds a price tag to the training objective: "
+        "minimize (average loss + λ × complexity). One dial trades fit "
+        "against simplicity.",
+        "λ near zero trusts the data completely - memorizing is allowed. "
+        "Huge λ ignores the data. The right λ follows the trend and lets "
+        "the noise go.",
+        "Ridge regression is exactly this idea for linear models: a penalty "
+        "on large weights that buys a little bias to remove a lot of variance.",
+        "Foreshadow: Session 4 tunes max_depth and min_samples_leaf on a "
+        "tree - those knobs ARE this dial. A shallow tree is a short leash.",
+    ],
+    caption="Illustration - synthetic points, same data in all panels. "
+            "MIT 6.390 ch. 2 (penalty framing); Harvard CS109A / ISLR ch. 6 (ridge).")
+
+# 9 - NEW theory: flexibility vs interpretability (ISLR fig 2.7 device)
+ds.image_slide(
+    prs, "Flexibility costs readability - and a bank or hospital may "
+         "choose the explainable point",
+    f"{FIGS_T}/flex_interp.png",
+    kicker="The trade-off chart",
+    bullets=[
+        "Model families live on a spectrum: as the range of shapes they "
+        "can fit grows, the ease of reading the fitted rule falls.",
+        "Our six contestants sit along that diagonal: the scorecard and the "
+        "single tree are readable; committees of hundreds of trees are not.",
+        "Flexible is not automatically better: flexible families need more "
+        "data and overfit more easily - the estimation-error trap from two "
+        "slides ago.",
+        "When a bank must explain a rejected loan, or a hospital must "
+        "justify a triage call, the explainable point wins - even at some "
+        "cost in raw accuracy.",
+    ],
+    caption="Schematic - our six models placed as a teaching judgment. "
+            "Device from ISLR fig. 2.7.")
+
+# 10 - theory (promoted): cross-validation
+ds.image_slide(
+    prs, "Cross-validation gives every row a turn at being the test",
+    f"{FIGS}/cv_folds.png",
+    kicker="Estimating the true error",
+    bullets=[
+        "Training error flatters, so hold data out and measure there. One "
+        "split can be lucky or unlucky - so rotate it: 5 folds, 5 rounds, "
+        "each fold sits out once as the judge.",
+        "Five honest scores instead of one: we see the mean AND the wobble "
+        "(std). One lucky split can flatter a model; five cannot.",
+        "Subtle but crucial: CV evaluates the recipe (algorithm + settings), "
+        "not one fitted model - CV scores the recipe, not the cake.",
+        "Why 5 folds? Fewer folds starve training; leave-one-out folds are "
+        "nearly identical and their average gets noisy - 5 or 10 is the "
+        "empirical sweet spot.",
+        "The real test set is never touched - CV lives entirely inside the "
+        "CHOOSE band.",
+    ],
+    caption="5-fold cross-validation, the referee used throughout Part 2. "
+            "MIT 6.390, Appendix C; Harvard CS109A / ISLR §5.1.")
+
+# 11 - PART 2 divider
+ds.section_slide(
+    prs, "02", "Part 2 - Practice: the tournament",
+    "Six contestants, one fair referee, one locked test set - Part 1's "
+    "theory, run for real on the Titanic manifest.")
+
+# 12 - the model zoo (+ Frame A callback footer)
 zoo = ds.table_slide(
     prs, "Six contestants enter, from a deliberately dumb floor to committees of trees",
     ["Model", "Intuition in one line", "Needs scaling", "Interpretability"],
@@ -297,49 +640,29 @@ zoo = ds.table_slide(
     note='A model is a function with adjustable knobs ("parameters"); training turns the knobs until predictions match the examples.',
     col_widths=[2.2, 5.2, 1.4, 3.2])
 footnote(zoo, "Session 1's recipe, refilled six times: each contestant is a different "
-              "filling of the MODEL slot — the loss and the referee stay the same for "
+              "filling of the MODEL slot - the loss and the referee stay the same for "
               "everyone. (MIT 6.390, Appendix C)", 5.95)
 
-# 4 - training accuracy lies
+# 13 - training accuracy lies (ERM's warning, live)
 ds.image_slide(
     prs, "Training accuracy lies: an unlimited tree scores 0.985 on itself, 0.751 honestly",
     f"{FIGS}/train_vs_cv.png",
-    kicker="Why we need a referee",
+    kicker="Part 1's warning, live",
     bullets=[
         "Let a decision tree grow without limits, then grade it on its own training "
         "data: 0.985. Grade it honestly with cross-validation: 0.751.",
         "It memorized the answers instead of learning the subject - like grading "
         "students on the exact questions they practiced at home.",
-        "Ng's diagnostic: always read TWO numbers - training score and honest score. "
-        "Poor training score = bias (too simple). Big gap = variance (memorizing). "
-        "Our tree: gap 0.233 = variance.",
-        "Ng's drill: train error 1% / dev error 11% = variance problem; train 15% / "
-        "dev 16% = bias problem. (Ng's teaching examples, not course numbers.)",
-        "Diagnose first - the cures are different and often opposite.",
+        "This is Rule D from the ERM slide, caught in the act: the flexible "
+        "candidate aces the past and stumbles on fresh rows.",
+        "Read it with the two-number grid: training error low, gap 0.233 wide - "
+        "the high-variance box.",
+        "That is why the tournament's referee is cross-validation, never "
+        "training accuracy.",
     ],
-    caption="Unlimited decision tree, training vs 5-fold CV accuracy. Module 2, notebook 2. "
-            "Diagnostic: Ng, Machine Learning Yearning chs. 20-21.")
+    caption="Unlimited decision tree, training vs 5-fold CV accuracy. Module 2, notebook 2.")
 
-# 5 - cross-validation
-ds.image_slide(
-    prs, "Cross-validation gives every row a turn at being the test",
-    f"{FIGS}/cv_folds.png",
-    kicker="The fair referee",
-    bullets=[
-        "Split the 712 training rows into 5 equal folds; run 5 rounds - each fold "
-        "sits out once as the judge.",
-        "Five honest scores instead of one: we see the mean AND the wobble (std). "
-        "One lucky split can flatter a model; five cannot.",
-        "Subtle but crucial: CV evaluates the recipe (algorithm + settings), not one "
-        "fitted model - CV scores the recipe, not the cake.",
-        "Why 5 folds? Fewer folds starve training; leave-one-out folds are nearly "
-        "identical and their average gets noisy - 5 or 10 is the empirical sweet spot.",
-        "The real test set is never touched - CV lives entirely inside the CHOOSE band.",
-    ],
-    caption="5-fold cross-validation. Module 2, notebook 2. "
-            "MIT 6.390, Appendix C; Harvard CS109A / ISLR §5.1.")
-
-# 6 - baseline first
+# 14 - baseline first
 ds.big_number_slide(
     prs, 'Beat the floor first: always saying "died" already scores 0.617',
     "0.617",
@@ -348,7 +671,7 @@ ds.big_number_slide(
          "Andrew Ng's doctrine: build your first system quickly, then iterate (Machine Learning Yearning, ch. 13).",
     kicker="Baseline first")
 
-# 7 - tournament results
+# 15 - tournament results
 ds.image_slide(
     prs, "The tournament verdict: the humble scorecard wins at 0.819",
     f"{FIGS}/tournament.png",
@@ -356,40 +679,15 @@ ds.image_slide(
     bullets=[
         "Same referee for all six: 5-fold CV, preprocessing re-fit inside every fold - no leaks.",
         "Logistic Regression leads at 0.819. Gradient Boosting is a close second at 0.816.",
-        "Those error bars are information: Random Forest wobbles most (+/- 0.054) - "
-        "the same model refit on slightly different data gives noticeably different "
-        "answers. Next slide shows why.",
+        "Those error bars are Part 1's spaghetti, measured: the 5 folds are 5 "
+        "mini-universes, and Random Forest wobbles most (+/- 0.054) while the "
+        "scorecard barely moves (+/- 0.020).",
         'Every real model clears the floor. The Dummy\'s F1 is 0.000 - it never predicts "survived".',
         "The surprise: fancy does not automatically mean better.",
     ],
     caption="Mean 5-fold CV accuracy, +/- 1 std. Module 2, notebook 2.")
 
-# 8 - NEW: Harvard's 2000-models device - why flexible models wobble
-ds.image_slide(
-    prs, "Why the forest wobbles: flexible models change with every sample they see",
-    f"{FIGS_T}/models_2000.png",
-    kicker="Parallel universes",
-    bullets=[
-        "Thought experiment: refit the same model on many different samples from "
-        "the same population - parallel universes - and watch the fits scatter.",
-        "Simple models (a straight line) form a tight bundle: they miss the same "
-        "way every time. Biased, but stable.",
-        "Very flexible models form spaghetti: unbiased on average, but each sample "
-        "yields a wildly different fit. That is variance.",
-        "Our tournament ran a small version of this: the 5 folds are 5 mini-universes, "
-        "and the fold-to-fold std is the wobble made visible - RF +/- 0.054 vs "
-        "LogReg +/- 0.020.",
-    ],
-    caption="Illustration - synthetic data, 60 refits per panel. "
-            "Device from Harvard CS109A L6 / ISLR §2.2.")
-
-# 9 - section divider
-ds.section_slide(
-    prs, "02", "Beyond accuracy",
-    "When 99% right is 100% useless: the mistakes have names, so count all "
-    "four kinds before you trust a score.")
-
-# 10 - confusion matrix
+# 16 - confusion matrix
 ds.image_slide(
     prs, "Accuracy can hide the mistakes that matter - the confusion matrix shows all four",
     f"{FIGS}/confusion.png",
@@ -405,7 +703,7 @@ ds.image_slide(
     caption="Logistic Regression, confusion matrix on the test set. Module 2, notebook 2. "
             "Harvard CS109A, Classification Metrics lecture.")
 
-# 11 - precision vs recall
+# 17 - precision vs recall
 ds.two_col_slide(
     prs, "Precision and recall answer different questions - pick the one your problem asks",
     ("Precision 0.823 - trust our alarms", [
@@ -424,27 +722,26 @@ ds.two_col_slide(
     note="F1 = harmonic mean of both = 0.779, high only when both are decent. "
          "Metric pairing after Andrew Ng's Machine Learning Specialization (C2, W3).")
 
-# 12 - overfitting made visible, now with MIT's names + Frame B callback
+# 18 - the real U-curve, with MIT's zone labels
 ds.image_slide(
     prs, "Overfitting made visible: past depth 3, the tree memorizes instead of learning",
     f"{FIGS}/depth_sweep.png",
-    kicker="Bias and variance, named",
+    kicker="The U-curve, for real",
     bullets=[
         "Grow the tree one level at a time. Training accuracy climbs to 0.985 and never looks back.",
         "The honest CV score peaks at 0.815 at depth 3, then slides. At depth 20 the "
         "gap is 0.236 - memorizing, not learning.",
-        "MIT's names make the tradeoff mechanical: more flexibility lowers structural "
-        "error and raises estimation error - every dial in Session 4 moves this dial.",
-        "The outcome is a hidden rule plus noise: Y = f(X) + ε. Learning estimates the "
-        "rule; nothing can predict the noise. Error you can shrink is reducible; the "
-        "noise floor is irreducible.",
-        "Why does the honest curve peak at 0.815, not 1.00? Session 1's grey bar: ε. "
-        "The rest is noise nobody can predict.",
+        "This is Part 1's two-zone diagram drawn by real data: left of the peak, "
+        "structural error dominates (family too rigid); right of it, estimation "
+        "error takes over. Every dial Session 4 turns moves along this axis.",
+        "Why does the honest curve peak at 0.815, not 1.00? The irreducible floor: "
+        "the outcome is a hidden rule plus noise, Y = f(X) + ε, and nothing can "
+        "predict the ε.",
     ],
     caption="Decision tree, max_depth 1-20, train vs 5-fold CV accuracy. Module 2, notebook 2. "
             "MIT 6.390, ch. 2 & ch. 5; Harvard CS109A / ISLR ch. 2.")
 
-# 13 - NEW: the learning curve, read with Ng's two regimes
+# 19 - the learning curve, read with Ng's two regimes
 ds.image_slide(
     prs, "The learning curve answers \"would more data help?\" - for us: no",
     f"{FIGS_T}/learning_curve.png",
@@ -463,7 +760,7 @@ ds.image_slide(
     caption="Main panel: real curve, Module 2, notebook 2. Insets: regime sketches - "
             "illustration. Ng, Machine Learning Yearning chs. 28-32.")
 
-# 14 - MERGE: checklist + verdict, with the pneumonia story as the footer
+# 20 - checklist + verdict, with the pneumonia story as the footer
 ds.two_col_slide(
     prs, "The verdict: the simplest model that beats the floor on the right metric - the scorecard",
     ("The checklist", [
@@ -488,15 +785,19 @@ ds.two_col_slide(
          "care), fatal if acted on; caught only because the model was readable. "
          "Source: Caruana et al., KDD 2015.")
 
-# 15 - close
+# 21 - close
 ds.close_slide(
     prs, "The referee, the floor, and the right question",
     [
-        "Two numbers, always: the training score lies, CV is honest - and the gap is variance.",
-        "Baseline first: the floor is 0.617. Beat it clearly, or go home.",
-        "Underfit = structural error, overfit = estimation error - the sweet spot is "
-        "where the honest curve peaks, and ε keeps it under 1.00.",
-        "The learning curve says more rows won't save us - better settings might (Session 4).",
+        "Part 1, the theory: training only minimizes loss on the past (ERM) - so read "
+        "two numbers, and let the gap name your problem: bias or variance.",
+        "Structural vs estimation error is the U-curve's grammar; regularization is "
+        "the leash, cross-validation the honest referee - and readability is a "
+        "feature, not a bonus.",
+        "Part 2, the practice: the floor was 0.617, the humble scorecard won at "
+        "0.819, and the locked test set was opened once: 0.838.",
+        "The real U-curve peaked at depth 3; the learning curve said more rows "
+        "won't save us - better settings might (Session 4).",
         "Accuracy is one question of many. Precision, recall, and F1 ask sharper ones.",
         "Practice now: notebook 02-model-selection in Colab.",
     ])
