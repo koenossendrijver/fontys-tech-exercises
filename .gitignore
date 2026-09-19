@@ -16,3 +16,6 @@ __pycache__/
 # Local outputs generated while running the notebooks
 *.joblib
 outputs/
+
+# Microsoft Office lock files
+~$*
