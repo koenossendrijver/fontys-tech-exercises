@@ -414,6 +414,76 @@ ax.axis("off")
 fig.savefig(f"{FIGS_STORY}/s2_pipeline_frankie.png")
 plt.close(fig)
 
+# -------- Theory figure (Ackoff 1989): data -> information -> knowledge -> wisdom --------
+# The DIKW ladder filled with one real passenger (PassengerId 166). Illustration.
+STEPS = [
+    ("DATA", "symbols - no meaning yet", "the raw file",
+     'Goldsmith, Master. Frank\nJohn William "Frankie"\n3, male, 9, 0, 2,\n20.525, S'),
+    ("INFORMATION", "organized for a purpose", "TODAY - Session 2",
+     "a 9-year-old boy, 3rd class,\ntravelling with 2 parents:\nTitle = Master\nFamilySize = 3"),
+    ("KNOWLEDGE", "a rule for using information", "Session 3",
+     "boys in small families\nsurvived far more often\nthan grown men"),
+    ("WISDOM", "acting well on knowledge", "Session 4",
+     "predict for a new\npassenger, then decide\nwhat to do"),
+]
+fig, ax = plt.subplots(figsize=(7.6, 4.8))
+bw, bh = 1.72, 1.95
+for i, (name, plain, when, filling) in enumerate(STEPS):
+    x = 0.12 + i * 1.92
+    y0 = 0.25 + i * 0.62
+    today = i == 1
+    fc = pal["blue"] if today else pal["panel"]
+    ec = pal["blue"] if today else pal["sky"]
+    hc = "white" if today else pal["navy"]
+    pc = pal["sky"] if today else pal["gray"]
+    bc = "white" if today else pal["ink"]
+    ax.add_patch(FancyBboxPatch((x, y0), bw, bh, boxstyle="round,pad=0.04",
+                                facecolor=fc, edgecolor=ec, lw=1.5))
+    ax.text(x + bw / 2, y0 + bh - 0.27, name, ha="center", va="center",
+            fontsize=10.5, fontweight="bold", color=hc)
+    ax.text(x + bw / 2, y0 + bh - 0.55, plain, ha="center", va="center",
+            fontsize=7.4, color=pc, style="italic")
+    ax.text(x + bw / 2, y0 + 0.62, filling, ha="center", va="center",
+            fontsize=7.8, color=bc, linespacing=1.3)
+    ax.text(x + bw / 2, y0 - 0.14, when, ha="center", va="top", fontsize=8,
+            fontweight="bold", color=pal["blue"] if today else pal["gray"])
+    if i:
+        ax.add_patch(FancyArrowPatch((x - 0.19, y0 - 0.62 + bh / 2),
+                                     (x + 0.01, y0 + bh / 2),
+                                     arrowstyle="-|>", mutation_scale=14,
+                                     color=pal["blue"], lw=1.6))
+ax.set_xlim(0, 7.8)
+ax.set_ylim(0, 4.3)
+ax.axis("off")
+fig.savefig(f"{FIGS_T2}/fig_dikw_titanic.png")
+plt.close(fig)
+
+# -------- Theory figure (Sweeney 2000): quasi-identifiers on the manifest --------
+# Counts computed on the course dataset (891 rows; 714 with a known Age):
+# share of passengers pinned down to exactly one person by the listed columns.
+REID_LABELS = ["class + sex", "+ age", "+ port of boarding", "+ fare paid"]
+REID_SHARES = [0.0, 16.9, 31.1, 86.3]
+fig, ax = plt.subplots(figsize=(7.6, 4.8))
+reid_bars = ax.barh(REID_LABELS, REID_SHARES,
+                    color=[pal["sky"], pal["sky"], pal["sky"], pal["blue"]])
+for bar, v in zip(reid_bars, REID_SHARES):
+    ax.text(v + 1.5, bar.get_y() + bar.get_height() / 2, f"{v:.1f}%",
+            va="center", fontweight="bold", color=pal["ink"])
+ax.invert_yaxis()
+ax.set_xlim(0, 100)
+ax.set_xlabel("share of passengers these columns pin down to exactly ONE "
+              "person\n(the 714 passengers with a known age)", fontsize=10)
+ax.set_title("No name, no ID - yet four ordinary columns single out most "
+             "passengers", fontsize=12.5)
+ax.text(36, 1.5, "Florence: 1st class, female, 38, boarded\nCherbourg - 2 "
+        "passengers match.\nAdd her fare: she is the only one.",
+        va="center", fontsize=9.2, color=pal["navy"], linespacing=1.3,
+        bbox=dict(boxstyle="round,pad=0.4", facecolor=pal["panel"],
+                  edgecolor=pal["sky"]))
+fig.tight_layout()
+fig.savefig(f"{FIGS_T2}/fig_reidentify.png")
+plt.close(fig)
+
 # ================================ DECK ================================
 prs = ds.new_deck()
 
@@ -463,6 +533,139 @@ ds.section_slide(
     "A row of numbers is called a vector. Before any code: the model only "
     "sees the numbers you construct - gaps, encodings, scales, and new "
     "columns are design decisions, not chores")
+
+# NEW - Ackoff's ladder: preparation is the step from data to information
+s = ds.image_slide(
+    prs,
+    "Preparation is the step from data to information - the model cannot "
+    "take it for you",
+    f"{FIGS_T2}/fig_dikw_titanic.png",
+    kicker="Data, information, knowledge",
+    bullets=[
+        "How to read it: four rising boxes, one real passenger climbing "
+        "them; the blue box is today",
+        "Data, in plain words: symbols with no meaning yet - '3, male, 9, "
+        "0, 2, 20.525, S'",
+        "Information: the same symbols organized for a purpose - a "
+        "9-year-old boy travelling with two parents",
+        "Knowledge: a rule for using information - Session 3 learns it; "
+        "wisdom: acting well on it - Session 4 ships it",
+        "Kitchen terms: raw ingredients, prepared ingredients, the recipe, "
+        "the meal served",
+        "Today's whole job is step one to step two - and no algorithm "
+        "does it for you",
+    ],
+    caption="Illustration - the data-information-knowledge-wisdom ladder. "
+            "Ackoff, 'From Data to Wisdom', Journal of Applied Systems "
+            "Analysis, 1989. Passenger: PassengerId 166, fields verbatim.")
+notes(s, "Start from the raw row and read it aloud as symbols: 3, male, 9, "
+         "0, 2, 20.525, S - it means nothing until you know what each "
+         "position is. Organize it for a purpose and it becomes "
+         "information: a nine-year-old boy in third class travelling with "
+         "two parents - Title Master, FamilySize 3. A rule for using that "
+         "information is knowledge - Session 3's model learns it; acting "
+         "well on the rule is wisdom - Session 4's app. Kitchen line: raw "
+         "ingredients, prepared ingredients, recipe, meal. Ask the class: "
+         "which step did M1's dashboards stop at?")
+
+# NEW - Why preparation deserves the time: data cascades
+s = ds.big_number_slide(
+    prs,
+    "Skimping on this step is the most common way real ML projects fail",
+    "92%",
+    "of AI practitioners in a Google study had lived through at least one "
+    "'data cascade' - a data flaw that surfaced late, as a model failure",
+    foot="In plain words: a cascade is a small data problem that grows as it "
+         "flows downstream - a typo in a recipe's first line. 53 "
+         "practitioners interviewed; 45% reported two or more per project. "
+         "Sambasivan et al., 'Everyone wants to do the model work, not the "
+         "data work', CHI 2021. Time budget: loading and cleaning data take "
+         "about 45% of a data scientist's day (Anaconda, State of Data "
+         "Science 2020).",
+    kicker="Why this session exists")
+notes(s, "The number first: 92 out of 100 practitioners in a Google Research "
+         "study had lived through a data cascade - a small data flaw that "
+         "surfaced late and expensively as a model failure. The paper's "
+         "title says the rest: everyone wants to do the model work, not the "
+         "data work. Then the time budget: about 45% of a data scientist's "
+         "day goes to loading and cleaning. Today is that 45%. Ask the "
+         "class: name one gap in the manifest that could become a cascade "
+         "if we ignored it.")
+
+# NEW - Data quality has dimensions (Wang & Strong)
+s = ds.table_slide(
+    prs,
+    "Data quality is more than accuracy - each manifest column fails a "
+    "different dimension",
+    ["Dimension (in plain words)", "On the manifest", "What we do today"],
+    [
+        ["Completeness - are the values there?",
+         "Age blank in 177 rows; Cabin blank in 687 of 891",
+         "Impute Age from train; drop Cabin"],
+        ["Accuracy - are they right?",
+         "18 ages end in .5 - the file's mark for an estimated age; 15 "
+         "fares read 0.00",
+         "Keep, but remember Session 1's noise floor"],
+        ["Consistent representation - same thing, same form?",
+         "Embarked is letters C/Q/S, Sex is words, Fare is numbers",
+         "One-hot the letters, scale the numbers"],
+        ["Relevance - does it bear on the question?",
+         "PassengerId and Ticket carry no signal about survival",
+         "Drop them"],
+        ["Appropriate amount - the right level of detail?",
+         "Name is raw text; 14 different titles hide inside it",
+         "Mine Name for Title, group 14 into 5 buckets"],
+        ["Believability - would you trust it?",
+         "A fare of 0.00 - free ticket, staff perk, or missing?",
+         "Flag it and ask someone who knows the domain"],
+    ],
+    kicker="Data quality: the theory",
+    note="Dimensions from Wang & Strong, 'Beyond Accuracy: What Data Quality "
+         "Means to Data Consumers', J. of Management Information Systems, "
+         "1996. Counts computed on the full 891-row file; the .5 rule is the "
+         "dataset's own convention for estimated ages.",
+    col_widths=[0.30, 0.40, 0.30])
+notes(s, "Kitchen line: inspect the ingredients before you cook. Read one "
+         "row at a time and say the dimension in plain words first - is the "
+         "value there, is it right, is it in the same form, does it matter, "
+         "is it the right level of detail, would you trust it. Every "
+         "Titanic column fails a different one, and every failure maps to "
+         "one of today's moves. Ask the class: 15 fares read 0.00 - which "
+         "dimension is that, and what would you do before imputing?")
+
+# NEW - Anonymous is not unidentifiable (Sweeney)
+s = ds.image_slide(
+    prs,
+    "Dropping the Name column is not anonymisation - four ordinary "
+    "columns single out 86% of passengers",
+    f"{FIGS_T2}/fig_reidentify.png",
+    kicker="Data you must handle with care",
+    bullets=[
+        "We drop Name and PassengerId today - the model does not need "
+        "them",
+        "How to read it: each bar adds one column; bar length = share of "
+        "passengers left standing alone",
+        "Class + sex + age + port already pins down 31%; add the fare "
+        "paid, 86%",
+        "In plain words: quasi-identifiers are columns that are not names "
+        "but together point at one person",
+        "Sweeney (2000): ZIP code + birth date + sex uniquely identify 87% "
+        "of Americans",
+        "The Titanic is public history; your customers' tables are not - "
+        "keep only the columns the question needs",
+    ],
+    caption="Counts computed on the course dataset (714 passengers with a "
+            "known age). Sweeney, 'Simple Demographics Often Identify People "
+            "Uniquely', Carnegie Mellon, 2000.")
+notes(s, "Ground it in a name they know: Florence Cumings. Drop her name and "
+         "ID, keep class, sex, age and port - only two passengers on the "
+         "whole ship match her; add her fare and she is alone. Read the "
+         "bars: each adds one ordinary column, and the share of passengers "
+         "standing alone jumps from 0 to 86%. Sweeney showed the same for "
+         "Americans with ZIP code, birth date and sex. The Titanic is public "
+         "history, so this is a lesson, not a leak; their future customer "
+         "tables are different. Ask the class: which of today's engineered "
+         "columns makes a passenger easier to single out?")
 
 # Slide 4 - NEW: feature representation is a first-class decision (MIT)
 s = ds.image_slide(
@@ -777,7 +980,9 @@ notes(s, "Same grounding as Part 1: Fare shouts (0-512), Age whispers "
          "measure distances or weigh sums (KNN, Logistic Regression) hear "
          "only the loud axis; trees just ask yes/no questions like 'is "
          "Fare > 30?', so they never notice. StandardScaler re-expresses "
-         "each value as 'how far from average'; MinMaxScaler squeezes "
+         "each value as 'how far from average' - the mean and standard "
+         "deviation from M1 are exactly the two numbers it learns from "
+         "train; MinMaxScaler squeezes "
          "into 0-1. Either way the histogram's shape is untouched - only "
          "the ruler's labels change. Ask the class: which of our six "
          "models from the next session will care?")
@@ -791,6 +996,8 @@ s = ds.image_slide(
     bullets=[
         'Every Name hides a title: "Cumings, Mrs. John Bradley" '
         "contains Mrs",
+        "Name is unstructured text inside a structured table - free "
+        "text has no column until you build one",
         'A regex (a text-search pattern), " ([A-Za-z]+)\\.", grabs the '
         "word before the period",
         "14 raw titles group into 5 buckets: Mr, Miss, Mrs, Master, Rare "
@@ -891,7 +1098,8 @@ s = ds.image_slide(
         "The dotted link: the top lane's last arrow IS the bottom lane",
         "fit_transform(train) learns every step's values; transform(test) "
         "only applies them",
-        "One Pipeline: no leakage, no forgotten steps, portable",
+        "Engineers call this shape ETL - extract, transform, load; one "
+        "Pipeline, no leakage, nothing forgotten",
         "IsAlone is computed but not on the feature lists - the "
         "ColumnTransformer drops it",
     ],
@@ -914,18 +1122,20 @@ ds.close_slide(
     prs,
     "Two parts, three golden rules",
     [
-        "Part 1, the theory: the model only sees the numbers you "
-        "construct (MIT)",
-        "Missing values have species - MCAR, MAR, MNAR - and the data "
-        "cannot tell you which",
-        "Features change the geometry: Ng's area, MIT's XOR, Harvard's "
-        "x-squared - good columns beat fancier algorithms",
-        "Part 2, the practice: split first (80/20, seed 42, stratified); "
-        "fit on train only; Pipelines always",
-        "Proof it works: a plain Logistic Regression scores 0.838 on the "
-        "179 unseen passengers - train 0.829, no memorization gap",
-        "Choosing the best model is Session 3's job. Practice now: "
-        "notebook 01-data-prep-and-feature-engineering in Colab",
+        "Part 1: preparation turns data into information (Ackoff) - the "
+        "model sees only the numbers you build",
+        "Quality has dimensions; missing values have species (MCAR, MAR, "
+        "MNAR) the data cannot tell apart",
+        "Features change the geometry - Ng's area, MIT's XOR, Harvard's "
+        "x-squared: good columns beat fancy models",
+        "Anonymous is not unidentifiable: four ordinary columns single "
+        "out 86% of passengers",
+        "Part 2: split first (80/20, seed 42, stratified); fit on train "
+        "only; Pipelines always",
+        "Proof: Logistic Regression scores 0.838 on the 179 unseen "
+        "passengers, 0.829 on train - no memorization gap",
+        "Session 3 chooses the model. Practice now: notebook "
+        "01-data-prep-and-feature-engineering in Colab",
     ])
 
 out = "../m2-session-2-data-prep-and-feature-engineering.pptx"

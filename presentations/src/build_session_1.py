@@ -489,6 +489,347 @@ def make_ladder_fig():
     plt.close(fig)
 
 
+def make_ai_circles_fig():
+    """Where ML sits: nested circles - AI, ML inside it, DL inside that.
+    Synthetic diagram, captioned as illustration on the slide. Motif:
+    Goodfellow, Bengio & Courville, Deep Learning (2016), Fig. 1.4."""
+    from matplotlib.patches import Circle
+    fig, ax = plt.subplots(figsize=(11.5, 5.0))
+    ax.add_patch(Circle((2.9, 2.75), 2.6, facecolor=pal["panel"],
+                        edgecolor=pal["sky"], lw=1.8))
+    ax.add_patch(Circle((2.65, 2.15), 1.75, facecolor=pal["sky"],
+                        edgecolor=pal["blue"], lw=1.8))
+    ax.add_patch(Circle((2.45, 1.6), 0.9, facecolor=pal["blue"],
+                        edgecolor=pal["blue"], lw=1.8))
+    ax.text(2.9, 4.85, "AI", ha="center", va="center", fontsize=15,
+            fontweight="bold", color=pal["navy"])
+    ax.text(2.65, 3.45, "ML", ha="center", va="center", fontsize=14,
+            fontweight="bold", color=pal["navy"])
+    ax.text(2.45, 1.6, "DL", ha="center", va="center", fontsize=13,
+            fontweight="bold", color="white")
+    ax.text(4.55, 2.15, "THIS\nMODULE", ha="center", va="center", fontsize=8.5,
+            fontweight="bold", color=pal["blue"], zorder=5,
+            bbox=dict(boxstyle="round,pad=0.35", facecolor="white",
+                      edgecolor=pal["blue"], lw=1.2))
+    rows = [
+        (4.6, 4.73, pal["gray"], "Artificial intelligence - the whole circle",
+         "in plain words: machines doing things we would call thinking",
+         "example: a chess program whose rules a person wrote down"),
+        (2.9, 4.23, pal["blue"], "Machine learning - this module",
+         "in plain words: show it examples with answers; it finds the rule",
+         "example: Logistic Regression, Session 3's champion"),
+        (1.3, 3.3, pal["navy"], "Deep learning - one way of doing ML",
+         "in plain words: ML built from many-layered neural networks",
+         "example: the face recognizer on your phone (a later course)"),
+    ]
+    for y, x0, c, head, plain, ex in rows:
+        ax.plot([x0, 6.0], [y, y], color=c, lw=1.2)
+        ax.scatter([x0], [y], s=28, color=c, zorder=4)
+        ax.text(6.15, y + 0.02, head, va="bottom", fontsize=11.5,
+                fontweight="bold", color=pal["navy"])
+        ax.text(6.15, y - 0.08, plain, va="top", fontsize=9.6, color=pal["ink"])
+        ax.text(6.15, y - 0.46, ex, va="top", fontsize=9.2, color=pal["gray"],
+                style="italic")
+    ax.set_xlim(0, 12.6)
+    ax.set_ylim(0, 5.5)
+    ax.set_aspect("equal")
+    ax.axis("off")
+    fig.savefig(f"{FIGS_THEORY}/s1_ai_circles.png")
+    plt.close(fig)
+
+
+def make_timeline_fig():
+    """AI is not new: eight dated milestones, evenly spaced (not to scale),
+    colored by the kind of technique. Dates from the original papers and
+    match records."""
+    import numpy as np
+    events = [
+        (1950, "Turing asks:\n'Can machines think?'", "rules"),
+        (1955, "Samuel's checkers program\nlearns by playing itself", "ml"),
+        (1957, "Rosenblatt's perceptron:\nthe first learning neuron", "ml"),
+        (1986, "Backpropagation trains\nmulti-layer networks", "dl"),
+        (1997, "Deep Blue beats Kasparov:\nhand-written search, no learning",
+         "rules"),
+        (2012, "AlexNet: deep learning\nwins the ImageNet contest", "dl"),
+        (2016, "AlphaGo beats Lee Sedol:\nlearning plus search", "dl"),
+        (2022, "ChatGPT: a language model\nin everyone's browser", "dl"),
+    ]
+    colors = {"rules": pal["gray"], "ml": pal["blue"], "dl": pal["navy"]}
+    fig, ax = plt.subplots(figsize=(11.5, 4.7))
+    xs = np.arange(len(events)) * 1.5 + 0.9
+    ax.plot([0.2, xs[-1] + 0.7], [0, 0], color=pal["sky"], lw=3.5, zorder=1)
+    for i, (x, (yr, label, kind)) in enumerate(zip(xs, events)):
+        c = colors[kind]
+        ax.scatter([x], [0], s=190, color=c, zorder=3, edgecolor="white",
+                   lw=1.5)
+        up = i % 2 == 0
+        sgn = 1 if up else -1
+        ax.plot([x, x], [0, sgn * 0.42], color=c, lw=1.1, zorder=2)
+        ax.text(x, sgn * 0.5, str(yr), ha="center",
+                va="bottom" if up else "top", fontsize=12.5,
+                fontweight="bold", color=c)
+        ax.text(x, sgn * 0.88, label, ha="center",
+                va="bottom" if up else "top", fontsize=9.2, color=pal["ink"],
+                linespacing=1.25)
+    x0, x1 = xs[5] - 0.55, xs[7] + 0.55
+    ax.plot([x0, x0, x1, x1], [1.62, 1.75, 1.75, 1.62], color=pal["blue"],
+            lw=1.4)
+    ax.text((x0 + x1) / 2, 1.85, "the 2010s: what changed was data and "
+            "computing power,\nnot the core ideas", ha="center", va="bottom",
+            fontsize=10, fontweight="bold", color=pal["blue"],
+            linespacing=1.25)
+    for j, (kind, lab) in enumerate([("rules", "hand-written rules"),
+                                     ("ml", "machine learning"),
+                                     ("dl", "deep learning")]):
+        ax.scatter([0.4 + j * 2.6], [-1.85], s=90, color=colors[kind])
+        ax.text(0.62 + j * 2.6, -1.85, lab, va="center", fontsize=9.5,
+                color=pal["ink"])
+    ax.text(xs[-1] + 0.7, -1.85, "72 years from the question to the chatbot",
+            ha="right", va="center", fontsize=9.5, color=pal["gray"],
+            style="italic")
+    ax.set_xlim(0, xs[-1] + 0.9)
+    ax.set_ylim(-2.1, 2.4)
+    ax.axis("off")
+    fig.savefig(f"{FIGS_THEORY}/s1_timeline.png")
+    plt.close(fig)
+
+
+def make_rules_flip_fig():
+    """Chollet's flip (Deep Learning with Python, Fig. 1.2): classic
+    programming = rules + data -> answers; machine learning = data + answers
+    -> rules. Filled with the Titanic."""
+    from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
+    fig, ax = plt.subplots(figsize=(7.6, 4.8))
+    lanes = [
+        (3.0, "CLASSIC PROGRAMMING - how software has always been written",
+         pal["gray"], False,
+         [("RULES", "a person writes them:\n'if female and 1st class,\n"
+                    "predict survived'"),
+          ("DATA", "the manifest:\n891 passenger rows"),
+          ("ANSWERS", "one prediction\nper passenger")]),
+        (0.75, "MACHINE LEARNING - this module", pal["blue"], True,
+         [("DATA", "the manifest's columns:\nclass, sex, age, fare..."),
+          ("ANSWERS", "the Survived column:\n1 or 0, known for all 891"),
+          ("RULES", "the fitted model:\nfound, not written")]),
+    ]
+    bw, bh = 2.0, 1.35
+    xs = [0.2, 2.7, 5.6]
+    for y0, name, lc, ml, boxes in lanes:
+        ax.text(0.2, y0 + bh + 0.12, name, fontsize=9.5, fontweight="bold",
+                color=lc, va="bottom")
+        for i, (x, (head, body)) in enumerate(zip(xs, boxes)):
+            out = i == 2
+            if ml and out:
+                fc, ec, hc, bc = pal["blue"], pal["blue"], "white", pal["sky"]
+            elif ml:
+                fc, ec, hc, bc = "white", pal["blue"], pal["navy"], pal["ink"]
+            else:
+                fc, ec, hc, bc = pal["panel"], pal["sky"], pal["navy"], pal["gray"]
+            ax.add_patch(FancyBboxPatch((x, y0), bw, bh,
+                                        boxstyle="round,pad=0.04",
+                                        facecolor=fc, edgecolor=ec, lw=1.5))
+            ax.text(x + bw / 2, y0 + bh - 0.3, head, ha="center", va="center",
+                    fontsize=10.5, fontweight="bold", color=hc)
+            ax.text(x + bw / 2, y0 + 0.5, body, ha="center", va="center",
+                    fontsize=8.2, color=bc, linespacing=1.25)
+        ax.text(2.45, y0 + bh / 2, "+", ha="center", va="center", fontsize=22,
+                fontweight="bold", color=pal["navy"])
+        ax.add_patch(FancyArrowPatch((4.85, y0 + bh / 2), (5.5, y0 + bh / 2),
+                                     arrowstyle="-|>", mutation_scale=18,
+                                     color=pal["blue"] if ml else pal["gray"],
+                                     lw=2))
+    ax.text(3.9, 0.28, "same three pieces - machine learning swaps which one "
+            "comes out", ha="center", va="center", fontsize=9.5,
+            fontweight="bold", color=pal["navy"])
+    ax.set_xlim(0, 7.8)
+    ax.set_ylim(0.0, 4.75)
+    ax.axis("off")
+    fig.savefig(f"{FIGS_THEORY}/s1_rules_flip.png")
+    plt.close(fig)
+
+
+def make_three_families_fig():
+    """The three ways machines learn, one panel each. Synthetic points -
+    captioned as illustration on the slide."""
+    import numpy as np
+    from matplotlib.patches import FancyBboxPatch, FancyArrowPatch, Circle
+    rng = np.random.default_rng(42)
+    fig, axes = plt.subplots(1, 3, figsize=(7.6, 4.6))
+    ax = axes[0]
+    a = rng.normal([2.0, 2.2], 0.55, (28, 2))
+    b = rng.normal([4.2, 4.0], 0.55, (28, 2))
+    ax.scatter(a[:, 0], a[:, 1], s=30, color=pal["blue"], marker="o",
+               label="died (label 0)")
+    ax.scatter(b[:, 0], b[:, 1], s=30, color=pal["navy"], marker="s",
+               label="survived (label 1)")
+    xs = np.linspace(0.5, 5.8, 10)
+    ax.plot(xs, 6.2 - xs, color=pal["blue"], lw=1.8, ls="--")
+    ax.legend(loc="upper right", fontsize=7.2, frameon=False)
+    ax.set_title("Supervised: every example\ncomes with its answer",
+                 fontsize=10)
+    ax.text(3.0, 0.25, "learn the line that\nseparates the two answers",
+            ha="center", fontsize=7.8, color=pal["gray"])
+    ax = axes[1]
+    centers = np.array([[1.6, 1.9], [4.4, 2.1], [3.0, 4.5]])
+    pts = np.vstack([rng.normal(c, 0.42, (22, 2)) for c in centers])
+    k = np.array([[1.0, 1.0], [3.0, 3.0], [5.0, 5.0]])
+    for _ in range(8):
+        d = ((pts[:, None, :] - k[None, :, :]) ** 2).sum(-1)
+        lab = d.argmin(1)
+        k = np.array([pts[lab == j].mean(0) if (lab == j).any() else k[j]
+                      for j in range(3)])
+    ax.scatter(pts[:, 0], pts[:, 1], s=26, color=pal["gray"], alpha=0.7)
+    for j in range(3):
+        r = np.sqrt(((pts[lab == j] - k[j]) ** 2).sum(1)).max() + 0.15
+        ax.add_patch(Circle(k[j], r, facecolor="none", edgecolor=pal["blue"],
+                            lw=1.3, ls="--"))
+    ax.scatter(k[:, 0], k[:, 1], s=150, marker="*", color=pal["blue"],
+               zorder=4)
+    ax.set_title("Unsupervised: no answers -\nfind the groups yourself",
+                 fontsize=10)
+    ax.text(3.0, 0.25, "gray = unlabeled; stars = group\ncenters found "
+            "(k-means)", ha="center", fontsize=7.8, color=pal["gray"])
+    for ax in axes[:2]:
+        ax.set_xlim(0, 6)
+        ax.set_ylim(-0.4, 6.9)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_xlabel("feature 1", fontsize=8.5)
+        ax.set_ylabel("feature 2", fontsize=8.5)
+    ax = axes[2]
+    ax.add_patch(FancyBboxPatch((0.3, 3.7), 2.8, 1.3, boxstyle="round,pad=0.05",
+                                facecolor=pal["blue"], edgecolor=pal["blue"]))
+    ax.text(1.7, 4.35, "THE LEARNER", ha="center", va="center", color="white",
+            fontweight="bold", fontsize=8.8)
+    ax.add_patch(FancyBboxPatch((2.9, 1.0), 3.0, 1.3, boxstyle="round,pad=0.05",
+                                facecolor=pal["panel"], edgecolor=pal["sky"]))
+    ax.text(4.4, 1.65, "THE WORLD\n(a game, a market...)", ha="center",
+            va="center", color=pal["navy"], fontweight="bold", fontsize=7.8)
+    ax.add_patch(FancyArrowPatch((2.7, 3.6), (4.1, 2.4),
+                                 connectionstyle="arc3,rad=-0.35",
+                                 arrowstyle="-|>", mutation_scale=14,
+                                 color=pal["navy"], lw=1.5))
+    ax.text(4.3, 3.55, "acts", fontsize=8.8, color=pal["navy"],
+            fontweight="bold")
+    ax.add_patch(FancyArrowPatch((3.15, 1.35), (1.4, 3.6),
+                                 connectionstyle="arc3,rad=-0.35",
+                                 arrowstyle="-|>", mutation_scale=14,
+                                 color=pal["blue"], lw=1.5))
+    ax.text(0.7, 2.35, "reward or\npenalty", fontsize=8.8, color=pal["blue"],
+            fontweight="bold", ha="center")
+    ax.set_title("Reinforcement: no examples -\nact, get rewarded, improve",
+                 fontsize=10)
+    ax.text(3.0, 0.25, "Samuel's checkers program\nimproving through wins "
+            "and losses", ha="center", fontsize=7.8, color=pal["gray"])
+    ax.set_xlim(0, 6)
+    ax.set_ylim(-0.4, 6.9)
+    ax.axis("off")
+    fig.tight_layout(w_pad=1.2)
+    fig.savefig(f"{FIGS_THEORY}/s1_three_families.png")
+    plt.close(fig)
+
+
+def make_labels_fig():
+    """Where labels come from: a CAPTCHA-style picture puzzle on the left,
+    the training table it silently produces on the right. Schematic."""
+    from matplotlib.patches import Rectangle, FancyBboxPatch, FancyArrowPatch
+    fig, ax = plt.subplots(figsize=(7.6, 4.8))
+    cx, cy, cw, ch = 0.15, 0.3, 3.0, 4.4
+    ax.add_patch(FancyBboxPatch((cx, cy), cw, ch, boxstyle="round,pad=0.03",
+                                facecolor="white", edgecolor=pal["gray"],
+                                lw=1.2))
+    ax.add_patch(Rectangle((cx, cy + ch - 1.0), cw, 1.0, facecolor=pal["blue"]))
+    ax.text(cx + 0.18, cy + ch - 0.32, "Select all squares with", fontsize=8.6,
+            color="white", va="center")
+    ax.text(cx + 0.18, cy + ch - 0.7, "traffic lights", fontsize=12.5,
+            color="white", fontweight="bold", va="center")
+    cell, gap = 0.85, 0.1
+    g0x, g0y = cx + 0.22, cy + 0.25
+    selected = {(0, 1), (1, 1), (2, 2)}
+    for r in range(3):
+        for c in range(3):
+            x = g0x + c * (cell + gap)
+            y = g0y + (2 - r) * (cell + gap)
+            sel = (r, c) in selected
+            ax.add_patch(Rectangle((x, y), cell, cell,
+                                   facecolor=pal["sky"] if sel else pal["panel"],
+                                   edgecolor=pal["blue"] if sel else pal["sky"],
+                                   lw=2 if sel else 1))
+            if sel:
+                ax.plot([x + 0.2, x + 0.38, x + 0.68],
+                        [y + 0.42, y + 0.22, y + 0.64], color=pal["blue"],
+                        lw=2.4, solid_capstyle="round")
+    ax.add_patch(FancyArrowPatch((3.3, 2.5), (3.95, 2.5), arrowstyle="-|>",
+                                 mutation_scale=20, color=pal["navy"], lw=2.2))
+    ax.text(3.62, 2.8, "your click", ha="center", fontsize=8.5,
+            color=pal["navy"], fontweight="bold")
+    ax.text(3.62, 2.12, "= one label", ha="center", fontsize=8.5,
+            color=pal["navy"], fontweight="bold")
+    tx, tw, ty = 4.05, 3.6, 3.9
+    ax.add_patch(Rectangle((tx, ty), tw, 0.5, facecolor=pal["navy"]))
+    ax.text(tx + 0.1, ty + 0.25, "SQUARE - the picture (X)", va="center",
+            fontsize=8.2, color="white", fontweight="bold")
+    ax.text(tx + 2.05, ty + 0.25, "TRAFFIC LIGHT? (y)", va="center",
+            fontsize=8.2, color="white", fontweight="bold")
+    rows = [("square 1", "0"), ("square 2", "1"), ("square 3", "0"),
+            ("square 5", "1"), ("...", "..."), ("square 9", "1")]
+    for i, (a, b) in enumerate(rows):
+        y = ty - (i + 1) * 0.48
+        ax.add_patch(Rectangle((tx, y), tw, 0.48,
+                               facecolor="white" if i % 2 else pal["panel"],
+                               edgecolor=pal["sky"], lw=0.8))
+        ax.text(tx + 0.1, y + 0.24, a, va="center", fontsize=9,
+                color=pal["ink"])
+        ax.text(tx + 2.05, y + 0.24, b, va="center", fontsize=9.5,
+                color=pal["blue"] if b == "1" else pal["ink"],
+                fontweight="bold")
+    ax.text(tx + tw / 2, 0.62, "the same shape as our manifest:\nfeatures + "
+            "the answer someone wrote down", ha="center", va="center",
+            fontsize=8.6, color=pal["navy"], fontweight="bold",
+            linespacing=1.3)
+    ax.set_xlim(0, 7.8)
+    ax.set_ylim(0.15, 4.85)
+    ax.axis("off")
+    fig.savefig(f"{FIGS_THEORY}/s1_labels_captcha.png")
+    plt.close(fig)
+
+
+def make_sample_population_fig():
+    """The M1 leap (sample -> population) beside ML's (train -> unseen).
+    Real counts: Encyclopedia Titanica for the population, our file for
+    the sample."""
+    fig, ax = plt.subplots(figsize=(7.6, 4.8))
+    bars = [(2.55, "THE POPULATION - all 1,317 passengers who sailed",
+             500, 817, "38.0% survived"),
+            (1.15, "THE SAMPLE - the 891 passengers in our file",
+             342, 549, "38.4% survived")]
+    for y, name, surv, died, pct in bars:
+        ax.text(0, y + 0.42, name, fontsize=10, fontweight="bold",
+                color=pal["navy"], va="bottom")
+        ax.barh(y, surv, height=0.58, color=pal["blue"])
+        ax.barh(y, died, left=surv, height=0.58, color=pal["navy"])
+        ax.text(surv / 2, y, f"{surv} survived", ha="center", va="center",
+                color="white", fontsize=9.5, fontweight="bold")
+        ax.text(surv + died / 2, y, f"{died} died", ha="center", va="center",
+                color="white", fontsize=9.5, fontweight="bold")
+        ax.text(surv + died + 25, y, pct, va="center", fontsize=10.5,
+                fontweight="bold", color=pal["blue"])
+    ax.annotate("", xy=(1050, 2.24), xytext=(1050, 1.46),
+                arrowprops=dict(arrowstyle="-|>", color=pal["gray"], lw=1.6))
+    ax.text(1080, 1.85, "M1's leap, inference:\nmeasure the sample,\n"
+            "conclude about everyone", va="center", fontsize=8.8,
+            color=pal["gray"], linespacing=1.25)
+    ax.text(0, 0.35, "ML's leap has the same shape: rules learned on the rows "
+            "you have, judged on rows you never saw.\nBoth rest on one "
+            "assumption: the part you hold looks like the whole.",
+            fontsize=9.3, color=pal["navy"], va="center", linespacing=1.35)
+    ax.set_xlim(-10, 1700)
+    ax.set_ylim(-0.1, 3.3)
+    ax.axis("off")
+    fig.savefig(f"{FIGS_THEORY}/s1_sample_population.png")
+    plt.close(fig)
+
+
 def slides():
     prs = ds.new_deck()
 
@@ -543,8 +884,8 @@ def slides():
             "Rung 3 is this module: what will happen to a NEW, unseen case?",
             "Rung 4, prescriptive: what should we do? It needs a trusted "
             "model first",
-            "M1 skills stay in daily use: 80% of the work is still "
-            "cleaning and describing",
+            "M1 skills stay in daily use: loading and cleaning data still "
+            "eat about 45% of a data scientist's time (Anaconda 2020 survey)",
             "The climb here: S1 ideas and honest splits; S2 features; "
             "S3 the model tournament; S4 tune and ship",
         ],
@@ -558,75 +899,119 @@ def slides():
              "question out loud - what happened, why, what will happen, what "
              "should we do. Ask the class: where on this ladder does a "
              "weather forecast sit?")
-    # 4. What machine learning is (absorbs old types table + everyday examples)
-    s = ds.bullets_slide(
+    # NEW - Where ML sits: AI, ML, DL as nested circles
+    s = ds.image_slide(
+        prs,
+        "Machine learning is one circle inside AI - and deep learning one "
+        "circle inside that",
+        f"{FIGS_THEORY}/s1_ai_circles.png",
+        kicker="Where ML sits",
+        caption="How to read it: each circle contains the next; the dot on "
+                "each circle's edge leads to its plain-words definition. "
+                "Illustration. Nesting: Goodfellow, Bengio & Courville, "
+                "Deep Learning (2016), Fig. 1.4.",
+    )
+    notes(s, "Three words the students hear every week, sorted once: AI is "
+             "the whole circle - any machine doing something we would call "
+             "thinking, including a chess program whose every rule a person "
+             "typed. Machine learning is the part that learns its rules from "
+             "examples - this module lives here. Deep learning is one way of "
+             "doing ML, with many-layered neural networks; it is a later "
+             "course. Ask the class: a thermostat that switches on below 18 "
+             "degrees - which circle is it in, if any?")
+
+    # REPLACED - the rules flip (was a bullets-only slide)
+    s = ds.image_slide(
         prs,
         "ML learns the rules from examples instead of being told them",
-        [
-            ("Classic programming: a human writes the rules by hand",
-             ["A spam rule list - block 'winner', block ALL CAPS, block "
-              "unknown senders - never ends",
-              "Spammers adapt faster than you can type new rules"]),
-            ("Machine learning: you show labeled examples - the algorithm "
-             "finds the rules",
-             ["Arthur Samuel: the \"field of study that gives computers the "
-              "ability to learn without being explicitly programmed\"",
-              "His 1950s checkers program beat its own programmer after "
-              "tens of thousands of self-played games"]),
-            ("It is already in your day",
-             ["Recommendations predict your next pick; map arrival times "
-              "predict a trip nobody has driven"]),
-            "Our data, same move: 891 passengers with known outcomes in - "
-            "a pattern that predicts new ones out",
-            "A model = a function with adjustable knobs (its parameters)",
-            "Training = turning the knobs until predictions match the "
-            "examples",
-        ],
+        f"{FIGS_THEORY}/s1_rules_flip.png",
         kicker="What ML is",
-        note="Samuel's phrase, quoted by Ng - Machine Learning "
-             "Specialization C1W1.",
+        bullets=[
+            "How to read it: top lane, a person writes the rules; bottom "
+            "lane, the rules come out",
+            "Spam by hand: block 'winner', block ALL CAPS - the list never "
+            "ends, spammers adapt faster",
+            "Faces by hand failed for decades: 'find two eyes and a nose' "
+            "barely worked; learning from labeled photos did",
+            "Arthur Samuel: computers that learn 'without being explicitly "
+            "programmed'",
+            "Our move: 891 passengers with known outcomes in - a rule that "
+            "predicts new ones out",
+            "A model = a function with adjustable knobs; training = turning "
+            "them until predictions match the examples",
+        ],
+        caption="The flip: rules + data give answers; data + answers give "
+                "rules. Chollet, Deep Learning with Python (2017), Fig. 1.2. "
+                "Samuel's phrase as quoted by Ng, C1W1.",
     )
-    notes(s, "Two ways to get rules into a computer: write them yourself, or "
-             "show labeled examples and let the algorithm find the rules. "
-             "Spam is the perfect story - a hand-written rule list never "
-             "ends, spammers adapt faster than you type. Ask the class: what "
-             "would YOUR three spam rules be, and how would a spammer dodge "
-             "each one within a week?")
+    notes(s, "Teach the picture first: the top lane is every program ever "
+             "written - a person writes the rules, data goes in, answers "
+             "come out. The bottom lane swaps the last two pieces: data and "
+             "answers go in, and the RULES come out. Spam is the perfect "
+             "story - a hand-written rule list never ends. Face detection is "
+             "the historical one: decades of hand-coding 'two eyes and a "
+             "nose' barely worked; learning from labeled photos did. Ask the "
+             "class: what would YOUR three spam rules be, and how would a "
+             "spammer dodge each one within a week?")
 
-    # Types of machine learning - the three families
-    s = ds.bullets_slide(
+    # NEW - AI is not new: the timeline
+    s = ds.image_slide(
+        prs,
+        "The ideas are 70 years old - what changed in the 2010s was data "
+        "and computing power",
+        f"{FIGS_THEORY}/s1_timeline.png",
+        kicker="AI is not new",
+        caption="Evenly spaced, not to scale. Gray = hand-written rules, blue "
+                "= machine learning, navy = deep learning. Dates from the "
+                "original papers and match records (Turing 1950; Samuel "
+                "1959; Rosenblatt 1958; Rumelhart, Hinton & Williams 1986; "
+                "Krizhevsky et al. 2012; Silver et al. 2016).",
+    )
+    notes(s, "Walk left to right and let the years sink in: the question is "
+             "from 1950, the first learning program from 1955, the first "
+             "learning neuron from 1957. Point at the colors - gray dots are "
+             "hand-written rules (Deep Blue searched millions of positions "
+             "but learned nothing), blue and navy dots learn from data. Then "
+             "the bracket: the 2010s did not bring new ideas, they brought "
+             "enough labeled data and enough computing power to make the "
+             "old ideas work. Ask the class: why did Samuel's program have "
+             "to wait 60 years for its ideas to run on your phone?")
+
+
+    # REPLACED - Types of machine learning: the three families, drawn
+    s = ds.image_slide(
         prs,
         "Machines learn in three ways - this module lives in the first",
-        [
-            ("Supervised learning: the examples include the right answer "
-             "(the label)",
-             ["A spam filter learns from mail already marked spam or "
-              "not spam",
-              "Ours: 891 passengers, each labeled Survived - 1 or 0"]),
-            ("Unsupervised learning: no labels - find the structure "
-             "yourself",
-             ["Grouping shoppers into segments nobody named in advance: "
-              "there is no right answer in the data to copy"]),
-            ("Reinforcement learning: no examples at all - act, get "
-             "rewarded or penalized, improve",
-             ["Samuel's checkers program improving through wins and losses "
-              "in self-play is the classic seed of the idea"]),
-            "The families differ in what the data gives you: answers, "
-            "no answers, or only consequences",
-            "This module is supervised classification end to end - the "
-            "other two families are a later course",
-        ],
+        f"{FIGS_THEORY}/s1_three_families.png",
         kicker="Types of machine learning",
-        note="Supervised learning comes first because it covers most ML "
-             "used in industry today - Ng, Machine Learning Specialization "
-             "C1W1.",
+        bullets=[
+            "How to read it: one panel per family; what differs is what "
+            "the data hands you",
+            "Supervised: every example carries its answer - our 891 "
+            "passengers each labeled Survived, 1 or 0",
+            "Unsupervised: no answers - the algorithm finds groups nobody "
+            "named, like shopper segments",
+            "Reinforcement: no examples at all - act, get rewarded or "
+            "penalized, improve",
+            "In plain words: answers given, answers absent, or only "
+            "consequences",
+            "This module is supervised classification end to end - the "
+            "other two are a later course",
+        ],
+        caption="Illustration - synthetic points. Supervised learning comes "
+                "first because it covers most ML used in industry today: "
+                "Ng, Machine Learning Specialization C1W1.",
     )
-    notes(s, "The three families differ only in what the data hands you: the "
-             "right answers (supervised), no answers (unsupervised), or only "
-             "consequences after acting (reinforcement). Everything in this "
-             "module is supervised - our passengers come with the answer "
-             "attached: survived or not. Ask the class: grouping customers "
-             "into types nobody named in advance - which family is that?")
+    notes(s, "Walk the three panels: left, dots already carry their answer "
+             "(blue died, navy survived) and we learn the line between "
+             "them. Middle, gray dots with no answer - the algorithm draws "
+             "the groups itself; the stars are the group centers k-means "
+             "found. Right, no data table at all: the learner acts on a "
+             "world and gets a reward or a penalty - Samuel's checkers "
+             "program improving through wins and losses. Everything in this "
+             "module is the left panel. Ask the class: grouping customers "
+             "into types nobody named in advance - which panel is that?")
+
 
     # 5. Features and target
     s = ds.two_col_slide(
@@ -658,6 +1043,42 @@ def slides():
              "is the whole distinction. Ask the class: same table, but now "
              "predict the Fare a passenger paid - classification or "
              "regression?")
+
+    # NEW - Where labels come from (and who pays for them)
+    s = ds.image_slide(
+        prs,
+        "Labels are the expensive half - someone, somewhere, wrote every "
+        "answer down",
+        f"{FIGS_THEORY}/s1_labels_captcha.png",
+        kicker="Where y comes from",
+        bullets=[
+            "How to read it: left, a puzzle you have solved a hundred "
+            "times; right, the table your clicks quietly build",
+            "Our labels: the Survived column came from the 1912 survivor "
+            "lists - history did the labeling",
+            "Spam labels: every 'report spam' click you ever made",
+            "The puzzles: reCAPTCHA began by making millions of people "
+            "transcribe words from scanned books",
+            "Its picture puzzles are widely reported to double as labeled "
+            "images for vision models - debate: are we training "
+            "self-driving cars for free?",
+            "No labels, no supervised learning - which is why labeled data "
+            "is worth so much",
+        ],
+        caption="Schematic, not a real puzzle. Book transcription: von Ahn "
+                "et al., 'reCAPTCHA: Human-Based Character Recognition via "
+                "Web Security Measures', Science, 2008.",
+    )
+    notes(s, "Exam terms: the label is the answer key, and somebody has to "
+             "write it. For the Titanic, history did it - the survivor lists "
+             "of 1912 became our Survived column. For spam, you do it every "
+             "time you click 'report spam'. Then the puzzle: the original "
+             "reCAPTCHA had millions of people transcribe words scanners "
+             "could not read, digitizing whole newspaper archives; the "
+             "picture version is widely reported to label street images "
+             "for vision models. Run the debate: are we training "
+             "self-driving cars for free - and is that a fair trade for a "
+             "free login check?")
 
     # 6. NEW - Frame B: Y = f(X) + epsilon, reducible vs irreducible error
     s = ds.image_slide(
@@ -707,8 +1128,9 @@ def slides():
             "rests on one assumption",
             "The assumption (called i.i.d.): new data looks like old - "
             "no assumption, no leap",
-            "MIT splits the job in two: estimation - see through the "
-            "noise; generalization - answer for inputs never seen",
+            "MIT splits the job in two: estimation - the room's true "
+            "temperature from noisy readings; generalization - tomorrow's "
+            "temperature",
             "Part 2 builds this exact leap: 712 passengers teach a rule; "
             "179 unseen ones judge it",
         ],
@@ -717,10 +1139,49 @@ def slides():
     )
     notes(s, "Lead with the dog photos: after ten photos of dogs you "
              "recognize an eleventh you have never seen - that is all "
-             "learning is. It works only because tomorrow resembles "
+             "learning is. MIT's two jobs, on a thermometer: estimation "
+             "is guessing the room's true temperature from a handful of "
+             "noisy readings (63, 74, 51...); generalization is predicting "
+             "tomorrow's temperature from a year of readings. It works "
+             "only because tomorrow resembles "
              "yesterday; that assumption is the bridge, not a proof. Ask the "
              "class: give me a case where tomorrow does NOT resemble "
              "yesterday - would a model trained on the past still work?")
+
+    # NEW - The leap has a name from M1: sample -> population
+    s = ds.image_slide(
+        prs,
+        "You made this leap in M1 already - from a sample to the "
+        "population; ML calls it generalization",
+        f"{FIGS_THEORY}/s1_sample_population.png",
+        kicker="The bridge from inferential statistics",
+        bullets=[
+            "How to read it: top bar, everyone who sailed; bottom bar, the "
+            "891 rows in our file; blue = survived",
+            "In plain words: the population is everyone you care about; "
+            "the sample is the part you actually hold",
+            "1,317 passengers sailed; 500 survived - 38.0%. Our file holds "
+            "891 of them; 342 survived - 38.4%",
+            "M1's inference: measure the sample, conclude about the "
+            "population - the sample's 38.4% estimates the true 38.0%",
+            "ML's generalization: learn on the rows you have, judge on rows "
+            "you never saw - same leap, new name",
+            "Both need the same assumption: the part you hold looks like "
+            "the whole (i.i.d. again)",
+        ],
+        caption="Population counts: Encyclopedia Titanica, 'The Statistics "
+                "of the Disaster'. Sample: Module 2, notebook 01. Kaggle "
+                "keeps 418 more rows as its own sealed test set.",
+    )
+    notes(s, "Reassure them again: they made this exact leap in M1. There "
+             "it was called inference - measure a sample, conclude about the "
+             "population. Read the two bars: 1,317 passengers sailed and "
+             "38.0% survived; our file holds 891 of them and says 38.4%. The "
+             "sample estimated the truth well because it looks like the "
+             "whole. ML makes the same leap sideways: rules learned on the "
+             "rows you have, judged on rows you never saw. Same leap, same "
+             "assumption, new name. Ask the class: our file has no crew and "
+             "skips 426 passengers - when would that break the leap?")
 
     # NEW - The hypothesis class (MIT)
     s = ds.image_slide(
@@ -910,9 +1371,9 @@ def slides():
             "Harvard's version has five stages - ask, get, explore, "
             "model, communicate; modeling is one box of five",
         ],
-        caption="Harvard CS109A teaches the same shape: one workflow "
-                "revisited all semester on messy real data. Source: Harvard "
-                "CS109A, Lecture 1 (the data science process).",
+        caption="Harvard CS109A teaches the same shape (Lecture 1, the data "
+                "science process); so does the business-analytics cycle - "
+                "state the metric, find the data, prepare, analyze, present.",
     )
     notes(s, "Walk the boxes left to right - prepare, train, evaluate, "
              "improve - then stop on the long arrow underneath: evaluation "
@@ -980,9 +1441,10 @@ def slides():
         prs,
         "You now predict, not describe - and every claim gets a number",
         [
-            "Part 1, the ideas: ML learns rules from labeled examples, "
-            "then leaps to unseen cases",
-            "One assumption allows the leap: new data looks like old",
+            "Part 1, the ideas: ML is the learning circle inside AI - it "
+            "learns rules from labeled examples, then leaps to unseen cases",
+            "One assumption allows the leap: new data looks like old - "
+            "M1's sample-to-population leap, renamed",
             "You choose the hypothesis class; every learner = model + "
             "loss + optimizer",
             "Training = making one number, the cost J, small; and Y = "
@@ -1010,6 +1472,12 @@ if __name__ == "__main__":
     make_loop_chart()
     make_hero_fig()
     make_ladder_fig()
+    make_ai_circles_fig()
+    make_timeline_fig()
+    make_rules_flip_fig()
+    make_three_families_fig()
+    make_labels_fig()
+    make_sample_population_fig()
     prs = slides()
     out = "../m2-session-1-machine-learning-fundamentals.pptx"
     ds.save_deck(prs, out, "M2 Session 1 - Machine Learning Fundamentals")
