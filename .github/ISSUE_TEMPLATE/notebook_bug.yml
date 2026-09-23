@@ -1,0 +1,44 @@
+name: Notebook does not run
+description: A cell fails, hangs, or gives an unexpected result
+title: "[M?-0?] short description"
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: notebook
+    attributes:
+      label: Notebook
+      options:
+        - M1-01 Data cleaning
+        - M1-02 Descriptive statistics
+        - M1-03 Visualization and dashboards
+        - M2-01 Data prep and feature engineering
+        - M2-02 Model selection
+        - M2-03 Model optimization and deployment
+        - M3-01 ML system architectures
+        - M3-02 Deploying models in the cloud
+        - M3-03 Consuming models from applications
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Where did you run it?
+      options:
+        - Google Colab
+        - Local Jupyter (macOS)
+        - Local Jupyter (Windows)
+        - Local Jupyter (Linux)
+    validations:
+      required: true
+  - type: textarea
+    id: cell
+    attributes:
+      label: Which cell, and what happened?
+      description: Paste the error message. Never paste tokens, passwords or personal data.
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Python and pandas versions (optional)
+      placeholder: "Python 3.12, pandas 2.2"

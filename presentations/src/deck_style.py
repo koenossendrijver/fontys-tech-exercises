@@ -46,14 +46,14 @@ def _fill(shape, color):
     shape.shadow.inherit = False
 
 
-def _rect(slide, l, t, w, h, color):
-    shp = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, l, t, w, h)
+def _rect(slide, left, t, w, h, color):
+    shp = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, left, t, w, h)
     _fill(shp, color)
     return shp
 
 
-def _box(slide, l, t, w, h):
-    box = slide.shapes.add_textbox(l, t, w, h)
+def _box(slide, left, t, w, h):
+    box = slide.shapes.add_textbox(left, t, w, h)
     box.text_frame.word_wrap = True
     return box
 
@@ -159,11 +159,11 @@ def bullets_slide(prs, title, bullets, kicker="", note=None):
     return s
 
 
-def _panel(slide, l, t, w, h, heading, lines, fill=PANEL, head_color=NAVY):
-    _rect(slide, l, t, w, h, fill)
-    hb = _box(slide, l + Inches(0.25), t + Inches(0.18), w - Inches(0.5), Inches(0.4))
+def _panel(slide, left, t, w, h, heading, lines, fill=PANEL, head_color=NAVY):
+    _rect(slide, left, t, w, h, fill)
+    hb = _box(slide, left + Inches(0.25), t + Inches(0.18), w - Inches(0.5), Inches(0.4))
     _para(hb.text_frame, heading, 15, head_color, bold=True, first=True)
-    bb = _box(slide, l + Inches(0.25), t + Inches(0.62), w - Inches(0.5), h - Inches(0.8))
+    bb = _box(slide, left + Inches(0.25), t + Inches(0.62), w - Inches(0.5), h - Inches(0.8))
     tf = bb.text_frame
     first = True
     for line in lines:

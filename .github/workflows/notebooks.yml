@@ -1,0 +1,44 @@
+name: Execute notebooks
+
+# Every notebook is run top to bottom in a clean environment, exactly as a
+# student would. Runs on pull requests that touch notebooks, weekly, and on demand.
+on:
+  pull_request:
+    paths:
+      - "**/*.ipynb"
+      - "requirements*.txt"
+      - "scripts/run_notebooks.sh"
+      - ".github/workflows/notebooks.yml"
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  execute:
+    name: ${{ matrix.notebook }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        notebook:
+          - "M1 - Descriptive analytics/01-data-cleaning.ipynb"
+          - "M1 - Descriptive analytics/02-descriptive-statistics.ipynb"
+          - "M1 - Descriptive analytics/03-visualization-and-dashboards.ipynb"
+          - "M2 - Machine Learning/01-data-prep-and-feature-engineering.ipynb"
+          - "M2 - Machine Learning/02-model-selection.ipynb"
+          - "M2 - Machine Learning/03-model-optimization-and-deployment.ipynb"
+          - "M3 - ML Architectures and Deployment/01-ml-system-architectures.ipynb"
+          - "M3 - ML Architectures and Deployment/02-deploying-models-in-the-cloud.ipynb"
+          - "M3 - ML Architectures and Deployment/03-consuming-models-from-applications.ipynb"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - run: scripts/run_notebooks.sh "${{ matrix.notebook }}"

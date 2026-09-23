@@ -1,0 +1,110 @@
+{
+ "trained_on": "712 training rows (80/20 stratified split, random_state=42), course recipe from M2 notebook 01/02",
+ "test_accuracy": 0.838,
+ "test_f1": 0.779,
+ "test_auc": 0.878,
+ "numeric": [
+  "Age",
+  "Fare",
+  "SibSp",
+  "Parch",
+  "FamilySize"
+ ],
+ "medians": {
+  "Age": 28.5,
+  "Fare": 14.4542,
+  "SibSp": 0.0,
+  "Parch": 0.0,
+  "FamilySize": 1.0
+ },
+ "means": {
+  "Age": 29.556067,
+  "Fare": 31.819826,
+  "SibSp": 0.492978,
+  "Parch": 0.390449,
+  "FamilySize": 1.883427
+ },
+ "scales": {
+  "Age": 13.016122,
+  "Fare": 48.025343,
+  "SibSp": 1.059975,
+  "Parch": 0.837545,
+  "FamilySize": 1.58793
+ },
+ "categorical": [
+  "Pclass",
+  "Sex",
+  "Embarked",
+  "Title"
+ ],
+ "cat_modes": {
+  "Pclass": "3",
+  "Sex": "male",
+  "Embarked": "S",
+  "Title": "Mr"
+ },
+ "categories": {
+  "Pclass": [
+   "1",
+   "2",
+   "3"
+  ],
+  "Sex": [
+   "female",
+   "male"
+  ],
+  "Embarked": [
+   "C",
+   "Q",
+   "S"
+  ],
+  "Title": [
+   "Master",
+   "Miss",
+   "Mr",
+   "Mrs",
+   "Rare"
+  ]
+ },
+ "feature_names": [
+  "Age",
+  "Fare",
+  "SibSp",
+  "Parch",
+  "FamilySize",
+  "Pclass_1",
+  "Pclass_2",
+  "Pclass_3",
+  "Sex_female",
+  "Sex_male",
+  "Embarked_C",
+  "Embarked_Q",
+  "Embarked_S",
+  "Title_Master",
+  "Title_Miss",
+  "Title_Mr",
+  "Title_Mrs",
+  "Title_Rare"
+ ],
+ "coef": [
+  -0.383078,
+  0.169124,
+  -0.280539,
+  -0.10656,
+  -0.243469,
+  1.012581,
+  -0.015849,
+  -0.992989,
+  0.83452,
+  -0.830778,
+  0.057779,
+  0.271685,
+  -0.325721,
+  1.38122,
+  -0.125857,
+  -1.238914,
+  0.559717,
+  -0.572424
+ ],
+ "intercept": 0.682734
+}

@@ -19,3 +19,13 @@ outputs/
 
 # Microsoft Office lock files
 ~$*
+
+# Local scratch from coding agents and one-off experiments
+.codex-*/
+.claude/
+
+# Local site preview and Python build artifacts
+docs/.cache/
+*.egg-info/
+build/
+dist/

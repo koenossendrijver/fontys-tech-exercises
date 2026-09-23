@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Manifest - Fontys Tech Exercises</title>
+  <meta name="description" content="891 passengers, twelve columns, one night in April 1912. The dataset behind nine notebooks on data analytics, machine learning and deployment, and what it teaches.">
+  <meta property="og:title" content="The Manifest - Fontys Tech Exercises">
+  <meta property="og:description" content="The story of the Titanic dataset that carries a nine-notebook course from data cleaning to a model running in your browser.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Instrument+Sans:ital,wght@0,400..700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#story">Skip to content</a>
+
+<header class="topbar" id="top">
+  <a class="brand" href="#top">
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17c2.2 0 2.2 1.6 4.4 1.6S9.6 17 11.8 17s2.2 1.6 4.4 1.6 2.2-1.6 4.4-1.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M5 14 7.5 6h9L19 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 6V3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <span>Fontys Tech Exercises</span>
+  </a>
+  <nav class="chapters" aria-label="Chapters">
+    <a href="#dots" data-chapter="dots">Each dot is a person</a>
+    <a href="#describe" data-chapter="describe">M1 Describe</a>
+    <a href="#predict" data-chapter="predict">M2 Predict</a>
+    <a href="#model" data-chapter="model">Run the model</a>
+    <a href="#deploy" data-chapter="deploy">M3 Deploy</a>
+    <a href="#course" data-chapter="course">The course</a>
+  </nav>
+  <div class="topbar-actions">
+    <a class="ghost" href="https://github.com/maglionejm/fontys-tech-exercises" rel="noopener">Source</a>
+    <button class="theme" id="theme-toggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+      <span class="theme-track"><span class="theme-knob"></span></span>
+    </button>
+  </div>
+</header>
+
+<main id="story">
+
+  <!-- ============================== HERO ============================== -->
+  <section class="hero" id="hero">
+    <div class="sea" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <p class="kicker reveal">A course in nine notebooks<span class="sep"></span>Fontys</p>
+      <h1 class="reveal">The manifest that taught a machine to&nbsp;<em>predict</em></h1>
+      <p class="lede reveal">891 passengers. Twelve columns. One night in April 1912. Every notebook in this course works the same passenger list, from cleaning it to serving a model that reads it. This page tells the dataset's story and shows what the notebooks produce.</p>
+      <div class="hero-actions reveal">
+        <a class="btn primary" href="https://colab.research.google.com/github/maglionejm/fontys-tech-exercises/blob/main/M1%20-%20Descriptive%20analytics/01-data-cleaning.ipynb" rel="noopener">Open notebook 1 in Colab</a>
+        <a class="btn" href="#course">Browse the course</a>
+      </div>
+      <dl class="stats reveal">
+        <div><dt>Rows</dt><dd data-count="891">0</dd></div>
+        <div><dt>Columns</dt><dd data-count="12">0</dd></div>
+        <div><dt>Survived</dt><dd data-count="342">0</dd></div>
+        <div><dt>Survival rate</dt><dd data-count="38.4" data-suffix="%" data-decimals="1">0</dd></div>
+        <div><dt>Ages missing</dt><dd data-count="177">0</dd></div>
+      </dl>
+    </div>
+    <div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker"></div></div>
+  </section>
+
+  <!-- ============================== UNIT CHART ============================== -->
+  <section class="chapter scrolly" id="dots">
+    <div class="chapter-head">
+      <p class="kicker">Chapter 1<span class="sep"></span>The whole table at once</p>
+      <h2>Each dot is a person</h2>
+      <p class="chapter-lede">A row in a table is easy to forget. Drawn as 891 dots, the manifest becomes a crowd, and every split the course makes, by class, by sex, by age, is a rearrangement of the same people. Scroll: the dots move, nobody is added or removed.</p>
+    </div>
+    <div class="scrolly-grid">
+      <div class="steps">
+        <article class="step is-active" data-layout="manifest">
+          <h3>891 rows, in manifest order</h3>
+          <p>Passenger 1 top-left, passenger 891 bottom-right. Teal dots survived, ember dots did not. In this order the outcome looks like noise. Everything the course does is a search for the order in which it stops looking like noise.</p>
+          <p class="fig">342 survived, 549 died. 38.4% is the number every model must beat.</p>
+        </article>
+        <article class="step" data-layout="outcome">
+          <h3>Sorted by outcome</h3>
+          <p>The same dots, survivors gathered on the left. This is what the target column looks like on its own: imbalanced but not extremely. A model that always says "died" is right 61.7% of the time. That is the floor, not an achievement.</p>
+        </article>
+        <article class="step" data-layout="class">
+          <h3>Split by ticket class</h3>
+          <p>Three columns, survivors at the top of each. First class survived at 63%, second at 47%, third at 24%. The column widths are the crowd sizes: more than half the passengers travelled third class.</p>
+        </article>
+        <article class="step" data-layout="sex">
+          <h3>Split by sex</h3>
+          <p>The strongest single signal in the table. 74% of women survived; 19% of men did. Session 3 of the machine learning module shows that a model given only this column already beats the floor by a wide margin.</p>
+        </article>
+        <article class="step" data-layout="classsex">
+          <h3>Class and sex together</h3>
+          <p>Six groups. First-class women survived at 97%, third-class men at 13%. Two columns explain most of the story, which is why the course spends so long on features before it spends any time on algorithms.</p>
+        </article>
+        <article class="step" data-layout="age">
+          <h3>By age, including the 177 blanks</h3>
+          <p>Children under 13 survived at 58%, passengers over 60 at 27%. The hollow dots are the 177 passengers with no recorded age. The first notebook of the ML module fills them with the training set's median, 28.5 years, and never with the test set's.</p>
+        </article>
+      </div>
+      <div class="sticky-viz">
+        <div class="viz-frame">
+          <div class="viz-legend" aria-hidden="true">
+            <span><i class="sw survived"></i>survived</span>
+            <span><i class="sw died"></i>died</span>
+            <span><i class="sw unknown"></i>age unknown</span>
+          </div>
+          <svg id="unit-chart" viewBox="0 0 900 790" role="img" aria-label="891 dots, one per passenger, colored by outcome and arranged by the selected split"></svg>
+          <p class="viz-caption" id="unit-caption">All 891 passengers in manifest order.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== THREE PASSENGERS ============================== -->
+  <section class="chapter" id="faces">
+    <div class="chapter-head">
+      <p class="kicker">Chapter 2<span class="sep"></span>Three rows with faces</p>
+      <h2>Owen, Florence and Frankie</h2>
+      <p class="chapter-lede">Three real rows return in every session of the course: their gaps get filled, their names get mined for titles, their odds get predicted. Fields below are verbatim from the dataset.</p>
+    </div>
+    <div class="cards">
+      <article class="passenger reveal" data-outcome="0">
+        <p class="pid">PassengerId 1</p>
+        <h3>Braund, Mr. Owen Harris</h3>
+        <dl>
+          <div><dt>Class</dt><dd>3rd</dd></div>
+          <div><dt>Age</dt><dd>22</dd></div>
+          <div><dt>Family aboard</dt><dd>1 (SibSp)</dd></div>
+          <div><dt>Fare</dt><dd>7.25</dd></div>
+          <div><dt>Boarded</dt><dd>Southampton</dd></div>
+        </dl>
+        <p class="outcome"><span class="tag died">Died</span><span class="odds" data-pid="1"></span></p>
+      </article>
+      <article class="passenger reveal" data-outcome="1">
+        <p class="pid">PassengerId 2</p>
+        <h3>Cumings, Mrs. John Bradley (Florence Briggs Thayer)</h3>
+        <dl>
+          <div><dt>Class</dt><dd>1st</dd></div>
+          <div><dt>Age</dt><dd>38</dd></div>
+          <div><dt>Family aboard</dt><dd>1 (SibSp)</dd></div>
+          <div><dt>Fare</dt><dd>71.2833</dd></div>
+          <div><dt>Boarded</dt><dd>Cherbourg</dd></div>
+        </dl>
+        <p class="outcome"><span class="tag survived">Survived</span><span class="odds" data-pid="2"></span></p>
+      </article>
+      <article class="passenger reveal" data-outcome="1">
+        <p class="pid">PassengerId 166</p>
+        <h3>Goldsmith, Master. Frank John William "Frankie"</h3>
+        <dl>
+          <div><dt>Class</dt><dd>3rd</dd></div>
+          <div><dt>Age</dt><dd>9</dd></div>
+          <div><dt>Family aboard</dt><dd>2 (Parch)</dd></div>
+          <div><dt>Fare</dt><dd>20.525</dd></div>
+          <div><dt>Boarded</dt><dd>Southampton</dd></div>
+        </dl>
+        <p class="outcome"><span class="tag survived">Survived</span><span class="odds" data-pid="166"></span></p>
+      </article>
+    </div>
+    <p class="footnote">The odds shown are what the course's final Logistic Regression assigns to each row today. It was trained on 712 other rows. Frankie's title, "Master", is the old word for a young boy: the Sex column calls Owen and Frankie both "male"; the Title feature tells the man from the boy.</p>
+  </section>
+
+  <!-- ============================== M1 DESCRIBE ============================== -->
+  <section class="chapter" id="describe">
+    <div class="chapter-head">
+      <p class="kicker">Module 1<span class="sep"></span>Descriptive analytics<span class="badge">3 notebooks</span></p>
+      <h2>Describe before you predict</h2>
+      <p class="chapter-lede">Module 1 cleans the table, summarizes it with numbers and turns it into charts and dashboards. Nothing here predicts anything. It answers one question: what happened?</p>
+    </div>
+    <div class="output-row">
+      <figure class="output reveal">
+        <figcaption><span class="kicker">Notebook M1-01<span class="sep"></span>example output</span>The first five rows, exactly as pandas prints them</figcaption>
+        <pre><code>   PassengerId  Survived  Pclass                                               Name     Sex   Age  SibSp  Parch            Ticket     Fare Cabin Embarked
+0            1         0       3                            Braund, Mr. Owen Harris    male  22.0      1      0         A/5 21171   7.2500   NaN        S
+1            2         1       1  Cumings, Mrs. John Bradley (Florence Briggs Thayer)  female  38.0      1      0          PC 17599  71.2833   C85        C
+2            3         1       3                             Heikkinen, Miss. Laina  female  26.0      0      0  STON/O2. 3101282   7.9250   NaN        S
+3            4         1       1       Futrelle, Mrs. Jacques Heath (Lily May Peel)  female  35.0      1      0            113803  53.1000  C123        S
+4            5         0       3                           Allen, Mr. William Henry    male  35.0      0      0            373450   8.0500   NaN        S</code></pre>
+      </figure>
+      <div class="tiles reveal">
+        <div class="tile"><span class="kicker">Age</span><strong>29.7</strong><span>mean, years</span><small>median 28.0, range 0.42 to 80</small></div>
+        <div class="tile"><span class="kicker">Fare</span><strong>32.20</strong><span>mean, pounds</span><small>median 14.45, max 512.33</small></div>
+        <div class="tile"><span class="kicker">Missing</span><strong>687</strong><span>blank Cabin values</span><small>177 blank ages, 2 blank ports</small></div>
+        <div class="tile"><span class="kicker">Fares of 0.00</span><strong>15</strong><span>passengers</span><small>free tickets, staff, or a gap</small></div>
+      </div>
+    </div>
+    <div class="chart-grid">
+      <figure class="chart reveal">
+        <figcaption><h3>Survival rate by ticket class</h3><p>How to read it: one bar per class, bar length is the share who survived. Hover for counts.</p></figcaption>
+        <div class="chart-box"><canvas id="chart-class"></canvas></div>
+        <p class="insight">Class is money, and money bought a cabin near the boat deck. Third class made up 55% of the passengers and 35% of the survivors.</p>
+      </figure>
+      <figure class="chart reveal">
+        <figcaption><h3>Survival rate by title mined from the name</h3><p>How to read it: the Title feature the ML module extracts from the Name column with one regular expression.</p></figcaption>
+        <div class="chart-box"><canvas id="chart-title"></canvas></div>
+        <p class="insight">"Mrs" and "Miss" survived at 79% and 70%; "Mr" at 16%. "Master", the young boys, sit at 58%: a signal the Sex column alone cannot see.</p>
+      </figure>
+      <figure class="chart reveal">
+        <figcaption><h3>Survival rate by age band</h3><p>How to read it: passengers grouped by age; 177 with no recorded age are excluded here.</p></figcaption>
+        <div class="chart-box"><canvas id="chart-age"></canvas></div>
+        <p class="insight">Children first, then a flat middle, then the oldest passengers fared worst. Age matters, but far less than class or sex.</p>
+      </figure>
+      <figure class="chart reveal">
+        <figcaption><h3>Survival rate by fare paid</h3><p>How to read it: four fare bands; the band widths in passengers are in the tooltip.</p></figcaption>
+        <div class="chart-box"><canvas id="chart-fare"></canvas></div>
+        <p class="insight">Fare is class measured in pounds. Above 100 pounds, 74% survived; under 10 pounds, 20%. Fare runs 0 to 512 while Age runs 0 to 80, which is why Module 2 scales both before modelling.</p>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============================== M2 PREDICT ============================== -->
+  <section class="chapter" id="predict">
+    <div class="chapter-head">
+      <p class="kicker">Module 2<span class="sep"></span>Machine learning<span class="badge">3 notebooks</span></p>
+      <h2>Then predict, honestly</h2>
+      <p class="chapter-lede">Module 2 asks a new question: what will happen to a passenger the model has never seen? The answer has to be a number, and the number has to be earned on rows that were locked away before any learning started.</p>
+    </div>
+    <div class="split reveal">
+      <div class="split-bar" role="img" aria-label="891 rows split into 712 training rows and 179 test rows">
+        <div class="seg train" style="flex-basis:79.9%"><span>Train<b>712 rows</b></span></div>
+        <div class="seg test" style="flex-basis:20.1%"><span>Test<b>179 rows</b></span></div>
+      </div>
+      <p class="split-note">80/20, stratified, <code>random_state=42</code>. The survivor share stays 38% in both halves. The test rows are sealed until the final exam, and opened exactly once.</p>
+    </div>
+    <div class="chart-grid two">
+      <figure class="chart reveal">
+        <figcaption><h3>The tournament: six models, one referee</h3><p>How to read it: mean accuracy over 5-fold cross-validation on the 712 training rows; the dashed line is the "always died" floor. Values printed with their standard deviation.</p></figcaption>
+        <div class="chart-box tall"><canvas id="chart-models"></canvas></div>
+        <p class="insight">Logistic Regression, the simplest real model, wins. Gradient Boosting is one point behind and far slower. The Decision Tree memorises its training data (98.5% on train) and drops to 75% when judged honestly.</p>
+      </figure>
+      <figure class="output reveal">
+        <figcaption><span class="kicker">Notebook M2-02<span class="sep"></span>example output</span>The final exam: the champion on the 179 sealed rows</figcaption>
+        <pre><code>Test accuracy: 0.838
+Precision (survived): 0.821  &lt;- of predicted survivors, fraction correct
+Recall    (survived): 0.739  &lt;- of true survivors, fraction caught
+F1        (survived): 0.779  &lt;- compromise of the two
+
+              precision    recall  f1-score   support
+
+    Died (0)       0.85      0.90      0.87       110
+Survived (1)       0.82      0.74      0.78        69
+
+    accuracy                           0.84       179
+   macro avg       0.83      0.82      0.83       179
+weighted avg       0.84      0.84      0.84       179
+
+AUC: 0.878</code></pre>
+        <div class="tiles inline">
+          <div class="tile"><span class="kicker">Test accuracy</span><strong>0.838</strong><span>floor 0.617</span></div>
+          <div class="tile"><span class="kicker">F1, survived</span><strong>0.779</strong><span>precision 0.82, recall 0.74</span></div>
+          <div class="tile"><span class="kicker">ROC AUC</span><strong>0.878</strong><span>coin flip = 0.5</span></div>
+        </div>
+      </figure>
+    </div>
+    <div class="tuning reveal">
+      <div>
+        <p class="kicker">Notebook M2-03<span class="sep"></span>tuning, then a reality check</p>
+        <h3>Eighteen grid combinations, fifteen random ones, and one honest number</h3>
+        <p>Grid search over a Random Forest reached a cross-validated 0.8259; random search reached 0.8274 with a third fewer trials. On the sealed test rows the tuned forest scored 0.8268, below the untuned Logistic Regression's 0.838. Tuning polishes a model; it does not change which model fits the data. That lesson is worth more than the two decimals.</p>
+      </div>
+      <pre><code>Best settings found: {'model__max_depth': 8, 'model__max_features': None,
+                     'model__min_samples_leaf': 3, 'model__n_estimators': 314}
+Best cross-validation accuracy: 0.8274
+Winner: random search with CV accuracy 0.8274
+Test accuracy: 0.8268</code></pre>
+    </div>
+  </section>
+
+  <!-- ============================== LIVE MODEL ============================== -->
+  <section class="chapter dark-panel" id="model">
+    <div class="chapter-head">
+      <p class="kicker">Interlude<span class="sep"></span>The model, running here</p>
+      <h2>Run the model, right now, in this page</h2>
+      <p class="chapter-lede">This is the course's Logistic Regression, trained with the exact recipe of the notebooks and exported as eighteen weights. No server is involved: your browser builds the same eighteen numbers the pipeline builds, multiplies, adds, and squashes the sum into a probability. Module 3 calls this the embedded serving pattern.</p>
+    </div>
+    <div class="predictor" id="predictor">
+      <form class="controls" id="controls" autocomplete="off">
+        <fieldset>
+          <legend class="kicker">Ticket class</legend>
+          <div class="segmented" role="radiogroup">
+            <label><input type="radio" name="Pclass" value="1"><span>1st</span></label>
+            <label><input type="radio" name="Pclass" value="2"><span>2nd</span></label>
+            <label><input type="radio" name="Pclass" value="3" checked><span>3rd</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend class="kicker">Sex</legend>
+          <div class="segmented" role="radiogroup">
+            <label><input type="radio" name="Sex" value="female"><span>female</span></label>
+            <label><input type="radio" name="Sex" value="male" checked><span>male</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend class="kicker">Title on the manifest</legend>
+          <div class="segmented" role="radiogroup" id="title-group">
+            <label><input type="radio" name="Title" value="Mr" checked><span>Mr</span></label>
+            <label><input type="radio" name="Title" value="Mrs"><span>Mrs</span></label>
+            <label><input type="radio" name="Title" value="Miss"><span>Miss</span></label>
+            <label><input type="radio" name="Title" value="Master"><span>Master</span></label>
+            <label><input type="radio" name="Title" value="Rare"><span>Rare</span></label>
+          </div>
+        </fieldset>
+        <label class="range"><span class="kicker">Age <output id="out-Age">22</output></span><input type="range" name="Age" min="0" max="80" step="1" value="22"></label>
+        <label class="range"><span class="kicker">Fare, pounds <output id="out-Fare">7.25</output></span><input type="range" name="Fare" min="0" max="300" step="0.001" value="7.25"></label>
+        <label class="range"><span class="kicker">Siblings and spouse aboard <output id="out-SibSp">1</output></span><input type="range" name="SibSp" min="0" max="8" step="1" value="1"></label>
+        <label class="range"><span class="kicker">Parents and children aboard <output id="out-Parch">0</output></span><input type="range" name="Parch" min="0" max="6" step="1" value="0"></label>
+        <fieldset>
+          <legend class="kicker">Port of boarding</legend>
+          <div class="segmented" role="radiogroup">
+            <label><input type="radio" name="Embarked" value="C"><span>Cherbourg</span></label>
+            <label><input type="radio" name="Embarked" value="Q"><span>Queenstown</span></label>
+            <label><input type="radio" name="Embarked" value="S" checked><span>Southampton</span></label>
+          </div>
+        </fieldset>
+        <div class="presets">
+          <span class="kicker">Load a real row</span>
+          <button type="button" data-preset="owen">Owen</button>
+          <button type="button" data-preset="florence">Florence</button>
+          <button type="button" data-preset="frankie">Frankie</button>
+        </div>
+      </form>
+      <div class="result">
+        <div class="gauge" role="img" aria-label="Predicted survival probability">
+          <svg viewBox="0 0 240 150" aria-hidden="true">
+            <path class="gauge-track" d="M20 130 A100 100 0 0 1 220 130"/>
+            <path class="gauge-fill" id="gauge-fill" d="M20 130 A100 100 0 0 1 220 130"/>
+          </svg>
+          <div class="gauge-value"><strong id="prob">0.0%</strong><span id="verdict">probability of survival</span></div>
+        </div>
+        <p class="result-note" id="model-note">Loading the model...</p>
+        <details class="how">
+          <summary>What the model sees: 18 numbers and their pull</summary>
+          <p>Each row is one of the eighteen features the pipeline builds from your inputs. The bar is the feature's contribution to the log-odds: weight times value. Teal pulls toward survival, ember pulls away. The intercept is the starting point before any feature speaks.</p>
+          <table class="contrib" id="contrib"><thead><tr><th>Feature</th><th>Value</th><th>Weight</th><th>Pull</th></tr></thead><tbody></tbody></table>
+        </details>
+        <figure class="output compact">
+          <figcaption><span class="kicker">The same request, as Module 3 sends it to the API</span></figcaption>
+          <pre><code id="api-json">POST /predict
+{ }</code></pre>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== M3 DEPLOY ============================== -->
+  <section class="chapter" id="deploy">
+    <div class="chapter-head">
+      <p class="kicker">Module 3<span class="sep"></span>Architectures and deployment<span class="badge">3 notebooks</span></p>
+      <h2>A trained model is a file. A useful model is a system.</h2>
+      <p class="chapter-lede">Module 3 puts the model where an application can reach it: behind a FastAPI endpoint, inside a Docker container, on Google Cloud Run or AWS App Runner, and finally into the hands of a web page that calls it over HTTP. The notebooks start a real server and talk to it.</p>
+    </div>
+    <div class="patterns reveal">
+      <article><p class="kicker">Pattern 1</p><h3>Batch</h3><p>Score the whole manifest overnight, write a table. Cheapest, slowest to react.</p></article>
+      <article><p class="kicker">Pattern 2</p><h3>Real-time API</h3><p>One request, one prediction, in milliseconds. What notebooks M3-02 and M3-03 build.</p></article>
+      <article><p class="kicker">Pattern 3</p><h3>Streaming</h3><p>Predictions ride along an event stream as records arrive.</p></article>
+      <article class="active"><p class="kicker">Pattern 4</p><h3>Embedded</h3><p>The model ships inside the application. The predictor above is this pattern: eighteen weights in a JSON file.</p></article>
+    </div>
+    <div class="output-row">
+      <figure class="output reveal">
+        <figcaption><span class="kicker">Notebook M3-02<span class="sep"></span>example output</span>Testing the API before shipping it</figcaption>
+        <pre><code>API defined with 2 endpoints: GET /health and POST /predict
+Status code: 200
+Body: {'status': 'ok'}
+
+Negative age -> status: 422
+Valid age    -> status: 200 body: {'prediction': 1, 'probability': 0.979}</code></pre>
+      </figure>
+      <figure class="output reveal">
+        <figcaption><span class="kicker">Notebook M3-03<span class="sep"></span>example output</span>A Python client calling the running server</figcaption>
+        <pre><code>Server is running at http://127.0.0.1:8123
+Status code: 200
+JSON body:   {'status': 'ok'}
+
+{
+  "prediction": 1,
+  "probability": 0.995
+}
+This passenger would likely have survived the Titanic (survival probability: 99.5%).
+Answered with status 200 well within the 5-second limit</code></pre>
+      </figure>
+    </div>
+    <p class="footnote">The 422 is not a failure: it is the API refusing a negative age before the model ever sees it. Validation at the door is half of deployment. The other half, timeouts, retries and error handling, is what the last notebook teaches a client to do.</p>
+  </section>
+
+  <!-- ============================== COURSE MAP ============================== -->
+  <section class="chapter" id="course">
+    <div class="chapter-head">
+      <p class="kicker">The course<span class="sep"></span>Three modules, nine notebooks</p>
+      <h2>Start anywhere. Every notebook stands alone.</h2>
+      <p class="chapter-lede">Click a badge to open a notebook in Google Colab and choose <code>Runtime &gt; Run all</code>. No account, no key, no installation. Or read the executed outputs directly on GitHub.</p>
+    </div>
+    <div class="modules">
+      <div class="module reveal">
+        <p class="kicker">Module 1<span class="sep"></span>Descriptive analytics</p>
+        <ol data-module="M1%20-%20Descriptive%20analytics">
+          <li data-nb="01-data-cleaning"><h3>Data cleaning</h3><p>Missing values, duplicates, wrong types, inconsistent text and outliers, with pandas and NumPy loops.</p></li>
+          <li data-nb="02-descriptive-statistics"><h3>Descriptive statistics</h3><p>Central tendency, spread, distribution shape, frequencies, group comparisons, correlation.</p></li>
+          <li data-nb="03-visualization-and-dashboards"><h3>Visualization and dashboards</h3><p>Matplotlib, seaborn and Plotly; chart-choice rules; static and interactive dashboards exported as HTML.</p></li>
+        </ol>
+      </div>
+      <div class="module reveal">
+        <p class="kicker">Module 2<span class="sep"></span>Machine learning</p>
+        <ol data-module="M2%20-%20Machine%20Learning">
+          <li data-nb="01-data-prep-and-feature-engineering"><h3>Data prep and feature engineering</h3><p>Split first, impute, encode, scale, engineer Title and FamilySize, wire it into one Pipeline.</p></li>
+          <li data-nb="02-model-selection"><h3>Model selection</h3><p>Six models judged by cross-validation; confusion matrices, precision, recall, F1, ROC AUC; learning curves.</p></li>
+          <li data-nb="03-model-optimization-and-deployment"><h3>Model optimization and deployment</h3><p>Grid and random search, saving with joblib, a Gradio app, a free deployment on Hugging Face Spaces.</p></li>
+        </ol>
+        <p class="decks">Four teaching decks accompany this module: <a href="https://github.com/maglionejm/fontys-tech-exercises/tree/main/presentations" rel="noopener">presentations/</a>.</p>
+      </div>
+      <div class="module reveal">
+        <p class="kicker">Module 3<span class="sep"></span>ML architectures and deployment</p>
+        <ol data-module="M3%20-%20ML%20Architectures%20and%20Deployment">
+          <li data-nb="01-ml-system-architectures"><h3>ML system architectures</h3><p>Data and training pipelines, model registry, four serving patterns, drift monitoring, build versus buy.</p></li>
+          <li data-nb="02-deploying-models-in-the-cloud"><h3>Deploying models in the cloud</h3><p>FastAPI, tests before shipping, Docker, the same container on Cloud Run and App Runner.</p></li>
+          <li data-nb="03-consuming-models-from-applications"><h3>Consuming models from applications</h3><p>A real server started in the notebook; requests with timeouts and retries; a web page that calls the model.</p></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <p><strong>Fontys Tech Exercises</strong> is MIT licensed. Passenger data: the public Titanic dataset (891 rows) as distributed by Data Science Dojo; population figures from Encyclopedia Titanica.</p>
+  <p><a href="https://github.com/maglionejm/fontys-tech-exercises" rel="noopener">Source on GitHub</a><span class="sep"></span><a href="https://github.com/maglionejm/fontys-tech-exercises/blob/main/CONTRIBUTING.md" rel="noopener">Contributing</a><span class="sep"></span><a href="https://github.com/maglionejm/fontys-tech-exercises/blob/main/SECURITY.md" rel="noopener">Security</a></p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+<script src="app.js" defer></script>
+</body>
+</html>
