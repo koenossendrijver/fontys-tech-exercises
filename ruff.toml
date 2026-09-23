@@ -1,0 +1,9 @@
+# Lint settings for the deck builders and maintainer scripts.
+line-length = 100
+target-version = "py310"
+
+[lint]
+select = ["E", "F", "W"]
+# E501: the builders hold long slide strings on purpose.
+# E402: build_session_2.py imports shared_figs after configuring matplotlib.
+ignore = ["E501", "E402"]

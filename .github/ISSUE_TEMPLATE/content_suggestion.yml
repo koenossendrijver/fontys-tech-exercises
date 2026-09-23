@@ -1,0 +1,22 @@
+name: Content suggestion
+description: Propose a clearer explanation, a new exercise, or a correction
+labels: ["content"]
+body:
+  - type: input
+    id: where
+    attributes:
+      label: Where
+      placeholder: "M2-02, section 6 (Beyond accuracy)"
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What should change, and why does it help a beginner?
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source (optional)
+      description: A textbook chapter, lecture or paper that supports the change.

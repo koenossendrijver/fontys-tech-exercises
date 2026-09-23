@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Course site
+    url: https://maglionejm.github.io/fontys-tech-exercises/
+    about: The story of the dataset, example outputs and links to every notebook.

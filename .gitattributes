@@ -1,0 +1,14 @@
+# Normalize line endings; mark binaries so git never tries to diff or merge them.
+* text=auto eol=lf
+
+*.ipynb text eol=lf
+*.md text eol=lf
+*.py text eol=lf
+*.pptx binary
+*.png binary
+*.jpg binary
+*.pdf binary
+*.woff2 binary
+
+# Generated decks and notebook outputs dominate diffs; hide them by default on GitHub.
+presentations/*.pptx linguist-generated=true
