@@ -1,0 +1,234 @@
+{
+ "n": 891,
+ "survived": 342,
+ "died": 549,
+ "by_class": {
+  "1st class": {
+   "n": 216,
+   "survived": 136,
+   "rate": 0.63
+  },
+  "2nd class": {
+   "n": 184,
+   "survived": 87,
+   "rate": 0.473
+  },
+  "3rd class": {
+   "n": 491,
+   "survived": 119,
+   "rate": 0.242
+  }
+ },
+ "by_sex": {
+  "female": {
+   "n": 314,
+   "survived": 233,
+   "rate": 0.742
+  },
+  "male": {
+   "n": 577,
+   "survived": 109,
+   "rate": 0.189
+  }
+ },
+ "by_class_sex": {
+  "1st female": {
+   "n": 94,
+   "survived": 91,
+   "rate": 0.968
+  },
+  "1st male": {
+   "n": 122,
+   "survived": 45,
+   "rate": 0.369
+  },
+  "2nd female": {
+   "n": 76,
+   "survived": 70,
+   "rate": 0.921
+  },
+  "2nd male": {
+   "n": 108,
+   "survived": 17,
+   "rate": 0.157
+  },
+  "3rd female": {
+   "n": 144,
+   "survived": 72,
+   "rate": 0.5
+  },
+  "3rd male": {
+   "n": 347,
+   "survived": 47,
+   "rate": 0.135
+  }
+ },
+ "by_embarked": {
+  "Cherbourg": {
+   "n": 168,
+   "survived": 93,
+   "rate": 0.554
+  },
+  "Queenstown": {
+   "n": 77,
+   "survived": 30,
+   "rate": 0.39
+  },
+  "Southampton": {
+   "n": 644,
+   "survived": 217,
+   "rate": 0.337
+  }
+ },
+ "by_age_band": {
+  "0-12": {
+   "n": 69,
+   "survived": 40,
+   "rate": 0.58
+  },
+  "13-19": {
+   "n": 95,
+   "survived": 39,
+   "rate": 0.411
+  },
+  "20-29": {
+   "n": 220,
+   "survived": 77,
+   "rate": 0.35
+  },
+  "30-39": {
+   "n": 167,
+   "survived": 73,
+   "rate": 0.437
+  },
+  "40-49": {
+   "n": 89,
+   "survived": 34,
+   "rate": 0.382
+  },
+  "50-59": {
+   "n": 48,
+   "survived": 20,
+   "rate": 0.417
+  },
+  "60+": {
+   "n": 26,
+   "survived": 7,
+   "rate": 0.269
+  }
+ },
+ "by_family_size": {
+  "1": {
+   "n": 537,
+   "survived": 163,
+   "rate": 0.304
+  },
+  "2": {
+   "n": 161,
+   "survived": 89,
+   "rate": 0.553
+  },
+  "3": {
+   "n": 102,
+   "survived": 59,
+   "rate": 0.578
+  },
+  "4": {
+   "n": 29,
+   "survived": 21,
+   "rate": 0.724
+  },
+  "5": {
+   "n": 15,
+   "survived": 3,
+   "rate": 0.2
+  },
+  "6": {
+   "n": 22,
+   "survived": 3,
+   "rate": 0.136
+  },
+  "7": {
+   "n": 12,
+   "survived": 4,
+   "rate": 0.333
+  },
+  "8": {
+   "n": 6,
+   "survived": 0,
+   "rate": 0.0
+  },
+  "11": {
+   "n": 7,
+   "survived": 0,
+   "rate": 0.0
+  }
+ },
+ "by_fare_band": {
+  "under 10": {
+   "n": 336,
+   "survived": 67,
+   "rate": 0.199
+  },
+  "10-30": {
+   "n": 315,
+   "survived": 134,
+   "rate": 0.425
+  },
+  "30-100": {
+   "n": 187,
+   "survived": 102,
+   "rate": 0.545
+  },
+  "100+": {
+   "n": 53,
+   "survived": 39,
+   "rate": 0.736
+  }
+ },
+ "by_title": {
+  "Mr": {
+   "n": 517,
+   "survived": 81,
+   "rate": 0.157
+  },
+  "Miss": {
+   "n": 185,
+   "survived": 130,
+   "rate": 0.703
+  },
+  "Mrs": {
+   "n": 126,
+   "survived": 100,
+   "rate": 0.794
+  },
+  "Master": {
+   "n": 40,
+   "survived": 23,
+   "rate": 0.575
+  },
+  "Rare": {
+   "n": 23,
+   "survived": 8,
+   "rate": 0.348
+  }
+ },
+ "age": {
+  "mean": 29.7,
+  "median": 28.0,
+  "min": 0.42,
+  "max": 80.0,
+  "known": 714
+ },
+ "fare": {
+  "mean": 32.2,
+  "median": 14.45,
+  "max": 512.33,
+  "zero": 15
+ },
+ "missing": {
+  "Age": 177,
+  "Cabin": 687,
+  "Embarked": 2
+ }
+}
